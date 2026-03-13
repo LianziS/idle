@@ -65,15 +65,7 @@ const elements = {
     pages: document.querySelectorAll('.page'),
     
     level: document.getElementById('level'),
-    gold: document.getElementById('gold'),
-    wood: document.getElementById('wood'),
-    stone: document.getElementById('stone'),
-    herb: document.getElementById('herb'),
-    
-    sidebarGold: document.getElementById('sidebar-gold'),
-    sidebarWood: document.getElementById('sidebar-wood'),
-    sidebarStone: document.getElementById('sidebar-stone'),
-    sidebarHerb: document.getElementById('sidebar-herb'),
+
     
     storageGold: document.getElementById('storage-gold'),
     storageWood: document.getElementById('storage-wood'),
@@ -163,18 +155,8 @@ function setupEventListeners() {
 
 // ============ UI 更新 ============
 function updateUI() {
-    // 顶部资源
+    // 等级
     elements.level.textContent = gameState.level;
-    elements.gold.textContent = formatNumber(Math.floor(gameState.resources.gold));
-    elements.wood.textContent = formatNumber(Math.floor(gameState.resources.wood));
-    elements.stone.textContent = formatNumber(Math.floor(gameState.resources.stone));
-    elements.herb.textContent = formatNumber(Math.floor(gameState.resources.herb));
-    
-    // 侧边栏资源
-    elements.sidebarGold.textContent = formatNumber(Math.floor(gameState.resources.gold));
-    elements.sidebarWood.textContent = formatNumber(Math.floor(gameState.resources.wood));
-    elements.sidebarStone.textContent = formatNumber(Math.floor(gameState.resources.stone));
-    elements.sidebarHerb.textContent = formatNumber(Math.floor(gameState.resources.herb));
     
     // 仓库资源
     elements.storageGold.textContent = formatNumber(Math.floor(gameState.resources.gold));
