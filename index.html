@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle Game - 放置类游戏</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 头部：资源显示 -->
+        <header class="header">
+            <h1>🎮 放置矿工</h1>
+            <div class="resources">
+                <div class="resource gold">
+                    <span class="icon">💰</span>
+                    <span id="gold" class="value">0</span>
+                </div>
+                <div class="resource income">
+                    <span class="icon">📈</span>
+                    <span id="income" class="value">0</span> /秒
+                </div>
+            </div>
+        </header>
+
+        <!-- 主游戏区 -->
+        <main class="main">
+            <!-- 点击区 -->
+            <section class="click-section">
+                <button id="click-btn" class="click-btn">
+                    <span class="btn-icon">⛏️</span>
+                    <span class="btn-text">挖矿</span>
+                    <span class="btn-hint">+1 金币</span>
+                </button>
+                <div id="click-feedback" class="click-feedback"></div>
+            </section>
+
+            <!-- 建筑区 -->
+            <section class="buildings-section">
+                <h2>🏗️ 建筑</h2>
+                <div class="buildings-list" id="buildings-list">
+                    <!-- 建筑会通过 JS 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 统计区 -->
+            <section class="stats-section">
+                <h2>📊 统计</h2>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <span class="stat-label">总金币</span>
+                        <span id="total-gold" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">点击次数</span>
+                        <span id="total-clicks" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">游戏时间</span>
+                        <span id="play-time" class="stat-value">00:00</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <span>💾 自动保存中</span>
+            <button id="reset-btn" class="reset-btn">重置进度</button>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

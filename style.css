@@ -1,0 +1,309 @@
+/* 放置矿工 - 样式表 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.game-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* 头部 */
+.header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.resources {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.resource {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.icon {
+    font-size: 2rem;
+}
+
+.value {
+    font-weight: bold;
+}
+
+/* 主游戏区 */
+.main {
+    padding: 30px;
+}
+
+/* 点击区 */
+.click-section {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.click-btn {
+    background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+    border: none;
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4);
+    transition: all 0.1s ease;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.click-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(243, 156, 18, 0.6);
+}
+
+.click-btn:active {
+    transform: scale(0.95);
+}
+
+.btn-icon {
+    font-size: 4rem;
+}
+
+.btn-text {
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-hint {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.click-feedback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    font-weight: bold;
+    color: #f39c12;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.click-feedback.show {
+    animation: feedback 0.8s ease-out;
+}
+
+@keyframes feedback {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(-50px);
+    }
+}
+
+/* 建筑区 */
+.buildings-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.buildings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.building-card {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.building-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.building-icon {
+    font-size: 3rem;
+    width: 60px;
+    text-align: center;
+}
+
+.building-info {
+    flex: 1;
+}
+
+.building-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.building-level {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.building-production {
+    font-size: 0.85rem;
+    color: #27ae60;
+}
+
+.building-btn {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.building-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.building-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* 统计区 */
+.stats-section {
+    margin-top: 30px;
+}
+
+.stats-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.stat {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* 底部 */
+.footer {
+    background: #f8f9fa;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+}
+
+.reset-btn {
+    background: #e74c3c;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.reset-btn:hover {
+    background: #c0392b;
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .resources {
+        gap: 20px;
+    }
+
+    .click-btn {
+        width: 150px;
+        height: 150px;
+    }
+
+    .btn-icon {
+        font-size: 3rem;
+    }
+
+    .btn-text {
+        font-size: 1.2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
