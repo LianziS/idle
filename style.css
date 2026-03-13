@@ -1,4 +1,4 @@
-/* 中世纪雇佣兵 - 简约侧边栏版本 */
+/* 中世纪雇佣兵 - 侧边栏版本 */
 
 * {
     margin: 0;
@@ -35,21 +35,35 @@ body::before {
     left: 0;
     width: 60px;
     height: calc(100% - 60px);
-    background: linear-gradient(180deg, rgba(15, 52, 96, 0.9) 0%, rgba(22, 33, 62, 0.9) 100%);
+    background: linear-gradient(180deg, rgba(15, 52, 96, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
     backdrop-filter: blur(10px);
     z-index: 1000;
     display: flex;
+    flex-direction: column;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     transition: width 0.3s ease;
+    overflow: hidden;
 }
 
+.sidebar.expanded {
+    width: 220px;
+}
+
+/* 图标栏 */
 .sidebar-icon-bar {
     width: 60px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 15px;
-    gap: 10px;
+    gap: 8px;
+    transition: width 0.3s ease;
+}
+
+.sidebar.expanded .sidebar-icon-bar {
+    width: 220px;
+    align-items: flex-start;
 }
 
 .toggle-btn {
@@ -64,6 +78,7 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .toggle-btn:hover {
@@ -77,29 +92,59 @@ body::before {
     background: rgba(255, 255, 255, 0.2);
     margin: 5px 0;
     border-radius: 2px;
+    flex-shrink: 0;
 }
 
-.icon-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
-    border: none;
-    background: transparent;
-    font-size: 1.5rem;
+.sidebar.expanded .icon-separator {
+    width: calc(100% - 40px);
+    margin: 8px 20px;
+}
+
+/* 导航项（图标 + 文字） */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
     cursor: pointer;
     transition: all 0.3s;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.nav-item:hover {
+    background: rgba(233, 69, 96, 0.15);
+}
+
+.nav-item.active {
+    background: rgba(233, 69, 96, 0.25);
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.icon-btn:hover {
-    background: rgba(233, 69, 96, 0.2);
+.nav-text {
+    font-size: 0.95rem;
+    color: #e0e0e0;
+    white-space: nowrap;
+    opacity: 0;
+    width: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
-.icon-btn.active {
-    background: rgba(233, 69, 96, 0.3);
-    box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+.sidebar.expanded .nav-text {
+    opacity: 1;
+    width: auto;
+    padding-left: 8px;
 }
 
 /* ============ 主容器 ============ */
@@ -568,11 +613,19 @@ body::before {
         width: 50px;
     }
     
+    .sidebar.expanded {
+        width: 200px;
+    }
+    
     .sidebar-icon-bar {
         width: 50px;
     }
     
-    .icon-btn, .toggle-btn {
+    .sidebar.expanded .sidebar-icon-bar {
+        width: 200px;
+    }
+    
+    .icon-btn, .toggle-btn, .nav-icon {
         width: 40px;
         height: 40px;
         font-size: 1.3rem;
