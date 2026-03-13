@@ -112,19 +112,12 @@ body {
 .sidebar-footer {
     padding: 15px 20px;
     border-top: 1px solid #333;
+    text-align: center;
 }
 
 .mini-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
     font-size: 0.85rem;
-}
-
-.mini-stats span {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 5px 10px;
-    border-radius: 15px;
+    color: #888;
 }
 
 /* ============ 主容器 ============ */
@@ -173,27 +166,6 @@ body {
     color: #e94560;
     font-weight: bold;
 }
-
-.resources-mini {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.res {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-}
-
-.res.gold { color: #f1c40f; }
-.res.wood { color: #27ae60; }
-.res.stone { color: #95a5a6; }
-.res.herb { color: #2ecc71; }
 
 /* ============ 页面 ============ */
 .page {
