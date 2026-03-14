@@ -52,31 +52,24 @@ body::after {
     top: 0;
     left: 0;
     width: 100%;
-    height: 150px;
+    height: 100px;
     background: linear-gradient(180deg, rgba(107, 79, 60, 0.95) 0%, rgba(45, 35, 30, 0.9) 100%);
     backdrop-filter: blur(10px);
     border-bottom: 3px solid #8B2C2D;
     z-index: 1100;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
 }
 
 .top-fixed-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 8px 20px 0 20px;
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-}
-
-.top-fixed h1 {
-    font-size: 1.8rem;
-    color: #A0B2C0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    letter-spacing: 2px;
 }
 
 .top-fixed-info {
@@ -90,59 +83,64 @@ body::after {
     align-items: center;
     gap: 8px;
     background: rgba(139, 44, 45, 0.3);
-    padding: 10px 18px;
-    border-radius: 8px;
+    padding: 6px 14px;
+    border-radius: 6px;
     border: 1px solid rgba(139, 44, 45, 0.5);
-    font-size: 1rem;
+    font-size: 0.85rem;
     color: #A0B2C0;
 }
 
 /* 行动状态栏 */
 .action-status-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 50px;
-    background: rgba(27, 42, 58, 0.9);
+    flex: 1;
+    background: rgba(27, 42, 58, 0.95);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(107, 79, 60, 0.3);
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding: 8px 20px;
 }
 
 .action-status-content {
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    gap: 6px;
     width: 100%;
-    max-width: 600px;
-    padding: 0 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.action-status-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .action-status-icon {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 
 .action-status-name {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #A0B2C0;
     white-space: nowrap;
-    min-width: 80px;
+}
+
+.action-progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .action-progress-bg {
     flex: 1;
-    height: 24px;
+    max-width: 200px;
+    height: 18px;
     background: rgba(107, 79, 60, 0.3);
-    border-radius: 12px;
+    border-radius: 9px;
     position: relative;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .action-progress-fill {
@@ -152,17 +150,45 @@ body::after {
     bottom: 0;
     width: 0%;
     background: linear-gradient(90deg, #8B2C2D 0%, #a33435 50%, #8B2C2D 100%);
-    border-radius: 12px;
+    border-radius: 9px;
+    transition: width 0.1s linear;
+}
+
+.action-progress-fill.smooth {
     transition: width 0.1s linear;
 }
 
 .action-progress-time {
-    position: relative;
-    z-index: 1;
-    font-size: 0.85rem;
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
     color: #fff;
     font-weight: bold;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    text-align: left;
+}
+
+.action-cancel-btn {
+    background: rgba(139, 44, 45, 0.6);
+    border: 1px solid rgba(139, 44, 45, 0.8);
+    color: #A0B2C0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s;
+}
+
+.action-cancel-btn:hover {
+    background: rgba(139, 44, 45, 0.8);
+}
+
+.action-cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ============ 侧边栏 ============ */
@@ -1003,42 +1029,54 @@ body::after {
     }
     
     .top-fixed {
-        height: 120px;
+        height: 90px;
     }
     
-    .top-fixed h1 {
-        font-size: 1.4rem;
+    .top-fixed-content {
+        padding: 6px 15px 0 15px;
     }
     
     .player-badge {
-        padding: 8px 14px;
-        font-size: 0.9rem;
+        padding: 5px 12px;
+        font-size: 0.8rem;
     }
     
     .action-status-bar {
-        height: 45px;
+        padding: 6px 15px;
     }
     
     .action-status-content {
-        gap: 10px;
-        padding: 0 15px;
+        gap: 4px;
+    }
+    
+    .action-status-left {
+        gap: 6px;
     }
     
     .action-status-icon {
-        font-size: 1.3rem;
+        font-size: 1rem;
     }
     
     .action-status-name {
-        font-size: 0.8rem;
-        min-width: 70px;
+        font-size: 0.75rem;
+    }
+    
+    .action-progress-wrapper {
+        gap: 8px;
     }
     
     .action-progress-bg {
-        height: 20px;
+        max-width: 150px;
+        height: 16px;
     }
     
     .action-progress-time {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+    }
+    
+    .action-cancel-btn {
+        padding: 3px 8px;
+        font-size: 0.7rem;
     }
     
     .sidebar {

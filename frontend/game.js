@@ -156,7 +156,8 @@ const elements = {
     actionStatusIcon: document.getElementById('action-status-icon'),
     actionStatusName: document.getElementById('action-status-name'),
     actionProgressFill: document.getElementById('action-progress-fill'),
-    actionProgressTime: document.getElementById('action-progress-time')
+    actionProgressTime: document.getElementById('action-progress-time'),
+    actionCancelBtn: document.getElementById('action-cancel-btn')
 };
 
 function init() {
@@ -237,6 +238,7 @@ function setupEventListeners() {
     elements.modal.addEventListener('click', (e) => {
         if (e.target === elements.modal) elements.modal.classList.remove('show');
     });
+    elements.actionCancelBtn.addEventListener('click', cancelCurrentAction);
 }
 
 function updateSkillNavExp(skill, expFillElem, levelElem) {
@@ -250,6 +252,32 @@ function updateSkillNavExp(skill, expFillElem, levelElem) {
     levelElem.textContent = gameState[skill + 'Level'];
 }
 
+function cancelCurrentAction() {
+    if (!gameState.currentAction) return;
+    
+    // 清除所有进行中的行动
+    if (gameState.activeWoodcutting) {
+        gameState.activeWoodcutting = null;
+    }
+    if (gameState.activeMining) {
+        gameState.activeMining = null;
+    }
+    for (const actionId in gameState.activeActions) {
+        delete gameState.activeActions[actionId];
+    }
+    if (gameState.combat.active) {
+        gameState.combat.active = false;
+    }
+    
+    setActionState(null, 0);
+    updateUI();
+    renderWoodcutting();
+    renderMining();
+    renderGatherActions();
+    renderCombatZones();
+    showToast('❌ 已取消行动');
+}
+
 function updateActionStatusBar() {
     if (!elements.actionStatusBar) return;
     
@@ -261,12 +289,16 @@ function updateActionStatusBar() {
         elements.actionStatusIcon.textContent = gameState.currentAction.icon;
         elements.actionStatusName.textContent = gameState.currentAction.name;
         elements.actionProgressFill.style.width = `${progress}%`;
+        elements.actionProgressFill.classList.add('smooth');
         elements.actionProgressTime.textContent = `${(gameState.actionDuration / 1000).toFixed(1)}秒`;
+        elements.actionCancelBtn.disabled = false;
     } else {
         elements.actionStatusIcon.textContent = '⏳';
         elements.actionStatusName.textContent = '未进行行动';
         elements.actionProgressFill.style.width = '0%';
+        elements.actionProgressFill.classList.remove('smooth');
         elements.actionProgressTime.textContent = '-';
+        elements.actionCancelBtn.disabled = true;
     }
 }
 
@@ -555,14 +587,15 @@ function addSkillExp(skill, amount) {
 
 function completeWoodcutting(treeId) {
     const tree = CONFIG.trees.find(t => t.id === treeId);
-    gameState.resources.wood += 1;
+    const dropAmount = 1;
+    gameState.resources.wood += dropAmount;
     addExp(tree.exp);
     addSkillExp('woodcutting', tree.exp);
     gameState.activeWoodcutting = null;
     setActionState(null, 0);
     updateUI();
     saveGame();
-    showToast(`✅ 采集了 ${tree.drop}`);
+    showToast(`+${dropAmount} ${tree.dropIcon} ${tree.drop}`);
 }
 
 function renderMining() {
@@ -618,14 +651,15 @@ function startMining(oreId) {
 
 function completeMining(oreId) {
     const ore = CONFIG.ores.find(o => o.id === oreId);
-    gameState.resources.stone += 1;
+    const dropAmount = 1;
+    gameState.resources.stone += dropAmount;
     addExp(ore.exp);
     addSkillExp('mining', ore.exp);
     gameState.activeMining = null;
     setActionState(null, 0);
     updateUI();
     saveGame();
-    showToast(`✅ 挖掘了 ${ore.drop}`);
+    showToast(`+${dropAmount} ${ore.dropIcon} ${ore.drop}`);
 }
 
 function craftItem(recipeId) {
@@ -709,23 +743,29 @@ function completeCombat(zone) {
         const amount = Math.floor(Math.random() * (r.max - r.min + 1)) + r.min;
         gameState.resources[r.item] += amount;
         const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
-        rewards.push(`${icons[r.item]} +${amount}`);
+        rewards.push(`+${amount} ${icons[r.item]} ${r.item === 'gold' ? '金币' : r.item === 'wood' ? '木材' : r.item === 'stone' ? '石头' : '草药'}`);
     });
     const expReward = zone.difficulty * 10;
     addExp(expReward);
     addSkillExp('combat', expReward);
-    elements.combatRewards.innerHTML = `🎉 战斗奖励：${rewards.join(' ')} | +${expReward} EXP`;
+    elements.combatRewards.innerHTML = `🎉 战斗奖励：${rewards.join('  |  ')}`;
     gameState.currentZoneIndex = (gameState.currentZoneIndex + 1) % CONFIG.combatZones.length;
     updateUI();
     saveGame();
+    // 显示获得物品提示
+    zone.rewards.forEach(r => {
+        const amount = Math.floor(Math.random() * (r.max - r.min + 1)) + r.min;
+        const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
+        showToast(`+${amount} ${icons[r.item]} ${r.item === 'gold' ? '金币' : r.item === 'wood' ? '木材' : r.item === 'stone' ? '石头' : '草药'}`);
+    });
 }
 
 function showToast(message) {
     const toast = document.createElement('div');
     toast.textContent = message;
-    toast.style.cssText = `position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #8B2C2D; color: #A0B2C0; padding: 12px 25px; border-radius: 8px; z-index: 3000; animation: toastFade 2s ease-out; border: 1px solid rgba(139, 44, 45, 0.5);`;
+    toast.style.cssText = `position: fixed; top: 110px; left: 20px; background: rgba(139, 44, 45, 0.95); color: #A0B2C0; padding: 8px 14px; border-radius: 6px; z-index: 3000; animation: toastFade 3s ease-out; border: 1px solid rgba(139, 44, 45, 0.5); font-size: 0.85rem; text-align: left;`;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
+    setTimeout(() => toast.remove(), 3000);
 }
 
 const style = document.createElement('style');

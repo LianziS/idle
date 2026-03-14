@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <title>中世纪雇佣兵 - 放置游戏</title>
-    <link rel="stylesheet" href="style.css?v=2026031410">
+    <link rel="stylesheet" href="style.css?v=2026031411">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1B2A3A;color:#A0B2C0;min-height:100vh;padding:0;font-size:14px;overflow-x:hidden}
@@ -20,7 +20,6 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <h1>⚔️ 中世纪雇佣兵</h1>
             <div class="top-fixed-info">
                 <span class="player-badge">
                     <span>👤</span>
@@ -31,11 +30,16 @@
         <!-- 行动状态栏 -->
         <div class="action-status-bar" id="action-status-bar">
             <div class="action-status-content">
-                <span class="action-status-icon" id="action-status-icon">⏳</span>
-                <span class="action-status-name" id="action-status-name">未进行行动</span>
-                <div class="action-progress-bg">
-                    <div class="action-progress-fill" id="action-progress-fill"></div>
-                    <span class="action-progress-time" id="action-progress-time">-</span>
+                <div class="action-status-left">
+                    <span class="action-status-icon" id="action-status-icon">⏳</span>
+                    <span class="action-status-name" id="action-status-name">未进行行动</span>
+                </div>
+                <div class="action-progress-wrapper">
+                    <div class="action-progress-bg">
+                        <div class="action-progress-fill" id="action-progress-fill"></div>
+                        <span class="action-progress-time" id="action-progress-time">-</span>
+                    </div>
+                    <button class="action-cancel-btn" id="action-cancel-btn">结束行动</button>
                 </div>
             </div>
         </div>
@@ -271,7 +275,7 @@
         </div>
     </div>
 
-    <script src="game.js?v=2026031410"></script>
+    <script src="game.js?v=2026031411"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
