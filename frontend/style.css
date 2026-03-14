@@ -87,7 +87,7 @@ body::after {
 .action-status-bar {
     background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 20px 10px 20px;
+    padding: 6px 10px 10px 10px;
 }
 
 .action-status-content {
@@ -97,6 +97,7 @@ body::after {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
+    padding-left: 10px;
 }
 
 .action-status-left {
@@ -167,6 +168,11 @@ body::after {
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.3s;
+    display: none;
+}
+
+.action-cancel-btn.visible {
+    display: block;
 }
 
 .action-cancel-btn:hover {
@@ -200,10 +206,10 @@ body::after {
 /* ============ 侧边栏 ============ */
 .sidebar {
     position: fixed;
-    top: 150px;
+    top: 100px;
     left: 0;
-    width: 55px;
-    height: calc(100% - 150px);
+    width: 70px;
+    height: calc(100% - 100px);
     background: linear-gradient(180deg, rgba(27, 42, 58, 0.95) 0%, rgba(45, 63, 82, 0.9) 100%);
     backdrop-filter: blur(10px);
     z-index: 1000;
@@ -216,33 +222,34 @@ body::after {
 }
 
 .sidebar.expanded {
-    width: 200px;
+    width: 220px;
 }
 
 /* 图标栏 */
 .sidebar-icon-bar {
-    width: 45px;
+    width: 70px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 8px;
-    gap: 2px;
+    padding-top: 10px;
+    gap: 4px;
     transition: width 0.3s ease;
 }
 
 .sidebar.expanded .sidebar-icon-bar {
-    width: 160px;
+    width: 220px;
     align-items: flex-start;
+    padding-left: 10px;
 }
 
 .toggle-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 6px;
     border: none;
     background: transparent;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     cursor: pointer;
     transition: all 0.3s;
     display: flex;
@@ -258,17 +265,17 @@ body::after {
 }
 
 .icon-separator {
-    width: 18px;
+    width: 24px;
     height: 2px;
     background: rgba(160, 178, 192, 0.3);
-    margin: 3px 0;
+    margin: 4px 0;
     border-radius: 2px;
     flex-shrink: 0;
 }
 
 .sidebar.expanded .icon-separator {
     width: calc(100% - 20px);
-    margin: 5px 10px;
+    margin: 6px 10px;
 }
 
 /* 技能经验条（伐木场/矿洞顶部） */
@@ -351,8 +358,8 @@ body::after {
 }
 
 .nav-icon {
-    font-size: 1.05rem;
-    width: 40px;
+    font-size: 1.3rem;
+    width: 50px;
     height: 34px;
     display: flex;
     align-items: center;
@@ -364,7 +371,7 @@ body::after {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 0 3px 0 0;
+    padding: 0 10px 0 0;
     min-width: 0;
 }
 
@@ -440,16 +447,20 @@ body::after {
 .game-container {
     max-width: 1400px;
     margin: 0 auto;
-    margin-left: 65px;
-    margin-top: 150px;
+    margin-left: 80px;
+    margin-top: 100px;
     background: rgba(27, 42, 58, 0.7);
     backdrop-filter: blur(10px);
     border-radius: 12px;
     overflow-x: hidden;
     transition: margin-left 0.3s ease;
-    min-height: calc(100vh - 150px);
+    min-height: calc(100vh - 100px);
     border: 1px solid rgba(107, 79, 60, 0.2);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.expanded ~ .game-container {
+    margin-left: 230px;
 }
 
 /* ============ 页面 ============ */
@@ -1076,11 +1087,12 @@ body::after {
     }
     
     .action-status-bar {
-        padding: 4px 15px 8px 15px;
+        padding: 4px 5px 8px 5px;
     }
     
     .action-status-content {
         gap: 4px;
+        padding-left: 5px;
     }
     
     .action-status-left {
@@ -1124,23 +1136,24 @@ body::after {
     }
     
     .sidebar {
-        top: 120px;
-        height: calc(100% - 120px);
-        width: 40px;
+        top: 90px;
+        height: calc(100% - 90px);
+        width: 50px;
     }
     
     .sidebar.expanded {
-        width: 150px;
+        width: 160px;
     }
     
     .sidebar-icon-bar {
-        width: 40px;
+        width: 50px;
         padding-top: 6px;
         gap: 2px;
     }
     
     .sidebar.expanded .sidebar-icon-bar {
-        width: 150px;
+        width: 160px;
+        padding-left: 8px;
     }
     
     .toggle-btn {
@@ -1152,7 +1165,7 @@ body::after {
     .nav-icon {
         width: 40px;
         height: 34px;
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
     
     .nav-text {
@@ -1165,7 +1178,7 @@ body::after {
     }
     
     .nav-skill-wrapper {
-        padding: 0 2px 0 0;
+        padding: 0 4px 0 0;
     }
     
     .nav-exp-level {
@@ -1176,7 +1189,7 @@ body::after {
     
     .game-container {
         margin-left: 55px;
-        margin-top: 120px;
+        margin-top: 90px;
     }
     
     .panel {

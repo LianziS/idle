@@ -256,7 +256,7 @@ function updateSkillNavExp(skill, expFillElem, levelElem) {
 function cancelCurrentAction() {
     if (!gameState.currentAction) return;
     
-    // 清除所有进行中的行动
+    // 清除所有进行中的行动，不给予奖励
     if (gameState.activeWoodcutting) {
         gameState.activeWoodcutting = null;
     }
@@ -270,13 +270,18 @@ function cancelCurrentAction() {
         gameState.combat.active = false;
     }
     
+    // 清除奖励显示
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = '';
+    }
+    
     setActionState(null, 0);
     updateUI();
     renderWoodcutting();
     renderMining();
     renderGatherActions();
     renderCombatZones();
-    showToast('❌ 已取消行动');
+    showToast('❌ 已停止行动');
 }
 
 let animationFrame = null;
@@ -303,6 +308,7 @@ function updateActionStatusBar() {
         elements.actionStatusName.textContent = gameState.currentAction.name;
         elements.actionProgressTime.textContent = `${(gameState.actionDuration / 1000).toFixed(1)}秒`;
         elements.actionCancelBtn.disabled = false;
+        elements.actionCancelBtn.classList.add('visible');
         
         // 启动平滑动画
         if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -314,6 +320,7 @@ function updateActionStatusBar() {
         elements.actionProgressFill.style.width = '0%';
         elements.actionProgressTime.textContent = '-';
         elements.actionCancelBtn.disabled = true;
+        elements.actionCancelBtn.classList.remove('visible');
     }
 }
 
