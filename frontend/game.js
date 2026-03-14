@@ -281,10 +281,7 @@ function setupEventListeners() {
         option.addEventListener('click', function() {
             document.querySelectorAll('.count-option').forEach(o => o.classList.remove('selected'));
             this.classList.add('selected');
-            const count = this.dataset.count;
-            if (elements.actionCountInput) {
-                elements.actionCountInput.value = count === '99999' ? '' : count;
-            }
+            // 不填充到文本框，让用户手动输入
         });
     });
     
@@ -343,11 +340,22 @@ function openActionModal(type, id, name) {
 
 function confirmActionCount() {
     if (!pendingAction) return;
-    const count = elements.actionCountInput ? parseInt(elements.actionCountInput.value) : 1;
+    
+    // 检查是否有选中的选项
+    const selectedOption = document.querySelector('.count-option.selected');
+    let count = 1;
+    
+    if (selectedOption) {
+        count = parseInt(selectedOption.dataset.count);
+    } else if (elements.actionCountInput && elements.actionCountInput.value) {
+        count = parseInt(elements.actionCountInput.value);
+    }
+    
     if (isNaN(count) || count < 1) {
-        showToast('❌ 请输入有效的次数');
+        showToast('❌ 请输入或选择有效的次数');
         return;
     }
+    
     pendingAction.count = count;
     elements.actionModal.classList.remove('show');
     
@@ -383,7 +391,8 @@ function startWoodcuttingWithCount(treeId, count) {
 }
 
 function scheduleWoodcutting(treeId) {
-    if (!gameState.activeWoodcutting || gameState.woodcuttingRemaining <= 0) {
+    const isInfinte = gameState.woodcuttingCount >= 99999;
+    if (!gameState.activeWoodcutting || (!isInfinte && gameState.woodcuttingRemaining <= 0)) {
         gameState.activeWoodcutting = null;
         gameState.woodcuttingCount = 0;
         gameState.woodcuttingRemaining = 0;
@@ -393,7 +402,9 @@ function scheduleWoodcutting(treeId) {
     }
     
     const tree = CONFIG.trees.find(t => t.id === treeId);
-    gameState.woodcuttingRemaining--;
+    if (!isInfinte) {
+        gameState.woodcuttingRemaining--;
+    }
     // 重置行动开始时间，让进度条重新跑
     setActionState({ name: `采集${tree.name}`, icon: tree.icon }, tree.duration);
     updateActionStatusBar();
@@ -432,7 +443,8 @@ function startMiningWithCount(oreId, count) {
 }
 
 function scheduleMining(oreId) {
-    if (!gameState.activeMining || gameState.miningRemaining <= 0) {
+    const isInfinte = gameState.miningCount >= 99999;
+    if (!gameState.activeMining || (!isInfinte && gameState.miningRemaining <= 0)) {
         gameState.activeMining = null;
         gameState.miningCount = 0;
         gameState.miningRemaining = 0;
@@ -442,7 +454,9 @@ function scheduleMining(oreId) {
     }
     
     const ore = CONFIG.ores.find(o => o.id === oreId);
-    gameState.miningRemaining--;
+    if (!isInfinte) {
+        gameState.miningRemaining--;
+    }
     // 重置行动开始时间，让进度条重新跑
     setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, ore.duration);
     updateActionStatusBar();
@@ -532,8 +546,16 @@ function updateActionStatusBarSmooth() {
     
     elements.actionProgressFill.style.width = `${progress}%`;
     
+    // 进度条完成后，如果是多次行动，会由 schedule 函数重置
     if (progress < 100) {
         animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+    } else {
+        // 进度条满格后重置为 0，等待下一次行动开始
+        setTimeout(() => {
+            if (gameState.currentAction) {
+                elements.actionProgressFill.style.width = '0%';
+            }
+        }, 100);
     }
 }
 
