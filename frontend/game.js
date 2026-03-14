@@ -135,7 +135,18 @@ const elements = {
     modal: document.getElementById('modal'),
     modalBody: document.getElementById('modal-body'),
     modalClose: document.querySelector('.modal-close'),
-    resetBtn: document.getElementById('reset-btn')
+    resetBtn: document.getElementById('reset-btn'),
+    // 侧边栏技能经验条
+    navWoodcuttingExp: document.getElementById('nav-woodcutting-exp'),
+    navWoodcuttingLvl: document.getElementById('nav-woodcutting-lvl'),
+    navMiningExp: document.getElementById('nav-mining-exp'),
+    navMiningLvl: document.getElementById('nav-mining-lvl'),
+    navGatherExp: document.getElementById('nav-gather-exp'),
+    navGatherLvl: document.getElementById('nav-gather-lvl'),
+    navCraftExp: document.getElementById('nav-craft-exp'),
+    navCraftLvl: document.getElementById('nav-craft-lvl'),
+    navCombatExp: document.getElementById('nav-combat-exp'),
+    navCombatLvl: document.getElementById('nav-combat-lvl')
 };
 
 function init() {
@@ -218,6 +229,17 @@ function setupEventListeners() {
     });
 }
 
+function updateSkillNavExp(skill, expFillElem, levelElem) {
+    if (!expFillElem || !levelElem) return;
+    const currentExp = getSkillExpForLevel(gameState[skill + 'Level']);
+    const nextExp = getSkillExpForLevel(gameState[skill + 'Level'] + 1);
+    const expNeeded = nextExp - currentExp;
+    const expProgress = gameState[skill + 'Exp'] - currentExp;
+    const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+    expFillElem.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+    levelElem.textContent = gameState[skill + 'Level'];
+}
+
 function updateUI() {
     const levelText = gameState.level.toString();
     if (elements.level) elements.level.textContent = levelText;
@@ -233,6 +255,13 @@ function updateUI() {
     const minutes = Math.floor((elapsed % 3600) / 60);
     const seconds = elapsed % 60;
     if (elements.playTime) elements.playTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // 更新侧边栏技能经验条
+    updateSkillNavExp('woodcutting', elements.navWoodcuttingExp, elements.navWoodcuttingLvl);
+    updateSkillNavExp('mining', elements.navMiningExp, elements.navMiningLvl);
+    updateSkillNavExp('gathering', elements.navGatherExp, elements.navGatherLvl);
+    updateSkillNavExp('crafting', elements.navCraftExp, elements.navCraftLvl);
+    updateSkillNavExp('combat', elements.navCombatExp, elements.navCombatLvl);
     
     updateCombatUI();
     renderBuildings();
@@ -371,6 +400,7 @@ function completeAction(actionId) {
     const action = CONFIG.gatherActions.find(a => a.id === actionId);
     for (const [res, amount] of Object.entries(action.reward)) { gameState.resources[res] += amount; }
     addExp(action.exp);
+    addSkillExp('gathering', action.exp);
     delete gameState.activeActions[actionId];
     updateUI();
     saveGame();
@@ -547,6 +577,7 @@ function craftItem(recipeId) {
     if (!canAfford(recipe.cost)) { showToast('❌ 资源不足'); return; }
     payCost(recipe.cost);
     addExp(recipe.exp);
+    addSkillExp('crafting', recipe.exp);
     gameState.resources.gold += recipe.exp * 2;
     updateUI();
     saveGame();
@@ -621,6 +652,7 @@ function completeCombat(zone) {
     });
     const expReward = zone.difficulty * 10;
     addExp(expReward);
+    addSkillExp('combat', expReward);
     elements.combatRewards.innerHTML = `🎉 战斗奖励：${rewards.join(' ')} | +${expReward} EXP`;
     gameState.currentZoneIndex = (gameState.currentZoneIndex + 1) % CONFIG.combatZones.length;
     updateUI();
