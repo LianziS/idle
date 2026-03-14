@@ -158,8 +158,23 @@ const elements = {
     actionProgressFill: document.getElementById('action-progress-fill'),
     actionProgressTime: document.getElementById('action-progress-time'),
     actionCancelBtn: document.getElementById('action-cancel-btn'),
-    actionRewards: document.getElementById('action-rewards')
+    actionRewards: document.getElementById('action-rewards'),
+    // 行动次数选择弹窗
+    actionModal: document.getElementById('action-modal'),
+    actionModalTitle: document.getElementById('action-modal-title'),
+    actionModalClose: document.getElementById('action-modal-close'),
+    actionModalCancel: document.getElementById('action-modal-cancel'),
+    actionModalConfirm: document.getElementById('action-modal-confirm'),
+    actionCountInput: document.getElementById('action-count-input'),
+    // 替换行动确认弹窗
+    replaceModal: document.getElementById('replace-modal'),
+    replaceModalClose: document.getElementById('replace-modal-close'),
+    replaceModalCancel: document.getElementById('replace-modal-cancel'),
+    replaceModalConfirm: document.getElementById('replace-modal-confirm')
 };
+
+// 临时存储待执行的行动
+let pendingAction = null;
 
 function init() {
     loadGame();
@@ -244,6 +259,65 @@ function setupEventListeners() {
         if (e.target === elements.modal) elements.modal.classList.remove('show');
     });
     elements.actionCancelBtn.addEventListener('click', cancelCurrentAction);
+    
+    // 行动次数选择弹窗事件
+    if (elements.actionModalClose) {
+        elements.actionModalClose.addEventListener('click', () => elements.actionModal.classList.remove('show'));
+    }
+    if (elements.actionModalCancel) {
+        elements.actionModalCancel.addEventListener('click', () => elements.actionModal.classList.remove('show'));
+    }
+    if (elements.actionModal) {
+        elements.actionModal.addEventListener('click', (e) => {
+            if (e.target === elements.actionModal) elements.actionModal.classList.remove('show');
+        });
+    }
+    if (elements.actionModalConfirm) {
+        elements.actionModalConfirm.addEventListener('click', confirmActionCount);
+    }
+    
+    // 选择次数选项
+    document.querySelectorAll('.count-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.count-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            const count = this.dataset.count;
+            if (elements.actionCountInput) {
+                elements.actionCountInput.value = count === '99999' ? '' : count;
+            }
+        });
+    });
+    
+    // 替换行动确认弹窗事件
+    if (elements.replaceModalClose) {
+        elements.replaceModalClose.addEventListener('click', () => {
+            elements.replaceModal.classList.remove('show');
+            pendingAction = null;
+        });
+    }
+    if (elements.replaceModalCancel) {
+        elements.replaceModalCancel.addEventListener('click', () => {
+            elements.replaceModal.classList.remove('show');
+            pendingAction = null;
+        });
+    }
+    if (elements.replaceModalConfirm) {
+        elements.replaceModalConfirm.addEventListener('click', () => {
+            elements.replaceModal.classList.remove('show');
+            if (pendingAction) {
+                cancelCurrentAction();
+                executePendingAction();
+            }
+        });
+    }
+    if (elements.replaceModal) {
+        elements.replaceModal.addEventListener('click', (e) => {
+            if (e.target === elements.replaceModal) {
+                elements.replaceModal.classList.remove('show');
+                pendingAction = null;
+            }
+        });
+    }
 }
 
 function updateSkillNavExp(skill, expFillElem, levelElem) {
@@ -257,15 +331,134 @@ function updateSkillNavExp(skill, expFillElem, levelElem) {
     levelElem.textContent = gameState[skill + 'Level'];
 }
 
+function openActionModal(type, id, name) {
+    if (!elements.actionModal) return;
+    const typeNames = { woodcutting: '伐木', mining: '挖矿' };
+    elements.actionModalTitle.textContent = `选择${typeNames[type]}次数 - ${name}`;
+    elements.actionCountInput.value = '';
+    document.querySelectorAll('.count-option').forEach(o => o.classList.remove('selected'));
+    pendingAction = { type, id, name };
+    elements.actionModal.classList.add('show');
+}
+
+function confirmActionCount() {
+    if (!pendingAction) return;
+    const count = elements.actionCountInput ? parseInt(elements.actionCountInput.value) : 1;
+    if (isNaN(count) || count < 1) {
+        showToast('❌ 请输入有效的次数');
+        return;
+    }
+    pendingAction.count = count;
+    elements.actionModal.classList.remove('show');
+    
+    // 检查是否有行动正在进行
+    if (hasActiveAction()) {
+        elements.replaceModal.classList.add('show');
+    } else {
+        executePendingAction();
+    }
+}
+
+function executePendingAction() {
+    if (!pendingAction) return;
+    const { type, id, count } = pendingAction;
+    
+    if (type === 'woodcutting') {
+        startWoodcuttingWithCount(id, count);
+    } else if (type === 'mining') {
+        startMiningWithCount(id, count);
+    }
+    
+    pendingAction = null;
+}
+
+function startWoodcuttingWithCount(treeId, count) {
+    const tree = CONFIG.trees.find(t => t.id === treeId);
+    gameState.activeWoodcutting = treeId;
+    gameState.woodcuttingCount = count;
+    gameState.woodcuttingRemaining = count;
+    setActionState({ name: `采集${tree.name}`, icon: tree.icon }, tree.duration);
+    renderWoodcutting();
+    scheduleWoodcutting(treeId);
+}
+
+function scheduleWoodcutting(treeId) {
+    if (!gameState.activeWoodcutting || gameState.woodcuttingRemaining <= 0) {
+        gameState.activeWoodcutting = null;
+        setActionState(null, 0);
+        renderWoodcutting();
+        return;
+    }
+    
+    const tree = CONFIG.trees.find(t => t.id === treeId);
+    gameState.woodcuttingRemaining--;
+    setTimeout(() => {
+        if (gameState.activeWoodcutting === treeId) {
+            completeWoodcuttingOnce(treeId);
+            scheduleWoodcutting(treeId);
+        }
+    }, tree.duration);
+}
+
+function completeWoodcuttingOnce(treeId) {
+    const tree = CONFIG.trees.find(t => t.id === treeId);
+    gameState.resources.wood += 1;
+    addExp(tree.exp);
+    addSkillExp('woodcutting', tree.exp);
+    updateUI();
+    saveGame();
+}
+
+function startMiningWithCount(oreId, count) {
+    const ore = CONFIG.ores.find(o => o.id === oreId);
+    gameState.activeMining = oreId;
+    gameState.miningCount = count;
+    gameState.miningRemaining = count;
+    setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, ore.duration);
+    renderMining();
+    scheduleMining(oreId);
+}
+
+function scheduleMining(oreId) {
+    if (!gameState.activeMining || gameState.miningRemaining <= 0) {
+        gameState.activeMining = null;
+        setActionState(null, 0);
+        renderMining();
+        return;
+    }
+    
+    const ore = CONFIG.ores.find(o => o.id === oreId);
+    gameState.miningRemaining--;
+    setTimeout(() => {
+        if (gameState.activeMining === oreId) {
+            completeMiningOnce(oreId);
+            scheduleMining(oreId);
+        }
+    }, ore.duration);
+}
+
+function completeMiningOnce(oreId) {
+    const ore = CONFIG.ores.find(o => o.id === oreId);
+    gameState.resources.stone += 1;
+    addExp(ore.exp);
+    addSkillExp('mining', ore.exp);
+    updateUI();
+    saveGame();
+}
+
 function cancelCurrentAction() {
     if (!gameState.currentAction) return;
     
     // 清除所有进行中的行动，不给予奖励
     if (gameState.activeWoodcutting) {
         gameState.activeWoodcutting = null;
+        gameState.woodcuttingCount = 0;
+        gameState.woodcuttingRemaining = 0;
     }
     if (gameState.activeMining) {
         gameState.activeMining = null;
+        gameState.miningCount = 0;
+        gameState.miningRemaining = 0;
     }
     for (const actionId in gameState.activeActions) {
         delete gameState.activeActions[actionId];
@@ -315,13 +508,27 @@ function updateActionStatusBarSmooth() {
     }
 }
 
+function formatTime(seconds) {
+    if (seconds < 60) {
+        return `${seconds.toFixed(1)}s`;
+    } else if (seconds < 3600) {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}m${s}s`;
+    } else {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        return `${h}h${m}m`;
+    }
+}
+
 function updateActionStatusBar() {
     if (!elements.actionStatusBar) return;
     
     if (gameState.currentAction) {
         elements.actionStatusIcon.textContent = gameState.currentAction.icon;
         elements.actionStatusName.textContent = gameState.currentAction.name;
-        elements.actionProgressTime.textContent = `${(gameState.actionDuration / 1000).toFixed(1)}秒`;
+        elements.actionProgressTime.textContent = formatTime(gameState.actionDuration / 1000);
         elements.actionCancelBtn.disabled = false;
         elements.actionCancelBtn.classList.add('visible');
         
@@ -605,6 +812,13 @@ function renderWoodcutting() {
     elements.woodcuttingList.innerHTML = CONFIG.trees.map(tree => {
         const isActive = gameState.activeWoodcutting === tree.id;
         const isUnlocked = gameState.level >= tree.reqLevel;
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.woodcuttingRemaining || 0;
+            const total = gameState.woodcuttingCount || 1;
+            const countText = total >= 99999 ? '∞' : `${remaining}/${total}`;
+            actionStatus = `<div class="action-timer">采集中... ${countText}</div>`;
+        }
         return `
             <div class="tree-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''}" data-id="${tree.id}">
                 <div class="tree-icon">${tree.icon}</div>
@@ -613,7 +827,7 @@ function renderWoodcutting() {
                     <div class="tree-req">等级：${tree.reqLevel} | ${tree.duration/1000}秒</div>
                     <div class="tree-drop">${tree.dropIcon} ${tree.drop} | +${tree.exp} EXP</div>
                 </div>
-                ${isActive ? '<div class="action-timer">采集中...</div>' : ''}
+                ${actionStatus}
                 ${!isUnlocked ? '<div class="tree-locked">🔒 等级不足</div>' : ''}
             </div>
         `;
@@ -624,8 +838,9 @@ function renderWoodcutting() {
             const treeId = card.dataset.id;
             const tree = CONFIG.trees.find(t => t.id === treeId);
             if (gameState.level < tree.reqLevel) { showToast(`❌ 需要等级 ${tree.reqLevel}`); return; }
-            if (gameState.activeWoodcutting) { showToast('⏳ 正在采集中'); return; }
-            startWoodcutting(treeId);
+            if (gameState.activeWoodcutting === treeId) { showToast('⏳ 正在采集中'); return; }
+            // 打开行动次数选择弹窗
+            openActionModal('woodcutting', treeId, tree.name);
         });
     });
 }
@@ -657,7 +872,7 @@ function addSkillExp(skill, amount) {
 
 function completeWoodcutting(treeId) {
     // 检查行动是否仍然有效（可能已被取消）
-    if (!gameState.activeWoodcutting || gameState.activeWoodcutting !== treeId) return;
+    if (!gameState.activeWoodcutting) return;
     
     const tree = CONFIG.trees.find(t => t.id === treeId);
     const dropAmount = 1;
@@ -692,6 +907,13 @@ function renderMining() {
     elements.miningList.innerHTML = CONFIG.ores.map(ore => {
         const isActive = gameState.activeMining === ore.id;
         const isUnlocked = gameState.level >= ore.reqLevel;
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.miningRemaining || 0;
+            const total = gameState.miningCount || 1;
+            const countText = total >= 99999 ? '∞' : `${remaining}/${total}`;
+            actionStatus = `<div class="action-timer">挖掘中... ${countText}</div>`;
+        }
         return `
             <div class="ore-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''}" data-id="${ore.id}">
                 <div class="ore-icon">${ore.icon}</div>
@@ -700,7 +922,7 @@ function renderMining() {
                     <div class="ore-req">等级：${ore.reqLevel} | ${ore.duration/1000}秒</div>
                     <div class="ore-drop">${ore.dropIcon} ${ore.drop} | +${ore.exp} EXP</div>
                 </div>
-                ${isActive ? '<div class="action-timer">挖掘中...</div>' : ''}
+                ${actionStatus}
                 ${!isUnlocked ? '<div class="ore-locked">🔒 等级不足</div>' : ''}
             </div>
         `;
@@ -711,8 +933,9 @@ function renderMining() {
             const oreId = card.dataset.id;
             const ore = CONFIG.ores.find(o => o.id === oreId);
             if (gameState.level < ore.reqLevel) { showToast(`❌ 需要等级 ${ore.reqLevel}`); return; }
-            if (gameState.activeMining) { showToast('⏳ 正在挖掘中'); return; }
-            startMining(oreId);
+            if (gameState.activeMining === oreId) { showToast('⏳ 正在挖掘中'); return; }
+            // 打开行动次数选择弹窗
+            openActionModal('mining', oreId, ore.name);
         });
     });
 }
@@ -728,7 +951,7 @@ function startMining(oreId) {
 
 function completeMining(oreId) {
     // 检查行动是否仍然有效（可能已被取消）
-    if (!gameState.activeMining || gameState.activeMining !== oreId) return;
+    if (!gameState.activeMining) return;
     
     const ore = CONFIG.ores.find(o => o.id === oreId);
     const dropAmount = 1;

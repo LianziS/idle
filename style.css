@@ -864,6 +864,111 @@ body::after {
     color: #8B2C2D;
 }
 
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(107, 79, 60, 0.3);
+}
+
+.modal-header h2 {
+    font-size: 1.3rem;
+    color: #A0B2C0;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(107, 79, 60, 0.3);
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.modal-btn.primary {
+    background: linear-gradient(135deg, #8B2C2D 0%, #a33435 100%);
+    color: #fff;
+    border: 1px solid rgba(139, 44, 45, 0.5);
+}
+
+.modal-btn.primary:hover {
+    background: linear-gradient(135deg, #a33435 0%, #8B2C2D 100%);
+}
+
+.modal-btn.secondary {
+    background: transparent;
+    color: #A0B2C0;
+    border: 1px solid rgba(160, 178, 192, 0.3);
+}
+
+.modal-btn.secondary:hover {
+    background: rgba(160, 178, 192, 0.1);
+}
+
+.action-count-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.count-option {
+    background: rgba(107, 79, 60, 0.2);
+    border: 2px solid rgba(107, 79, 60, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    color: #A0B2C0;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.count-option:hover {
+    border-color: #8B2C2D;
+    background: rgba(139, 44, 45, 0.2);
+}
+
+.count-option.selected {
+    border-color: #8B2C2D;
+    background: rgba(139, 44, 45, 0.3);
+}
+
+.action-count-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.action-count-custom label {
+    color: #A0B2C0;
+    font-size: 0.9rem;
+}
+
+.action-count-custom input {
+    background: rgba(107, 79, 60, 0.2);
+    border: 2px solid rgba(107, 79, 60, 0.4);
+    border-radius: 6px;
+    padding: 10px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.action-count-custom input:focus {
+    outline: none;
+    border-color: #8B2C2D;
+}
+
 /* ============ 滚动条 ============ */
 ::-webkit-scrollbar {
     width: 8px;
