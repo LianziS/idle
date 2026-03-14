@@ -278,27 +278,61 @@ function cancelCurrentAction() {
     showToast('❌ 已取消行动');
 }
 
+let animationFrame = null;
+
+function updateActionStatusBarSmooth() {
+    if (!gameState.currentAction) return;
+    
+    const now = Date.now();
+    const elapsed = now - gameState.actionStartTime;
+    const progress = Math.min(100, (elapsed / gameState.actionDuration) * 100);
+    
+    elements.actionProgressFill.style.width = `${progress}%`;
+    
+    if (progress < 100) {
+        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+    }
+}
+
 function updateActionStatusBar() {
     if (!elements.actionStatusBar) return;
     
     if (gameState.currentAction) {
-        const now = Date.now();
-        const elapsed = now - gameState.actionStartTime;
-        const progress = Math.min(100, (elapsed / gameState.actionDuration) * 100);
-        
         elements.actionStatusIcon.textContent = gameState.currentAction.icon;
         elements.actionStatusName.textContent = gameState.currentAction.name;
-        elements.actionProgressFill.style.width = `${progress}%`;
-        elements.actionProgressFill.classList.add('smooth');
         elements.actionProgressTime.textContent = `${(gameState.actionDuration / 1000).toFixed(1)}秒`;
         elements.actionCancelBtn.disabled = false;
+        
+        // 启动平滑动画
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
     } else {
-        elements.actionStatusIcon.textContent = '⏳';
-        elements.actionStatusName.textContent = '未进行行动';
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        elements.actionStatusIcon.textContent = '∞';
+        elements.actionStatusName.textContent = '休息中';
         elements.actionProgressFill.style.width = '0%';
-        elements.actionProgressFill.classList.remove('smooth');
         elements.actionProgressTime.textContent = '-';
         elements.actionCancelBtn.disabled = true;
+    }
+}
+
+function showActionReward(text) {
+    if (!elements.actionRewards) return;
+    const rewardItem = document.createElement('span');
+    rewardItem.className = 'action-reward-item';
+    rewardItem.textContent = text;
+    elements.actionRewards.appendChild(rewardItem);
+    // 3 秒后移除
+    setTimeout(() => {
+        if (rewardItem.parentNode) {
+            rewardItem.parentNode.removeChild(rewardItem);
+        }
+    }, 3000);
+}
+
+function clearActionRewards() {
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = '';
     }
 }
 
@@ -481,14 +515,19 @@ function startAction(actionId) {
 
 function completeAction(actionId) {
     const action = CONFIG.gatherActions.find(a => a.id === actionId);
-    for (const [res, amount] of Object.entries(action.reward)) { gameState.resources[res] += amount; }
+    for (const [res, amount] of Object.entries(action.reward)) {
+        gameState.resources[res] += amount;
+        const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
+        const names = { gold: '金币', wood: '木材', stone: '石头', herb: '草药' };
+        clearActionRewards();
+        showActionReward(`+${amount} ${icons[res]} ${names[res]}`);
+    }
     addExp(action.exp);
     addSkillExp('gathering', action.exp);
     delete gameState.activeActions[actionId];
     setActionState(null, 0);
     updateUI();
     saveGame();
-    showToast(`✅ 完成 ${action.name}：${action.desc}`);
 }
 
 function renderCraftActions() {
@@ -593,9 +632,10 @@ function completeWoodcutting(treeId) {
     addSkillExp('woodcutting', tree.exp);
     gameState.activeWoodcutting = null;
     setActionState(null, 0);
+    clearActionRewards();
     updateUI();
     saveGame();
-    showToast(`+${dropAmount} ${tree.dropIcon} ${tree.drop}`);
+    showActionReward(`+${dropAmount} ${tree.dropIcon} ${tree.drop}`);
 }
 
 function renderMining() {
@@ -657,9 +697,10 @@ function completeMining(oreId) {
     addSkillExp('mining', ore.exp);
     gameState.activeMining = null;
     setActionState(null, 0);
+    clearActionRewards();
     updateUI();
     saveGame();
-    showToast(`+${dropAmount} ${ore.dropIcon} ${ore.drop}`);
+    showActionReward(`+${dropAmount} ${ore.dropIcon} ${ore.drop}`);
 }
 
 function craftItem(recipeId) {
@@ -738,12 +779,15 @@ function toggleCombat() {
 function completeCombat(zone) {
     gameState.combat.active = false;
     setActionState(null, 0);
+    clearActionRewards();
     let rewards = [];
     zone.rewards.forEach(r => {
         const amount = Math.floor(Math.random() * (r.max - r.min + 1)) + r.min;
         gameState.resources[r.item] += amount;
         const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
-        rewards.push(`+${amount} ${icons[r.item]} ${r.item === 'gold' ? '金币' : r.item === 'wood' ? '木材' : r.item === 'stone' ? '石头' : '草药'}`);
+        const name = r.item === 'gold' ? '金币' : r.item === 'wood' ? '木材' : r.item === 'stone' ? '石头' : '草药';
+        rewards.push(`+${amount} ${icons[r.item]} ${name}`);
+        showActionReward(`+${amount} ${icons[r.item]} ${name}`);
     });
     const expReward = zone.difficulty * 10;
     addExp(expReward);
@@ -752,12 +796,6 @@ function completeCombat(zone) {
     gameState.currentZoneIndex = (gameState.currentZoneIndex + 1) % CONFIG.combatZones.length;
     updateUI();
     saveGame();
-    // 显示获得物品提示
-    zone.rewards.forEach(r => {
-        const amount = Math.floor(Math.random() * (r.max - r.min + 1)) + r.min;
-        const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
-        showToast(`+${amount} ${icons[r.item]} ${r.item === 'gold' ? '金币' : r.item === 'wood' ? '木材' : r.item === 'stone' ? '石头' : '草药'}`);
-    });
 }
 
 function showToast(message) {

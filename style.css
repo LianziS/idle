@@ -52,53 +52,42 @@ body::after {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100px;
-    background: linear-gradient(180deg, rgba(107, 79, 60, 0.95) 0%, rgba(45, 35, 30, 0.9) 100%);
+    background: transparent;
     backdrop-filter: blur(10px);
-    border-bottom: 3px solid #8B2C2D;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
     z-index: 1100;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
 }
 
 .top-fixed-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 8px 20px 0 20px;
+    padding: 8px 20px;
     width: 100%;
     display: flex;
     justify-content: flex-end;
     align-items: center;
 }
 
-.top-fixed-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
 .player-badge {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(139, 44, 45, 0.3);
-    padding: 6px 14px;
+    gap: 6px;
+    background: transparent;
+    padding: 4px 12px;
     border-radius: 6px;
-    border: 1px solid rgba(139, 44, 45, 0.5);
-    font-size: 0.85rem;
-    color: #A0B2C0;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+    color: #fff;
+    font-weight: bold;
 }
 
 /* 行动状态栏 */
 .action-status-bar {
-    flex: 1;
-    background: rgba(27, 42, 58, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(107, 79, 60, 0.3);
-    display: flex;
-    align-items: center;
-    padding: 8px 20px;
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 20px 10px 20px;
 }
 
 .action-status-content {
@@ -119,6 +108,7 @@ body::after {
 .action-status-icon {
     font-size: 1.1rem;
     flex-shrink: 0;
+    color: #fff;
 }
 
 .action-status-name {
@@ -136,9 +126,10 @@ body::after {
 .action-progress-bg {
     flex: 1;
     max-width: 200px;
-    height: 18px;
-    background: rgba(107, 79, 60, 0.3);
-    border-radius: 9px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
     position: relative;
     overflow: hidden;
 }
@@ -150,12 +141,7 @@ body::after {
     bottom: 0;
     width: 0%;
     background: linear-gradient(90deg, #8B2C2D 0%, #a33435 50%, #8B2C2D 100%);
-    border-radius: 9px;
-    transition: width 0.1s linear;
-}
-
-.action-progress-fill.smooth {
-    transition: width 0.1s linear;
+    transition: width 0.05s linear;
 }
 
 .action-progress-time {
@@ -163,32 +149,52 @@ body::after {
     left: 8px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #fff;
     font-weight: bold;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     text-align: left;
+    z-index: 1;
 }
 
 .action-cancel-btn {
-    background: rgba(139, 44, 45, 0.6);
-    border: 1px solid rgba(139, 44, 45, 0.8);
-    color: #A0B2C0;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.3s;
 }
 
 .action-cancel-btn:hover {
-    background: rgba(139, 44, 45, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
 .action-cancel-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+}
+
+.action-rewards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 18px;
+    padding-left: 2px;
+}
+
+.action-reward-item {
+    font-size: 0.75rem;
+    color: #A0B2C0;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
 }
 
 /* ============ 侧边栏 ============ */
@@ -1029,20 +1035,20 @@ body::after {
     }
     
     .top-fixed {
-        height: 90px;
+        min-height: 85px;
     }
     
     .top-fixed-content {
-        padding: 6px 15px 0 15px;
+        padding: 6px 15px;
     }
     
     .player-badge {
-        padding: 5px 12px;
-        font-size: 0.8rem;
+        padding: 4px 10px;
+        font-size: 0.75rem;
     }
     
     .action-status-bar {
-        padding: 6px 15px;
+        padding: 4px 15px 8px 15px;
     }
     
     .action-status-content {
@@ -1054,29 +1060,34 @@ body::after {
     }
     
     .action-status-icon {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
     
     .action-status-name {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
     
     .action-progress-wrapper {
-        gap: 8px;
+        gap: 6px;
     }
     
     .action-progress-bg {
-        max-width: 150px;
-        height: 16px;
+        max-width: 140px;
+        height: 14px;
     }
     
     .action-progress-time {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
     
     .action-cancel-btn {
-        padding: 3px 8px;
+        padding: 2px 6px;
+        font-size: 0.65rem;
+    }
+    
+    .action-reward-item {
         font-size: 0.7rem;
+        padding: 1px 5px;
     }
     
     .sidebar {
