@@ -91,6 +91,7 @@ body::after {
     background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     padding: 6px 20px 10px 20px;
+    min-height: 80px;
 }
 
 .action-status-content {
@@ -100,6 +101,10 @@ body::after {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
+}
+
+.action-rewards {
+    min-height: 20px;
 }
 
 .action-status-left {
@@ -166,16 +171,18 @@ body::after {
 }
 
 .action-cancel-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, #8B2C2D 0%, #a33435 100%);
+    border: 1px solid rgba(139, 44, 45, 0.6);
     color: #fff;
-    padding: 3px 8px;
+    padding: 0 10px;
     border-radius: 4px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.3s;
     display: none;
+    height: 24px;
+    line-height: 24px;
 }
 
 .action-cancel-btn.visible {
@@ -183,8 +190,8 @@ body::after {
 }
 
 .action-cancel-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, #a33435 0%, #8B2C2D 100%);
+    border-color: rgba(139, 44, 45, 0.8);
 }
 
 .action-cancel-btn:disabled {
@@ -1238,7 +1245,9 @@ body::after {
     }
     
     .action-cancel-btn {
-        padding: 4px 8px;
+        height: 22px;
+        line-height: 22px;
+        padding: 0 8px;
         font-size: 0.7rem;
     }
     
