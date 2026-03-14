@@ -515,12 +515,12 @@ function startAction(actionId) {
 
 function completeAction(actionId) {
     const action = CONFIG.gatherActions.find(a => a.id === actionId);
-    clearActionRewards();
+    let rewardHTML = '';
     for (const [res, amount] of Object.entries(action.reward)) {
         gameState.resources[res] += amount;
         const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
         const names = { gold: '金币', wood: '木材', stone: '石头', herb: '草药' };
-        showActionReward(`+${amount} ${icons[res]} ${names[res]}`);
+        rewardHTML += `<span class="action-reward-item">+${amount} ${icons[res]} ${names[res]}</span>`;
     }
     addExp(action.exp);
     addSkillExp('gathering', action.exp);
@@ -528,6 +528,11 @@ function completeAction(actionId) {
     setActionState(null, 0);
     updateUI();
     saveGame();
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = rewardHTML;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
 }
 
 function renderCraftActions() {
@@ -632,10 +637,13 @@ function completeWoodcutting(treeId) {
     addSkillExp('woodcutting', tree.exp);
     gameState.activeWoodcutting = null;
     setActionState(null, 0);
-    clearActionRewards();
     updateUI();
     saveGame();
-    showActionReward(`+${dropAmount} ${tree.dropIcon} ${tree.drop}`);
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = `<span class="action-reward-item">+${dropAmount} ${tree.dropIcon} ${tree.drop}</span>`;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
 }
 
 function renderMining() {
@@ -697,10 +705,13 @@ function completeMining(oreId) {
     addSkillExp('mining', ore.exp);
     gameState.activeMining = null;
     setActionState(null, 0);
-    clearActionRewards();
     updateUI();
     saveGame();
-    showActionReward(`+${dropAmount} ${ore.dropIcon} ${ore.drop}`);
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = `<span class="action-reward-item">+${dropAmount} ${ore.dropIcon} ${ore.drop}</span>`;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
 }
 
 function craftItem(recipeId) {
@@ -779,20 +790,25 @@ function toggleCombat() {
 function completeCombat(zone) {
     gameState.combat.active = false;
     setActionState(null, 0);
-    clearActionRewards();
     let rewards = [];
+    let rewardHTML = '';
     zone.rewards.forEach(r => {
         const amount = Math.floor(Math.random() * (r.max - r.min + 1)) + r.min;
         gameState.resources[r.item] += amount;
         const icons = { gold: '💰', wood: '🪵', stone: '🪨', herb: '🌿' };
         const name = r.item === 'gold' ? '金币' : r.item === 'wood' ? '木材' : r.item === 'stone' ? '石头' : '草药';
         rewards.push(`+${amount} ${icons[r.item]} ${name}`);
-        showActionReward(`+${amount} ${icons[r.item]} ${name}`);
+        rewardHTML += `<span class="action-reward-item">+${amount} ${icons[r.item]} ${name}</span>`;
     });
     const expReward = zone.difficulty * 10;
     addExp(expReward);
     addSkillExp('combat', expReward);
     elements.combatRewards.innerHTML = `🎉 战斗奖励：${rewards.join('  |  ')}`;
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = rewardHTML;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
     gameState.currentZoneIndex = (gameState.currentZoneIndex + 1) % CONFIG.combatZones.length;
     updateUI();
     saveGame();

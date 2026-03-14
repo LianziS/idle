@@ -889,15 +889,29 @@ body::after {
     position: relative;
 }
 
+.tree-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: #8B2C2D;
+    border-radius: 10px 0 0 10px;
+    transition: width 0.3s;
+}
+
 .tree-card:hover {
     border-color: #8B2C2D;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(139, 44, 45, 0.3);
 }
 
 .tree-card.active {
-    border-color: #8B2C2D;
+    border-color: rgba(107, 79, 60, 0.4);
     background: linear-gradient(180deg, rgba(139, 44, 45, 0.3) 0%, rgba(27, 42, 58, 0.6) 100%);
+}
+
+.tree-card.active::before {
+    width: 4px;
 }
 
 .tree-card.locked {
@@ -969,15 +983,29 @@ body::after {
     position: relative;
 }
 
+.ore-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: #8B2C2D;
+    border-radius: 10px 0 0 10px;
+    transition: width 0.3s;
+}
+
 .ore-card:hover {
     border-color: #8B2C2D;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(139, 44, 45, 0.3);
 }
 
 .ore-card.active {
-    border-color: #8B2C2D;
+    border-color: rgba(107, 79, 60, 0.4);
     background: linear-gradient(180deg, rgba(139, 44, 45, 0.3) 0%, rgba(27, 42, 58, 0.6) 100%);
+}
+
+.ore-card.active::before {
+    width: 4px;
 }
 
 .ore-card.locked {
