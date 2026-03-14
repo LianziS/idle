@@ -157,7 +157,8 @@ const elements = {
     actionStatusName: document.getElementById('action-status-name'),
     actionProgressFill: document.getElementById('action-progress-fill'),
     actionProgressTime: document.getElementById('action-progress-time'),
-    actionCancelBtn: document.getElementById('action-cancel-btn')
+    actionCancelBtn: document.getElementById('action-cancel-btn'),
+    actionRewards: document.getElementById('action-rewards')
 };
 
 function init() {
