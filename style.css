@@ -1537,8 +1537,8 @@ body::after {
     left: 0;
     width: 50px;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(180deg, rgba(45, 63, 82, 0.98) 0%, rgba(27, 42, 58, 0.98) 100%);
+    border-right: 2px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1989,5 +1989,11 @@ body::after {
     
     .merchant-sidebar {
         width: 44px;
+    }
+    
+    /* 移动端弹窗宽度 4/6，左侧露出商人列表 */
+    .merchant-modal-panel {
+        width: 66.67vw !important;
+        max-width: 66.67vw !important;
     }
 }
