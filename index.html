@@ -7,7 +7,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <title>中世纪雇佣兵 - 放置游戏</title>
-    <link rel="stylesheet" href="style.css?v=2026031428">
+    <link rel="stylesheet" href="style.css?v=2026031501">
+    <script src="frontend/game.js?v=2026031501"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1B2A3A;color:#A0B2C0;min-height:100vh;padding:0;font-size:14px;overflow-x:hidden}
@@ -126,6 +127,12 @@
                 </div>
             </div>
             
+            <!-- 商人 -->
+            <div class="nav-item" data-page="merchant">
+                <span class="nav-icon">🏪</span>
+                <span class="nav-text">商人</span>
+            </div>
+            
         </div>
     </nav>
 
@@ -233,6 +240,14 @@
             </section>
         </main>
 
+        <!-- 商人页 -->
+        <main class="page" id="page-merchant">
+            <section class="panel">
+                <h2 class="panel-title">🏪 商人</h2>
+                <div class="merchant-grid" id="merchant-list"></div>
+            </section>
+        </main>
+
         <!-- 底部 -->
         <footer class="footer">
             <span>💾 自动保存</span>
@@ -241,6 +256,55 @@
         </footer>
     </div>
 
+    <!-- 商人交易弹窗 -->
+    <div class="merchant-modal" id="merchant-modal">
+        <div class="merchant-modal-overlay" id="merchant-modal-overlay"></div>
+        <div class="merchant-modal-panel">
+            <div class="merchant-modal-header">
+                <div class="merchant-modal-title">
+                    <span class="merchant-modal-avatar" id="merchant-modal-avatar">🏪</span>
+                    <div class="merchant-modal-info">
+                        <h3 id="merchant-modal-name">商人名称</h3>
+                        <div class="merchant-favorability">
+                            <span class="favorability-icon">❤️</span>
+                            <span class="favorability-value" id="merchant-modal-favorability">0.00</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="merchant-modal-close" id="merchant-modal-close">&times;</button>
+            </div>
+            
+            <!-- 二级菜单 -->
+            <div class="merchant-tabs">
+                <button class="merchant-tab active" data-tab="trade">交易</button>
+                <button class="merchant-tab" data-tab="quest">任务</button>
+            </div>
+            
+            <!-- 交易栏 -->
+            <div class="merchant-tab-content active" id="merchant-tab-trade">
+                <div class="merchant-goods-list" id="merchant-goods-list"></div>
+            </div>
+            
+            <!-- 任务栏 -->
+            <div class="merchant-tab-content" id="merchant-tab-quest">
+                <div class="merchant-quest-list" id="merchant-quest-list"></div>
+            </div>
+            
+            <!-- 我的仓库 -->
+            <div class="merchant-warehouse">
+                <div class="merchant-warehouse-header">
+                    <h4>我的仓库</h4>
+                    <button class="merchant-select-btn" id="merchant-select-btn">选择</button>
+                </div>
+                <div class="merchant-warehouse-grid" id="merchant-warehouse-grid"></div>
+                <div class="merchant-sell-bar" id="merchant-sell-bar" style="display: none;">
+                    <span class="merchant-sell-total">总计：<span id="merchant-sell-total">0</span> 金币</span>
+                    <button class="merchant-sell-btn" id="merchant-sell-btn">出售</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 模态框 -->
     <div class="modal" id="modal">
         <div class="modal-content">
@@ -294,7 +358,6 @@
         </div>
     </div>
 
-    <script src="game.js?v=2026031428"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

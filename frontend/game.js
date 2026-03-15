@@ -77,7 +77,60 @@ const CONFIG = {
         { id: 'cave', name: '哥布林洞穴', icon: '🕳️', difficulty: 2, duration: 15000, rewards: [{ item: 'gold', min: 30, max: 60 }, { item: 'stone', min: 10, max: 20 }], reqLevel: 3 },
         { id: 'ruins', name: '古代废墟', icon: '🏛️', difficulty: 3, duration: 20000, rewards: [{ item: 'gold', min: 60, max: 120 }, { item: 'herb', min: 10, max: 25 }], reqLevel: 5 },
         { id: 'dragon_lair', name: '龙之巢穴', icon: '🐉', difficulty: 5, duration: 30000, rewards: [{ item: 'gold', min: 150, max: 300 }, { item: 'stone', min: 50, max: 100 }], reqLevel: 10 }
-    ]
+    ],
+    // 商人配置
+    merchants: [
+        { 
+            id: 'architect', 
+            name: '建筑师', 
+            title: '建筑大师',
+            avatar: '🏗️', 
+            favorability: 0,
+            goods: [{ id: 'architect_scroll', name: '建筑大师卷轴', icon: '📜', price: 1000, currency: 'gold' }],
+            quests: [
+                { id: 'architect_quest_1', name: '初级建筑材料', desc: '提交 50 木材和 30 石头', reward: { gold: 200, favorability: 0.5 }, requirement: { wood: 50, stone: 30 } }
+            ]
+        },
+        { 
+            id: 'armorsmith', 
+            name: '铸甲师', 
+            title: '锻造大师',
+            avatar: '⚒️', 
+            favorability: 0,
+            goods: [{ id: 'armorsmith_scroll', name: '锻造大师卷轴', icon: '📜', price: 1000, currency: 'gold' }],
+            quests: [
+                { id: 'armorsmith_quest_1', name: '金属收集', desc: '提交 40 石头', reward: { gold: 150, favorability: 0.5 }, requirement: { stone: 40 } }
+            ]
+        },
+        { 
+            id: 'tailor', 
+            name: '缝缀师', 
+            title: '裁缝大师',
+            avatar: '🧵', 
+            favorability: 0,
+            goods: [{ id: 'tailor_scroll', name: '裁缝大师卷轴', icon: '📜', price: 1000, currency: 'gold' }],
+            quests: [
+                { id: 'tailor_quest_1', name: '布料准备', desc: '提交 30 木材', reward: { gold: 120, favorability: 0.5 }, requirement: { wood: 30 } }
+            ]
+        },
+        { 
+            id: 'alchemist', 
+            name: '药剂师', 
+            title: '炼金大师',
+            avatar: '⚗️', 
+            favorability: 0,
+            goods: [{ id: 'alchemist_scroll', name: '药剂大师卷轴', icon: '📜', price: 1000, currency: 'gold' }],
+            quests: [
+                { id: 'alchemist_quest_1', name: '草药采集', desc: '提交 25 草药', reward: { gold: 100, favorability: 0.5 }, requirement: { herb: 25 } }
+            ]
+        }
+    ],
+    // 资源出售价格
+    resourcePrices: {
+        wood: 2,
+        stone: 3,
+        herb: 5
+    }
 };
 
 let gameState = {
@@ -106,10 +159,24 @@ let gameState = {
     // 全局行动状态
     currentAction: null,
     actionStartTime: 0,
-    actionDuration: 0
+    actionDuration: 0,
+    // 商人系统状态
+    merchantData: {},
+    activeQuests: {},
+    warehouseSelection: [],
+    isSelectMode: false,
+    sellConfirming: false
 };
 
 CONFIG.buildings.forEach(b => { gameState.buildings[b.id] = { level: 0 }; });
+
+// 初始化商人数据
+CONFIG.merchants.forEach(m => {
+    gameState.merchantData[m.id] = {
+        favorability: m.favorability,
+        completedQuests: []
+    };
+});
 
 const elements = {
     sidebar: document.getElementById('sidebar'),
@@ -159,6 +226,24 @@ const elements = {
     actionProgressTime: document.getElementById('action-progress-time'),
     actionCancelBtn: document.getElementById('action-cancel-btn'),
     actionRewards: document.getElementById('action-rewards'),
+    // 商人系统
+    merchantList: document.getElementById('merchant-list'),
+    merchantModal: document.getElementById('merchant-modal'),
+    merchantModalOverlay: document.getElementById('merchant-modal-overlay'),
+    merchantModalClose: document.getElementById('merchant-modal-close'),
+    merchantModalAvatar: document.getElementById('merchant-modal-avatar'),
+    merchantModalName: document.getElementById('merchant-modal-name'),
+    merchantModalFavorability: document.getElementById('merchant-modal-favorability'),
+    merchantTabs: document.querySelectorAll('.merchant-tab'),
+    merchantTabTrade: document.getElementById('merchant-tab-trade'),
+    merchantTabQuest: document.getElementById('merchant-tab-quest'),
+    merchantGoodsList: document.getElementById('merchant-goods-list'),
+    merchantQuestList: document.getElementById('merchant-quest-list'),
+    merchantWarehouseGrid: document.getElementById('merchant-warehouse-grid'),
+    merchantSelectBtn: document.getElementById('merchant-select-btn'),
+    merchantSellBar: document.getElementById('merchant-sell-bar'),
+    merchantSellTotal: document.getElementById('merchant-sell-total'),
+    merchantSellBtn: document.getElementById('merchant-sell-btn'),
     // 行动次数选择弹窗
     actionModal: document.getElementById('action-modal'),
     actionModalTitle: document.getElementById('action-modal-title'),
@@ -186,7 +271,9 @@ function init() {
     renderWoodcutting();
     renderMining();
     renderCombatZones();
+    renderMerchants();
     setupEventListeners();
+    setupMerchantListeners();
     startGameLoop();
     updateUI();
     
@@ -255,6 +342,385 @@ function setupSidebar() {
 }
 
 function setupNavigation() {}
+
+// ============ 商人系统 ============
+
+let currentMerchantId = null;
+
+function renderMerchants() {
+    if (!elements.merchantList) return;
+    
+    const html = CONFIG.merchants.map(merchant => {
+        const data = gameState.merchantData[merchant.id];
+        const favorability = data ? data.favorability : 0;
+        const level = getFavorabilityLevel(favorability);
+        const progress = Math.min(100, (favorability % 1) * 100);
+        
+        return `
+            <div class="merchant-card" data-merchant-id="${merchant.id}">
+                <div class="merchant-card-header">
+                    <div class="merchant-card-avatar">${merchant.avatar}</div>
+                    <div class="merchant-card-info">
+                        <div class="merchant-card-name">${merchant.name}</div>
+                        <div class="merchant-card-title">${merchant.title}</div>
+                    </div>
+                </div>
+                <div class="merchant-favorability-bar">
+                    <div class="favorability-label">
+                        <span>好感度</span>
+                        <span class="favorability-level">${level}</span>
+                    </div>
+                    <div class="favorability-progress-bg">
+                        <div class="favorability-progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    elements.merchantList.innerHTML = html;
+    
+    // 绑定点击事件
+    elements.merchantList.querySelectorAll('.merchant-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const merchantId = this.dataset.merchantId;
+            openMerchantModal(merchantId);
+        });
+    });
+}
+
+function getFavorabilityLevel(favorability) {
+    if (favorability >= 3) return '崇敬';
+    if (favorability >= 2) return '尊敬';
+    if (favorability >= 1) return '友好';
+    if (favorability >= 0.5) return '中立';
+    return '陌生';
+}
+
+function openMerchantModal(merchantId) {
+    currentMerchantId = merchantId;
+    const merchant = CONFIG.merchants.find(m => m.id === merchantId);
+    if (!merchant) return;
+    
+    const data = gameState.merchantData[merchant.id];
+    
+    // 更新弹窗信息
+    elements.merchantModalAvatar.textContent = merchant.avatar;
+    elements.merchantModalName.textContent = merchant.name;
+    elements.merchantModalFavorability.textContent = data.favorability.toFixed(2);
+    
+    // 重置状态
+    gameState.warehouseSelection = [];
+    gameState.isSelectMode = false;
+    gameState.sellConfirming = false;
+    
+    // 渲染商品
+    renderMerchantGoods(merchant);
+    
+    // 渲染任务
+    renderMerchantQuests(merchant, data);
+    
+    // 渲染仓库
+    renderMerchantWarehouse();
+    
+    // 显示弹窗
+    elements.merchantModal.classList.add('active');
+    
+    // 默认显示交易栏
+    switchMerchantTab('trade');
+}
+
+function closeMerchantModal() {
+    elements.merchantModal.classList.remove('active');
+    currentMerchantId = null;
+}
+
+function renderMerchantGoods(merchant) {
+    if (!elements.merchantGoodsList) return;
+    
+    const html = merchant.goods.map(good => {
+        const canAfford = gameState.resources[good.currency] >= good.price;
+        return `
+            <div class="merchant-goods-item">
+                <div class="merchant-goods-icon">${good.icon}</div>
+                <div class="merchant-goods-info">
+                    <div class="merchant-goods-name">${good.name}</div>
+                    <div class="merchant-goods-price">💰 ${good.price} 金币</div>
+                </div>
+                <button class="merchant-buy-btn" ${!canAfford ? 'disabled' : ''} data-good-id="${good.id}">
+                    购买
+                </button>
+            </div>
+        `;
+    }).join('');
+    
+    elements.merchantGoodsList.innerHTML = html;
+    
+    // 绑定购买事件
+    elements.merchantGoodsList.querySelectorAll('.merchant-buy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const goodId = this.dataset.goodId;
+            const good = merchant.goods.find(g => g.id === goodId);
+            buyGood(merchant, good);
+        });
+    });
+}
+
+function buyGood(merchant, good) {
+    const price = good.price;
+    const currency = good.currency;
+    
+    if (gameState.resources[currency] >= price) {
+        gameState.resources[currency] -= price;
+        showToast(`✅ 购买了 ${good.name}`);
+        updateUI();
+        saveGame();
+        
+        // 重新渲染（更新按钮状态）
+        renderMerchantGoods(merchant);
+    } else {
+        showToast('❌ 资源不足');
+    }
+}
+
+function renderMerchantQuests(merchant, data) {
+    if (!elements.merchantQuestList) return;
+    
+    const html = merchant.quests.map(quest => {
+        const isCompleted = data.completedQuests.includes(quest.id);
+        const activeQuest = gameState.activeQuests[quest.id];
+        const isAccepted = !!activeQuest;
+        
+        let btnText = '领取任务';
+        let btnClass = '';
+        let canSubmit = false;
+        
+        if (isCompleted) {
+            btnText = '已完成';
+            btnClass = 'disabled';
+        } else if (isAccepted) {
+            btnText = '提交';
+            btnClass = 'submit';
+            canSubmit = canSubmitQuest(quest);
+        }
+        
+        return `
+            <div class="merchant-quest-item ${isCompleted ? 'completed' : ''}">
+                <div class="merchant-quest-header">
+                    <div class="merchant-quest-name">${quest.name}</div>
+                    <div class="merchant-quest-reward">💰 ${quest.reward.gold} | ❤️ ${quest.reward.favorability}</div>
+                </div>
+                <div class="merchant-quest-desc">${quest.desc}</div>
+                <button class="merchant-quest-btn ${btnClass}" 
+                    ${isCompleted ? 'disabled' : ''} 
+                    ${isAccepted && !canSubmit ? 'disabled' : ''}
+                    data-quest-id="${quest.id}">
+                    ${btnText}
+                </button>
+            </div>
+        `;
+    }).join('');
+    
+    elements.merchantQuestList.innerHTML = html;
+    
+    // 绑定事件
+    elements.merchantQuestList.querySelectorAll('.merchant-quest-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const questId = this.dataset.questId;
+            const quest = merchant.quests.find(q => q.id === questId);
+            handleQuest(merchant, quest, data);
+        });
+    });
+}
+
+function canSubmitQuest(quest) {
+    for (const [res, amount] of Object.entries(quest.requirement)) {
+        if (gameState.resources[res] < amount) return false;
+    }
+    return true;
+}
+
+function handleQuest(merchant, quest, data) {
+    const activeQuest = gameState.activeQuests[quest.id];
+    
+    if (activeQuest) {
+        // 提交任务
+        if (canSubmitQuest(quest)) {
+            // 扣除资源
+            for (const [res, amount] of Object.entries(quest.requirement)) {
+                gameState.resources[res] -= amount;
+            }
+            
+            // 发放奖励
+            gameState.resources.gold += quest.reward.gold;
+            gameState.merchantData[merchant.id].favorability += quest.reward.favorability;
+            gameState.merchantData[merchant.id].completedQuests.push(quest.id);
+            delete gameState.activeQuests[quest.id];
+            
+            showToast(`✅ 任务完成！+${quest.reward.gold} 金币，+${quest.reward.favorability} 好感度`);
+            updateUI();
+            saveGame();
+            
+            // 重新渲染
+            renderMerchantQuests(merchant, gameState.merchantData[merchant.id]);
+            elements.merchantModalFavorability.textContent = gameState.merchantData[merchant.id].favorability.toFixed(2);
+        } else {
+            showToast('❌ 资源不足，无法提交任务');
+        }
+    } else {
+        // 领取任务
+        gameState.activeQuests[quest.id] = {
+            merchantId: merchant.id,
+            questId: quest.id,
+            acceptedAt: Date.now()
+        };
+        showToast(`📋 已领取任务：${quest.name}`);
+        
+        // 重新渲染
+        renderMerchantQuests(merchant, data);
+    }
+}
+
+function renderMerchantWarehouse() {
+    if (!elements.merchantWarehouseGrid) return;
+    
+    const resources = CONFIG.resources.filter(r => r !== 'gold');
+    const html = resources.map(res => {
+        const count = gameState.resources[res];
+        const isSelected = gameState.warehouseSelection.includes(res);
+        const icons = { wood: '🪵', stone: '🪨', herb: '🌿' };
+        const names = { wood: '木材', stone: '石头', herb: '草药' };
+        
+        return `
+            <div class="merchant-warehouse-item ${isSelected ? 'selected' : ''}" 
+                data-resource="${res}"
+                ${!gameState.isSelectMode ? 'style="pointer-events: none;"' : ''}>
+                <div class="merchant-warehouse-item-icon">${icons[res]}</div>
+                <div class="merchant-warehouse-item-name">${names[res]}</div>
+                <div class="merchant-warehouse-item-count">${count}</div>
+            </div>
+        `;
+    }).join('');
+    
+    elements.merchantWarehouseGrid.innerHTML = html;
+    
+    // 绑定选择事件
+    elements.merchantWarehouseGrid.querySelectorAll('.merchant-warehouse-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const res = this.dataset.resource;
+            toggleWarehouseSelection(res);
+        });
+    });
+    
+    // 更新出售按钮栏
+    updateSellBar();
+}
+
+function toggleWarehouseSelection(resource) {
+    const index = gameState.warehouseSelection.indexOf(resource);
+    if (index > -1) {
+        gameState.warehouseSelection.splice(index, 1);
+    } else {
+        gameState.warehouseSelection.push(resource);
+    }
+    renderMerchantWarehouse();
+}
+
+function updateSellBar() {
+    if (!elements.merchantSellBar || !elements.merchantSellTotal) return;
+    
+    if (gameState.warehouseSelection.length === 0) {
+        elements.merchantSellBar.style.display = 'none';
+        return;
+    }
+    
+    let total = 0;
+    gameState.warehouseSelection.forEach(res => {
+        total += gameState.resources[res] * CONFIG.resourcePrices[res];
+    });
+    
+    elements.merchantSellTotal.textContent = total;
+    elements.merchantSellBar.style.display = 'flex';
+    
+    if (gameState.sellConfirming) {
+        elements.merchantSellBtn.textContent = '确认出售';
+        elements.merchantSellBtn.classList.add('confirming');
+    } else {
+        elements.merchantSellBtn.textContent = '出售';
+        elements.merchantSellBtn.classList.remove('confirming');
+    }
+}
+
+function switchMerchantTab(tab) {
+    elements.merchantTabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    
+    elements.merchantTabTrade.classList.toggle('active', tab === 'trade');
+    elements.merchantTabQuest.classList.toggle('active', tab === 'quest');
+}
+
+function setupMerchantListeners() {
+    // 关闭弹窗
+    if (elements.merchantModalClose) {
+        elements.merchantModalClose.addEventListener('click', closeMerchantModal);
+    }
+    if (elements.merchantModalOverlay) {
+        elements.merchantModalOverlay.addEventListener('click', closeMerchantModal);
+    }
+    
+    // 切换标签
+    elements.merchantTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            switchMerchantTab(this.dataset.tab);
+        });
+    });
+    
+    // 选择模式
+    if (elements.merchantSelectBtn) {
+        elements.merchantSelectBtn.addEventListener('click', function() {
+            gameState.isSelectMode = !gameState.isSelectMode;
+            gameState.warehouseSelection = [];
+            gameState.sellConfirming = false;
+            this.classList.toggle('active', gameState.isSelectMode);
+            this.textContent = gameState.isSelectMode ? '取消' : '选择';
+            renderMerchantWarehouse();
+        });
+    }
+    
+    // 出售按钮
+    if (elements.merchantSellBtn) {
+        elements.merchantSellBtn.addEventListener('click', function() {
+            if (gameState.sellConfirming) {
+                // 确认出售
+                let total = 0;
+                gameState.warehouseSelection.forEach(res => {
+                    const count = gameState.resources[res];
+                    total += count * CONFIG.resourcePrices[res];
+                    gameState.resources[res] = 0;
+                });
+                gameState.resources.gold += total;
+                
+                showToast(`✅ 出售完成！获得 ${total} 金币`);
+                
+                // 重置状态
+                gameState.warehouseSelection = [];
+                gameState.isSelectMode = false;
+                gameState.sellConfirming = false;
+                elements.merchantSelectBtn.classList.remove('active');
+                elements.merchantSelectBtn.textContent = '选择';
+                
+                updateUI();
+                saveGame();
+                renderMerchantWarehouse();
+            } else {
+                // 第一次点击，进入确认状态
+                gameState.sellConfirming = true;
+                updateSellBar();
+            }
+        });
+    }
+}
 
 function switchPage(pageId) {
     gameState.currentPage = pageId;
