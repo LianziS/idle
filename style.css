@@ -1812,13 +1812,15 @@ body::after {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding: 12px;
     background: rgba(0, 0, 0, 0.2);
-    min-height: 300px;
+    height: 554px;
+    display: flex;
+    flex-direction: column;
 }
 
 @media (max-width: 768px) {
     .merchant-warehouse {
         padding: 8px;
-        min-height: 400px;  /* 移动端增加高度 */
+        height: 554px;
     }
 }
 
@@ -1860,7 +1862,6 @@ body::after {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 8px;
-    min-height: 200px;
     overflow-y: auto;
     align-content: start;
 }
@@ -1868,7 +1869,6 @@ body::after {
 @media (max-width: 768px) {
     .merchant-warehouse-grid {
         gap: 6px;
-        min-height: 280px;
     }
 }
 
