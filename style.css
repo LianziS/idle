@@ -1522,7 +1522,7 @@ body::after {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: -3px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 @media (min-width: 501px) {
@@ -1531,15 +1531,15 @@ body::after {
     }
 }
 
-/* 移动端弹窗 4/6 宽度 */
+/* 移动端弹窗 75vw 宽度 */
 @media (max-width: 768px) {
     .merchant-modal {
         width: 100vw;
     }
     
     .merchant-modal-panel {
-        width: 66.67vw !important;
-        max-width: 66.67vw !important;
+        width: 75vw !important;
+        max-width: 75vw !important;
         right: 0;
     }
 }
@@ -1609,6 +1609,7 @@ body::after {
 .merchant-tabs {
     display: flex;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
 }
 
 .merchant-tab {
@@ -1619,11 +1620,13 @@ body::after {
     color: #A0B2C0;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: flex 0.3s ease, padding 0.3s ease;
     border-bottom: 2px solid transparent;
+    white-space: nowrap;
 }
 
 .merchant-tab.active {
+    flex: 2;
     color: #FFD700;
     border-bottom-color: #FFD700;
     background: rgba(255, 215, 0, 0.05);
@@ -1632,6 +1635,18 @@ body::after {
 .merchant-tab:hover:not(.active) {
     background: rgba(255, 255, 255, 0.05);
     color: #fff;
+}
+
+@media (max-width: 768px) {
+    .merchant-tab {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .merchant-tab.active {
+        flex: 2;
+        padding: 10px 12px;
+    }
 }
 
 /* 内容区域 */
@@ -1782,8 +1797,15 @@ body::after {
 /* 仓库区域 */
 .merchant-warehouse {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 16px;
+    padding: 12px;
     background: rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .merchant-warehouse {
+        padding: 8px;
+    }
 }
 
 .merchant-warehouse-header {
@@ -1824,8 +1846,15 @@ body::after {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    max-height: 180px;
+    max-height: 160px;
     overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .merchant-warehouse-grid {
+        max-height: 120px;
+        gap: 4px;
+    }
 }
 
 .merchant-warehouse-item {
@@ -1945,8 +1974,9 @@ body::after {
     }
     
     .merchant-modal-panel {
-        width: 66.67vw !important;
-        max-width: 66.67vw !important;
+        width: 75vw !important;
+        max-width: 75vw !important;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.25);
     }
     
     .merchant-modal-header {
