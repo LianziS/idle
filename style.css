@@ -1531,6 +1531,15 @@ body::after {
     }
 }
 
+/* 内容区域（交易/任务） */
+.merchant-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
 @media (min-width: 501px) {
     .merchant-modal-panel {
         width: 500px;
@@ -1812,15 +1821,16 @@ body::after {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding: 12px;
     background: rgba(0, 0, 0, 0.2);
-    height: 554px;
+    flex: 0 0 40%;  /* 占整个弹窗高度的 40% */
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 @media (max-width: 768px) {
     .merchant-warehouse {
         padding: 8px;
-        height: 554px;
+        flex: 0 0 40%;  /* 移动端同样占 40% */
     }
 }
 
