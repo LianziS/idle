@@ -586,13 +586,13 @@ function renderMerchantWarehouse() {
     if (!elements.merchantWarehouseGrid) return;
     
     const resources = CONFIG.resources.filter(r => r !== 'gold');
-    const totalSlots = 24; // 4 排 x 6 列 = 24 格
     
-    // 生成 24 个格子
-    const html = Array.from({ length: totalSlots }, (_, index) => {
-        if (index < resources.length) {
-            const res = resources[index];
-            const count = gameState.resources[res];
+    // 只显示有物品的格子
+    const html = resources.map(res => {
+        const count = gameState.resources[res];
+        
+        // 只有数量>0 才显示
+        if (count > 0) {
             const isSelected = gameState.warehouseSelection.includes(res);
             const icons = { wood: '🪵', stone: '🪨', herb: '🌿' };
             const names = { wood: '木材', stone: '石头', herb: '草药' };
@@ -606,18 +606,14 @@ function renderMerchantWarehouse() {
                     <div class="merchant-warehouse-item-count">${count}</div>
                 </div>
             `;
-        } else {
-            // 空格子（不显示内容）
-            return `
-                <div class="merchant-warehouse-item empty-slot"></div>
-            `;
         }
-    }).join('');
+        return ''; // 没有物品就不显示格子
+    }).filter(html => html !== '').join('');
     
-    elements.merchantWarehouseGrid.innerHTML = html;
+    elements.merchantWarehouseGrid.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 20px;">仓库空空如也</div>';
     
     // 绑定选择事件
-    elements.merchantWarehouseGrid.querySelectorAll('.merchant-warehouse-item:not(.empty-slot)').forEach(item => {
+    elements.merchantWarehouseGrid.querySelectorAll('.merchant-warehouse-item').forEach(item => {
         item.addEventListener('click', function() {
             const res = this.dataset.resource;
             toggleWarehouseSelection(res);
