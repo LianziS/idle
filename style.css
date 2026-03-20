@@ -113,8 +113,6 @@ body::after {
     flex-direction: column;
     gap: 6px;
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
 }
 
 .action-rewards {
