@@ -1983,16 +1983,11 @@ function renderGatheringTabs() {
     
     elements.gatheringTabs.innerHTML = html;
     
-    // 绑定点击事件
+    // 绑定点击事件 - 允许点击切换标签页，但内部物品会有等级限制
     elements.gatheringTabs.querySelectorAll('.gathering-tab').forEach(tab => {
         tab.addEventListener('click', function(e) {
             e.stopPropagation();
             const index = parseInt(this.dataset.index);
-            const loc = CONFIG.gatheringLocations[index];
-            if (gameState.level < loc.reqLevel) {
-                showToast(`❌ 需要等级 ${loc.reqLevel}`);
-                return;
-            }
             currentGatheringLocationIndex = index;
             renderGatheringTabs();
             renderGatheringItems();
@@ -2344,7 +2339,7 @@ function completeCombat(zone) {
 function showToast(message) {
     const toast = document.createElement('div');
     toast.textContent = message;
-    toast.style.cssText = `position: fixed; top: 110px; left: 20px; background: rgba(139, 44, 45, 0.95); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 3000; animation: toastFade 3s ease-out; border: 1px solid rgba(139, 44, 45, 0.5); font-size: 0.85rem; text-align: left;`;
+    toast.style.cssText = `position: fixed; top: 110px; left: 50%; transform: translateX(-50%); background: rgba(139, 44, 45, 0.95); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 3000; animation: toastFade 3s ease-out; border: 1px solid rgba(139, 44, 45, 0.5); font-size: 0.85rem; text-align: center; white-space: nowrap;`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
