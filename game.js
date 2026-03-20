@@ -195,6 +195,17 @@ const CONFIG = {
         { id: 'ancient_oak_plank', name: '古橡木板', icon: '🪵', reqLevel: 80, duration: 18000, exp: 9, materials: { ancient_oak: 2 } },
         { id: 'world_tree_plank', name: '世界木板', icon: '🪵', reqLevel: 95, duration: 30000, exp: 12, materials: { world_tree: 2 } }
     ],
+    // 矿锭配置
+    ingots: [
+        { id: 'cyan_ingot', name: '青闪铁锭', icon: '🔩', reqLevel: 1, duration: 6000, exp: 3, materials: { cyan_ore: 2 } },
+        { id: 'red_copper_ingot', name: '赤铜锭', icon: '🥉', reqLevel: 10, duration: 8000, exp: 4, materials: { red_iron: 2 } },
+        { id: 'feather_ingot', name: '轻羽锭', icon: '🪶', reqLevel: 20, duration: 10000, exp: 5, materials: { feather_ore: 2 } },
+        { id: 'white_silver_ingot', name: '白银锭', icon: '🪙', reqLevel: 35, duration: 12000, exp: 6, materials: { white_ore: 2 } },
+        { id: 'hell_steel_ingot', name: '狱炎钢', icon: '🔥', reqLevel: 50, duration: 14000, exp: 7, materials: { hell_ore: 2 } },
+        { id: 'thunder_steel_ingot', name: '雷鸣钢', icon: '⚡', reqLevel: 65, duration: 16000, exp: 8, materials: { thunder_ore: 2 } },
+        { id: 'brilliant_crystal', name: '璀璨水晶', icon: '💎', reqLevel: 80, duration: 18000, exp: 9, materials: { brilliant: 2 } },
+        { id: 'star_crystal', name: '星辉水晶', icon: '✨', reqLevel: 95, duration: 30000, exp: 12, materials: { star_ore: 2 } }
+    ],
     // 商人配置
     merchants: [
         { 
@@ -300,7 +311,15 @@ let gameState = {
     craftingCount: 0,
     craftingRemaining: 0,
     // 木板存储
-    planksInventory: {}
+    planksInventory: {},
+    // 锻造状态
+    forgingLevel: 1,
+    forgingExp: 0,
+    activeForging: null,
+    forgingCount: 0,
+    forgingRemaining: 0,
+    // 矿锭存储
+    ingotsInventory: {}
 };
 
 CONFIG.buildings.forEach(b => { gameState.buildings[b.id] = { level: 0 }; });
@@ -345,10 +364,16 @@ const elements = {
     craftingExpFill: document.getElementById('crafting-exp-fill'),
     craftingLevel: document.getElementById('crafting-level'),
     craftingPlanksList: document.getElementById('crafting-planks-list'),
+    // 锻造
+    forgingExpFill: document.getElementById('forging-exp-fill'),
+    forgingLevel: document.getElementById('forging-level'),
+    forgingIngotsList: document.getElementById('forging-ingots-list'),
     navGatheringExp: document.getElementById('nav-gathering-exp'),
     navGatheringLvl: document.getElementById('nav-gathering-lvl'),
     navCraftingExp: document.getElementById('nav-crafting-exp'),
     navCraftingLvl: document.getElementById('nav-crafting-lvl'),
+    navForgingExp: document.getElementById('nav-forging-exp'),
+    navForgingLvl: document.getElementById('nav-forging-lvl'),
     playTime: document.getElementById('play-time'),
     modal: document.getElementById('modal'),
     modalBody: document.getElementById('modal-body'),
@@ -419,6 +444,7 @@ function init() {
     renderMining();
     renderGathering();
     renderCrafting();
+    renderForging();
     renderCombatZones();
     renderMerchants();
     setupEventListeners();
@@ -429,6 +455,7 @@ function init() {
     renderMiningInventory();
     renderGatheringInventory();
     renderPlanksInventory();
+    renderIngotsInventory();
     
     // 修复刷新页面后进度条异常：如果有进行中的行动，重置进度条和开始时间
     if (gameState.currentAction) {
@@ -1034,7 +1061,8 @@ function openActionModal(type, id, name, itemId = null) {
         mining: '挖矿',
         gathering_item: '采集',
         gathering_all: '全采集',
-        crafting: '制作'
+        crafting: '制作',
+        forging: '锻造'
     };
     elements.actionModalTitle.textContent = `选择${typeNames[type] || '行动'}次数 - ${name}`;
     elements.actionCountInput.value = '';
@@ -1084,6 +1112,8 @@ function executePendingAction() {
         startGatheringWithCount(type, id, itemId, count);
     } else if (type === 'crafting') {
         startCraftingWithCount(id, count);
+    } else if (type === 'forging') {
+        startForgingWithCount(id, count);
     }
     
     pendingAction = null;
@@ -1575,6 +1605,7 @@ function updateUI() {
     renderMining();
     renderGathering();
     renderCrafting();
+    renderForging();
     renderCombatZones();
     
     // 渲染仓库物品
@@ -1582,6 +1613,7 @@ function updateUI() {
     renderMiningInventory();
     renderGatheringInventory();
     renderPlanksInventory();
+    renderIngotsInventory();
 }
 
 function formatNumber(num) {
@@ -2248,6 +2280,248 @@ function renderPlanksInventory() {
         .join('');
     
     container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无木板</div>';
+}
+
+// ============ 锻造系统 ============
+
+function renderForging() {
+    // 更新锻造经验条
+    if (elements.forgingExpFill && elements.forgingLevel) {
+        const currentExp = getSkillExpForLevel(gameState.forgingLevel);
+        const nextExp = getSkillExpForLevel(gameState.forgingLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.forgingExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.forgingExpFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.forgingLevel.textContent = gameState.forgingLevel;
+    }
+    
+    // 更新侧边栏锻造经验条
+    if (elements.navForgingExp && elements.navForgingLvl) {
+        const currentExp = getSkillExpForLevel(gameState.forgingLevel);
+        const nextExp = getSkillExpForLevel(gameState.forgingLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.forgingExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.navForgingExp.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.navForgingLvl.textContent = gameState.forgingLevel;
+    }
+    
+    // 渲染矿锭列表
+    renderIngotsList();
+}
+
+function renderIngotsList() {
+    if (!elements.forgingIngotsList) return;
+    
+    const html = CONFIG.ingots.map(ingot => {
+        const isUnlocked = gameState.forgingLevel >= ingot.reqLevel;
+        const isActive = gameState.activeForging === ingot.id;
+        const canForge = canForgeIngot(ingot);
+        
+        // 获取材料名称
+        const materialNames = Object.entries(ingot.materials).map(([oreId, count]) => {
+            const ore = CONFIG.ores.find(o => o.id === oreId);
+            const owned = gameState.miningInventory[oreId] || 0;
+            return `${ore ? ore.drop : oreId}×${count} (${owned}/${count})`;
+        }).join(', ');
+        
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.forgingRemaining || 0;
+            const total = gameState.forgingCount || 1;
+            const countText = total >= 99999 ? '∞' : `${remaining}/${total}`;
+            actionStatus = `<div class="action-timer">锻造中... ${countText}</div>`;
+        }
+        
+        return `
+            <div class="gathering-item-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''}" data-ingot-id="${ingot.id}">
+                <div class="gathering-item-icon">${ingot.icon}</div>
+                <div class="gathering-item-info">
+                    <div class="gathering-item-name">${ingot.name}</div>
+                    <div class="gathering-item-desc">${materialNames}</div>
+                    <div class="gathering-item-meta">${ingot.duration/1000}秒 | +${ingot.exp} EXP | Lv.${ingot.reqLevel}</div>
+                </div>
+                ${actionStatus}
+                ${!isUnlocked ? '<div class="gathering-item-locked">🔒 等级不足</div>' : ''}
+                ${isUnlocked && !canForge ? '<div class="gathering-item-locked">📦 材料不足</div>' : ''}
+            </div>
+        `;
+    }).join('');
+    
+    elements.forgingIngotsList.innerHTML = html;
+    
+    // 绑定点击事件
+    elements.forgingIngotsList.querySelectorAll('.gathering-item-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            const ingotId = this.dataset.ingotId;
+            const ingot = CONFIG.ingots.find(i => i.id === ingotId);
+            
+            // 检查等级
+            if (gameState.forgingLevel < ingot.reqLevel) {
+                showToast(`❌ 需要锻造等级 ${ingot.reqLevel}`);
+                return;
+            }
+            
+            // 检查材料
+            if (!canForgeIngot(ingot)) {
+                showToast('❌ 材料不足');
+                return;
+            }
+            
+            // 检查是否正在进行中
+            if (this.classList.contains('active')) {
+                showToast('⏳ 正在锻造中');
+                return;
+            }
+            
+            openActionModal('forging', ingotId, ingot.name);
+        });
+    });
+}
+
+function canForgeIngot(ingot) {
+    for (const [oreId, count] of Object.entries(ingot.materials)) {
+        const owned = gameState.miningInventory[oreId] || 0;
+        if (owned < count) return false;
+    }
+    return true;
+}
+
+function startForgingWithCount(ingotId, count) {
+    const ingot = CONFIG.ingots.find(i => i.id === ingotId);
+    if (!ingot) return;
+    
+    // 检查材料是否足够
+    if (!canForgeIngot(ingot)) {
+        showToast('❌ 材料不足');
+        return;
+    }
+    
+    gameState.activeForging = ingotId;
+    gameState.forgingCount = count;
+    gameState.forgingRemaining = count;
+    
+    // 重置进度条
+    if (elements.actionProgressFill) {
+        elements.actionProgressFill.style.width = '0%';
+    }
+    setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, ingot.duration);
+    renderForging();
+    
+    // 启动进度条动画
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    lastActionStartTime = gameState.actionStartTime;
+    animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+    
+    scheduleForging(ingotId);
+}
+
+function scheduleForging(ingotId) {
+    const isInfinite = gameState.forgingCount >= 99999;
+    if (!gameState.activeForging || (!isInfinite && gameState.forgingRemaining <= 0)) {
+        gameState.activeForging = null;
+        gameState.forgingCount = 0;
+        gameState.forgingRemaining = 0;
+        setActionState(null, 0);
+        renderForging();
+        return;
+    }
+    
+    const ingot = CONFIG.ingots.find(i => i.id === ingotId);
+    if (!ingot) return;
+    
+    // 检查材料
+    if (!canForgeIngot(ingot)) {
+        showToast('❌ 材料不足，锻造停止');
+        gameState.activeForging = null;
+        gameState.forgingCount = 0;
+        gameState.forgingRemaining = 0;
+        setActionState(null, 0);
+        renderForging();
+        return;
+    }
+    
+    if (!isInfinite) {
+        gameState.forgingRemaining--;
+    }
+    
+    if (gameState.activeForging === ingotId) {
+        setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, ingot.duration);
+        if (elements.actionProgressFill) {
+            elements.actionProgressFill.style.width = '0%';
+        }
+        updateActionStatusBar();
+        renderForging();
+        
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        lastActionStartTime = gameState.actionStartTime;
+        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+        
+        setTimeout(() => {
+            if (gameState.activeForging === ingotId) {
+                completeForgingOnce(ingotId);
+                scheduleForging(ingotId);
+            }
+        }, ingot.duration);
+    }
+}
+
+function completeForgingOnce(ingotId) {
+    const ingot = CONFIG.ingots.find(i => i.id === ingotId);
+    if (!ingot) return;
+    
+    // 消耗材料
+    for (const [oreId, count] of Object.entries(ingot.materials)) {
+        gameState.miningInventory[oreId] -= count;
+    }
+    
+    // 添加矿锭到存储
+    if (!gameState.ingotsInventory[ingotId]) {
+        gameState.ingotsInventory[ingotId] = 0;
+    }
+    gameState.ingotsInventory[ingotId]++;
+    
+    addExp(ingot.exp);
+    addSkillExp('forging', ingot.exp);
+    updateUI();
+    saveGame();
+    
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${ingot.icon} ${ingot.name}</span>`;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
+}
+
+function renderIngotsInventory() {
+    const container = document.getElementById('storage-ingots-items');
+    if (!container) return;
+    
+    if (!gameState.ingotsInventory || Object.keys(gameState.ingotsInventory).length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无矿锭</div>';
+        return;
+    }
+    
+    const html = Object.entries(gameState.ingotsInventory)
+        .filter(([id, count]) => count > 0)
+        .map(([id, count]) => {
+            const ingot = CONFIG.ingots.find(i => i.id === id);
+            const name = ingot ? ingot.name : id;
+            const icon = ingot ? ingot.icon : '🔩';
+            return `
+                <div class="storage-item-small">
+                    <div class="storage-item-small-icon">${icon}</div>
+                    <div class="storage-item-small-name">${name}</div>
+                    <div class="storage-item-small-count">×${count}</div>
+                </div>
+            `;
+        })
+        .join('');
+    
+    container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无矿锭</div>';
 }
 
 function renderGatheringTabs() {
