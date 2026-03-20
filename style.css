@@ -2155,7 +2155,6 @@ body::after {
 
 .gathering-tab.locked {
     opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .gathering-items-list {
