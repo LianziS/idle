@@ -58,8 +58,8 @@ const CONFIG = {
         { id: 'hell_ore', name: '狱炎矿', icon: '🔥', reqLevel: 35, duration: 12000, drop: '狱炎石', dropIcon: '🪨', exp: 5 },
         { id: 'white_ore', name: '白鸠矿', icon: '⚪', reqLevel: 50, duration: 14000, drop: '白鸠石', dropIcon: '🪨', exp: 6 },
         { id: 'thunder_ore', name: '雷鸣矿', icon: '⚡', reqLevel: 65, duration: 16000, drop: '雷鸣石', dropIcon: '🪨', exp: 7 },
-        { id: 'brilliant', name: '璀璨原石', icon: '✨', reqLevel: 80, duration: 18000, drop: '璀璨水晶', dropIcon: '💎', exp: 8 },
-        { id: 'star_ore', name: '星辉原石', icon: '⭐', reqLevel: 95, duration: 30000, drop: '星辉水晶', dropIcon: '💎', exp: 10 }
+        { id: 'brilliant', name: '曜光结晶', icon: '✨', reqLevel: 80, duration: 18000, drop: '璀璨原石', dropIcon: '💎', exp: 8 },
+        { id: 'star_ore', name: '月华结晶', icon: '⭐', reqLevel: 95, duration: 30000, drop: '星辉原石', dropIcon: '💎', exp: 10 }
     ],
     // 采集地点配置
     gatheringLocations: [
