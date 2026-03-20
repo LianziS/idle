@@ -2372,12 +2372,67 @@ function loadGame() {
             if (gameState.combat.active && gameState.combat.endTime > now) {
                 setTimeout(() => completeCombat(CONFIG.combatZones.find(z => z.id === gameState.combat.zoneId)), gameState.combat.endTime - now);
             } else { gameState.combat.active = false; }
-            if (gameState.activeWoodcutting) {
-                gameState.activeWoodcutting = null;
+            
+            // 恢复进行中的伐木行动
+            if (gameState.activeWoodcutting && gameState.woodcuttingRemaining > 0) {
+                const tree = CONFIG.trees.find(t => t.id === gameState.activeWoodcutting);
+                if (tree) {
+                    // 计算剩余时间
+                    const elapsed = now - gameState.actionStartTime;
+                    const remaining = Math.max(0, gameState.actionDuration - elapsed);
+                    
+                    setActionState({ name: `采集${tree.name}`, icon: tree.icon }, tree.duration);
+                    
+                    if (remaining > 0) {
+                        // 还有剩余时间，继续当前行动
+                        setTimeout(() => {
+                            if (gameState.activeWoodcutting === tree.id) {
+                                completeWoodcuttingOnce(tree.id);
+                                scheduleWoodcutting(tree.id);
+                            }
+                        }, remaining);
+                    } else {
+                        // 时间已到，立即完成并继续下一次
+                        completeWoodcuttingOnce(tree.id);
+                        scheduleWoodcutting(tree.id);
+                    }
+                    
+                    // 启动进度条动画
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                    lastActionStartTime = gameState.actionStartTime;
+                    animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+                    renderWoodcutting();
+                }
             }
-            if (gameState.activeMining) {
-                gameState.activeMining = null;
+            
+            // 恢复进行中的挖矿行动
+            if (gameState.activeMining && gameState.miningRemaining > 0) {
+                const ore = CONFIG.ores.find(o => o.id === gameState.activeMining);
+                if (ore) {
+                    const elapsed = now - gameState.actionStartTime;
+                    const remaining = Math.max(0, gameState.actionDuration - elapsed);
+                    
+                    setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, ore.duration);
+                    
+                    if (remaining > 0) {
+                        setTimeout(() => {
+                            if (gameState.activeMining === ore.id) {
+                                completeMiningOnce(ore.id);
+                                scheduleMining(ore.id);
+                            }
+                        }, remaining);
+                    } else {
+                        completeMiningOnce(ore.id);
+                        scheduleMining(ore.id);
+                    }
+                    
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                    lastActionStartTime = gameState.actionStartTime;
+                    animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+                    renderMining();
+                }
             }
+            
             console.log('💾 游戏已加载');
         } catch (e) { console.error('加载失败:', e); }
     }
