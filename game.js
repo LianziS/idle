@@ -1832,7 +1832,7 @@ function renderWoodcutting() {
     
     elements.woodcuttingList.innerHTML = CONFIG.trees.map(tree => {
         const isActive = gameState.activeWoodcutting === tree.id;
-        const isUnlocked = gameState.level >= tree.reqLevel;
+        const isUnlocked = gameState.woodcuttingLevel >= tree.reqLevel;
         let actionStatus = '';
         if (isActive) {
             const remaining = gameState.woodcuttingRemaining || 0;
@@ -1858,7 +1858,7 @@ function renderWoodcutting() {
         card.addEventListener('click', () => {
             const treeId = card.dataset.id;
             const tree = CONFIG.trees.find(t => t.id === treeId);
-            if (gameState.level < tree.reqLevel) { showToast(`❌ 需要等级 ${tree.reqLevel}`); return; }
+            if (gameState.woodcuttingLevel < tree.reqLevel) { showToast(`❌ 需要伐木等级 ${tree.reqLevel}`); return; }
             if (gameState.activeWoodcutting === treeId) { showToast('⏳ 正在采集中'); return; }
             // 打开行动次数选择弹窗
             openActionModal('woodcutting', treeId, tree.name);
@@ -1927,7 +1927,7 @@ function renderMining() {
     
     elements.miningList.innerHTML = CONFIG.ores.map(ore => {
         const isActive = gameState.activeMining === ore.id;
-        const isUnlocked = gameState.level >= ore.reqLevel;
+        const isUnlocked = gameState.miningLevel >= ore.reqLevel;
         let actionStatus = '';
         if (isActive) {
             const remaining = gameState.miningRemaining || 0;
@@ -1953,7 +1953,7 @@ function renderMining() {
         card.addEventListener('click', () => {
             const oreId = card.dataset.id;
             const ore = CONFIG.ores.find(o => o.id === oreId);
-            if (gameState.level < ore.reqLevel) { showToast(`❌ 需要等级 ${ore.reqLevel}`); return; }
+            if (gameState.miningLevel < ore.reqLevel) { showToast(`❌ 需要挖矿等级 ${ore.reqLevel}`); return; }
             if (gameState.activeMining === oreId) { showToast('⏳ 正在挖掘中'); return; }
             // 打开行动次数选择弹窗
             openActionModal('mining', oreId, ore.name);
@@ -2553,7 +2553,7 @@ function renderGatheringItems() {
     const location = CONFIG.gatheringLocations[currentGatheringLocationIndex];
     if (!location) return;
     
-    const isLocationUnlocked = gameState.level >= location.reqLevel;
+    const isLocationUnlocked = gameState.gatheringLevel >= location.reqLevel;
     
     // 添加"全采集"卡片
     const allGatherCard = `
@@ -2607,7 +2607,7 @@ function renderGatheringItems() {
             
             // 检查是否锁定
             if (this.classList.contains('locked')) {
-                showToast(`❌ 需要等级 ${location.reqLevel}`);
+                showToast(`❌ 需要采集等级 ${location.reqLevel}`);
                 return;
             }
             
