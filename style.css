@@ -64,8 +64,6 @@ body::after {
 }
 
 .top-fixed-content {
-    max-width: 1400px;
-    margin: 0 auto;
     padding: 8px 20px;
     width: 100%;
     display: flex;
@@ -97,13 +95,16 @@ body::after {
     font-size: 0.7rem;
     color: #A0B2C0;
     margin-right: auto;
+    position: fixed;
+    left: 90px;
+    top: 12px;
 }
 
 /* 行动状态栏 */
 .action-status-bar {
     background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 20px 10px 20px;
+    padding: 6px 20px 10px 90px;
     min-height: 80px;
 }
 

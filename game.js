@@ -1607,7 +1607,13 @@ function addExp(amount) {
 
 function renderBuildings() {
     if (!elements.buildingsList) return;
-    elements.buildingsList.innerHTML = CONFIG.buildings.map(b => {
+    
+    // 过滤掉伐木场、矿洞、草药园（它们有独立的页面）
+    const displayBuildings = CONFIG.buildings.filter(b => 
+        !['lumber', 'mine', 'farm'].includes(b.id)
+    );
+    
+    elements.buildingsList.innerHTML = displayBuildings.map(b => {
         const building = gameState.buildings[b.id];
         const unlocked = checkUnlock(b.unlockReq);
         return `
