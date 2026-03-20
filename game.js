@@ -895,12 +895,21 @@ function switchPage(pageId) {
 }
 
 function setupEventListeners() {
-    elements.combatBtn.addEventListener('click', toggleCombat);
-    elements.resetBtn.addEventListener('click', resetGame);
-    elements.modalClose.addEventListener('click', () => elements.modal.classList.remove('show'));
-    elements.modal.addEventListener('click', (e) => {
-        if (e.target === elements.modal) elements.modal.classList.remove('show');
-    });
+    // 检查元素是否存在再添加事件监听器
+    if (elements.combatBtn) {
+        elements.combatBtn.addEventListener('click', toggleCombat);
+    }
+    if (elements.resetBtn) {
+        elements.resetBtn.addEventListener('click', resetGame);
+    }
+    if (elements.modalClose) {
+        elements.modalClose.addEventListener('click', () => elements.modal.classList.remove('show'));
+    }
+    if (elements.modal) {
+        elements.modal.addEventListener('click', (e) => {
+            if (e.target === elements.modal) elements.modal.classList.remove('show');
+        });
+    }
     if (elements.actionCancelBtn) {
         elements.actionCancelBtn.addEventListener('click', function(e) {
             e.stopPropagation();
