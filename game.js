@@ -55,8 +55,8 @@ const CONFIG = {
         { id: 'cyan_ore', name: '青闪矿', icon: '💎', reqLevel: 1, duration: 6000, drop: '青闪石', dropIcon: '💎', exp: 2 },
         { id: 'red_iron', name: '赤铁矿', icon: '🔴', reqLevel: 10, duration: 8000, drop: '赤铁石', dropIcon: '🪨', exp: 3 },
         { id: 'feather_ore', name: '羽石矿', icon: '🪶', reqLevel: 20, duration: 10000, drop: '羽石', dropIcon: '🪨', exp: 4 },
-        { id: 'hell_ore', name: '狱炎矿', icon: '🔥', reqLevel: 35, duration: 12000, drop: '狱炎石', dropIcon: '🪨', exp: 5 },
-        { id: 'white_ore', name: '白鸠矿', icon: '⚪', reqLevel: 50, duration: 14000, drop: '白鸠石', dropIcon: '🪨', exp: 6 },
+        { id: 'hell_ore', name: '白鸠矿', icon: '⚪', reqLevel: 35, duration: 12000, drop: '白鸠石', dropIcon: '🪨', exp: 5 },
+        { id: 'white_ore', name: '狱炎矿', icon: '🔥', reqLevel: 50, duration: 14000, drop: '狱炎石', dropIcon: '🪨', exp: 6 },
         { id: 'thunder_ore', name: '雷鸣矿', icon: '⚡', reqLevel: 65, duration: 16000, drop: '雷鸣石', dropIcon: '🪨', exp: 7 },
         { id: 'brilliant', name: '曜光结晶', icon: '✨', reqLevel: 80, duration: 18000, drop: '璀璨原石', dropIcon: '💎', exp: 8 },
         { id: 'star_ore', name: '月华结晶', icon: '⭐', reqLevel: 95, duration: 30000, drop: '星辉原石', dropIcon: '💎', exp: 10 }
