@@ -523,6 +523,11 @@ function openMerchantModal(merchantId) {
     const merchant = CONFIG.merchants.find(m => m.id === merchantId);
     if (!merchant) return;
     
+    // 打开弹窗时恢复 pointer-events
+    if (elements.merchantModal) {
+        elements.merchantModal.style.pointerEvents = 'auto';
+    }
+    
     const data = gameState.merchantData[merchant.id];
     
     // 更新弹窗信息
@@ -552,8 +557,17 @@ function openMerchantModal(merchantId) {
 }
 
 function closeMerchantModal() {
+    if (!elements.merchantModal) return;
     elements.merchantModal.classList.remove('active');
     currentMerchantId = null;
+    
+    // 确保弹窗完全隐藏后不阻挡交互
+    // 添加一个短暂的延迟，让 CSS 动画完成
+    setTimeout(() => {
+        if (elements.merchantModal && !elements.merchantModal.classList.contains('active')) {
+            elements.merchantModal.style.pointerEvents = 'none';
+        }
+    }, 350); // 等待 CSS transition 完成 (0.3s)
 }
 
 function renderMerchantGoods(merchant) {
