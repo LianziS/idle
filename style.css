@@ -1188,6 +1188,193 @@ body::after {
     font-weight: bold;
 }
 
+/* ============ 采集页面 ============ */
+.gathering-locations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.gathering-location-section {
+    background: linear-gradient(180deg, rgba(107, 79, 60, 0.2) 0%, rgba(27, 42, 58, 0.4) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(107, 79, 60, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.gathering-location-section.locked {
+    opacity: 0.7;
+    filter: grayscale(0.4);
+}
+
+.gathering-location-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gathering-location-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #E8C57F;
+}
+
+.gathering-location-meta {
+    font-size: 0.85rem;
+    color: #6b7f90;
+}
+
+.gathering-location-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+/* 删除旧的标签页样式（gathering-tabs, gathering-tab 等已移除） */
+
+.gathering-item-card {
+    background: linear-gradient(180deg, rgba(107, 79, 60, 0.25) 0%, rgba(27, 42, 58, 0.5) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(107, 79, 60, 0.4);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.gathering-item-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(180deg, #4a7c2d 0%, #2d5a1a 100%);
+    border-radius: 10px 0 0 10px;
+    transition: width 0.3s;
+}
+
+.gathering-item-card:hover {
+    border-color: #4a7c2d;
+}
+
+.gathering-item-card.active {
+    border-color: rgba(107, 79, 60, 0.4);
+    background: linear-gradient(180deg, rgba(74, 124, 45, 0.3) 0%, rgba(27, 42, 58, 0.6) 100%);
+}
+
+.gathering-item-card.active::before {
+    width: 4px;
+}
+
+.gathering-item-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+}
+
+.gathering-item-card.locked:hover {
+    border-color: rgba(107, 79, 60, 0.4);
+    transform: none;
+}
+
+.gathering-item-card.all-gather::before {
+    background: linear-gradient(180deg, #8B2C2D 0%, #5a1a1a 100%);
+}
+
+.gathering-item-card.all-gather .gathering-item-name {
+    color: #E8C57F;
+}
+
+.gathering-item-icon {
+    font-size: 2.5rem;
+}
+
+.gathering-item-info {
+    flex: 1;
+}
+
+.gathering-item-name {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #A0B2C0;
+}
+
+.gathering-item-desc {
+    font-size: 0.8rem;
+    color: #6b7f90;
+    margin-bottom: 3px;
+}
+
+.gathering-item-meta {
+    font-size: 0.85rem;
+    color: #6b4f3c;
+    font-weight: bold;
+}
+
+.gathering-item-locked {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #8B2C2D;
+    font-weight: bold;
+}
+
+/* ============ 仓库页面 ============ */
+.storage-section-title {
+    font-size: 0.95rem;
+    color: #A0B2C0;
+    margin: 20px 0 12px 0;
+    padding-left: 8px;
+    border-left: 3px solid #8B2C2D;
+}
+
+.storage-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.storage-item-small {
+    background: linear-gradient(180deg, rgba(107, 79, 60, 0.25) 0%, rgba(27, 42, 58, 0.5) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(107, 79, 60, 0.4);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.storage-item-small-icon {
+    font-size: 2rem;
+}
+
+.storage-item-small-name {
+    font-size: 0.8rem;
+    color: #A0B2C0;
+}
+
+.storage-item-small-count {
+    font-size: 0.9rem;
+    color: #E8C57F;
+    font-weight: bold;
+}
+
 /* ============ 移动端适配 ============ */
 @media (max-width: 480px) {
     body {
@@ -1384,725 +1571,5 @@ body::after {
     
     .zone-name {
         font-size: 0.9rem;
-    }
-}
-
-/* ============ 商人系统 ============ */
-
-/* 商人列表网格 */
-.merchant-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    padding: 8px;
-}
-
-/* 商人卡片 */
-.merchant-card {
-    background: linear-gradient(135deg, rgba(45, 63, 82, 0.9) 0%, rgba(27, 42, 58, 0.95) 100%);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.merchant-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
-}
-
-.merchant-card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.merchant-card-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-}
-
-.merchant-card-info {
-    flex: 1;
-}
-
-.merchant-card-name {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 4px;
-}
-
-.merchant-card-title {
-    font-size: 0.8rem;
-    color: #A0B2C0;
-}
-
-/* 好感度进度条 */
-.merchant-favorability-bar {
-    margin-top: 8px;
-}
-
-.favorability-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.75rem;
-    color: #A0B2C0;
-    margin-bottom: 4px;
-}
-
-.favorability-level {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    background: rgba(255, 215, 0, 0.2);
-    border-radius: 4px;
-    color: #FFD700;
-}
-
-.favorability-progress-bg {
-    height: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.favorability-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
-    border-radius: 4px;
-    transition: width 0.3s ease;
-}
-
-/* 商人交易弹窗 */
-.merchant-modal {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 100%;
-    height: 100vh;
-    z-index: 2000;
-    transition: right 0.3s ease;
-}
-
-.merchant-modal.active {
-    right: 0;
-}
-
-.merchant-modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-}
-
-.merchant-modal-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    max-width: 500px;
-    height: 100vh;
-    background: linear-gradient(180deg, rgba(45, 63, 82, 0.98) 0%, rgba(27, 42, 58, 0.98) 100%);
-    border-left: 2px solid rgba(255, 255, 255, 0.3);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: -3px 0 15px rgba(0, 0, 0, 0.3);
-}
-
-@media (max-width: 768px) {
-    .merchant-modal-panel {
-        height: 100vh;
-    }
-}
-
-/* 内容区域（交易/任务） */
-.merchant-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-}
-
-@media (min-width: 501px) {
-    .merchant-modal-panel {
-        width: 500px;
-    }
-}
-
-/* 移动端弹窗 75vw 宽度 */
-@media (max-width: 768px) {
-    .merchant-modal {
-        width: 100vw;
-    }
-    
-    .merchant-modal-panel {
-        width: 75vw !important;
-        max-width: 75vw !important;
-        right: 0;
-    }
-}
-
-/* 弹窗头部 */
-.merchant-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.merchant-modal-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.merchant-modal-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-}
-
-.merchant-modal-info h3 {
-    font-size: 1.1rem;
-    color: #fff;
-    margin-bottom: 4px;
-}
-
-.merchant-modal-favorability {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.85rem;
-    color: #FFD700;
-}
-
-.merchant-modal-close {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: #fff;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.merchant-modal-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* 二级菜单 */
-.merchant-tabs {
-    display: flex;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-}
-
-.merchant-tab {
-    flex: 1;
-    padding: 12px;
-    background: transparent;
-    border: none;
-    color: #A0B2C0;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: flex 0.3s ease, padding 0.3s ease;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-}
-
-.merchant-tab.active {
-    flex: 2;
-    color: #FFD700;
-    border-bottom-color: #FFD700;
-    background: rgba(255, 215, 0, 0.05);
-}
-
-.merchant-tab:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-}
-
-@media (max-width: 768px) {
-    .merchant-tab {
-        padding: 10px 8px;
-        font-size: 0.75rem;
-    }
-    
-    .merchant-tab.active {
-        flex: 2;
-        padding: 10px 12px;
-    }
-}
-
-/* 内容区域 */
-.merchant-tab-content {
-    display: none;
-    padding: 16px;
-    max-height: 40vh;
-    overflow-y: auto;
-}
-
-.merchant-tab-content.active {
-    display: block;
-}
-
-@media (max-width: 768px) {
-    .merchant-tab-content {
-        padding: 10px;
-        max-height: 35vh;
-    }
-}
-
-/* 商品列表 */
-.merchant-goods-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.merchant-goods-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.merchant-goods-icon {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-}
-
-.merchant-goods-info {
-    flex: 1;
-}
-
-.merchant-goods-name {
-    font-size: 0.95rem;
-    color: #fff;
-    margin-bottom: 4px;
-}
-
-.merchant-goods-price {
-    font-size: 0.8rem;
-    color: #A0B2C0;
-}
-
-.merchant-buy-btn {
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    border: none;
-    border-radius: 6px;
-    color: #1B2A3A;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.merchant-buy-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-}
-
-.merchant-buy-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* 任务列表 */
-.merchant-quest-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.merchant-quest-item {
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.merchant-quest-item.completed {
-    opacity: 0.6;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.merchant-quest-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.merchant-quest-name {
-    font-size: 0.95rem;
-    color: #fff;
-    font-weight: bold;
-}
-
-.merchant-quest-reward {
-    font-size: 0.8rem;
-    color: #FFD700;
-}
-
-.merchant-quest-desc {
-    font-size: 0.8rem;
-    color: #A0B2C0;
-    margin-bottom: 8px;
-}
-
-.merchant-quest-btn {
-    padding: 6px 12px;
-    background: rgba(255, 215, 0, 0.2);
-    border: 1px solid #FFD700;
-    border-radius: 4px;
-    color: #FFD700;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.merchant-quest-btn:hover {
-    background: rgba(255, 215, 0, 0.3);
-}
-
-.merchant-quest-btn.submit {
-    background: rgba(0, 255, 100, 0.2);
-    border-color: #00FF64;
-    color: #00FF64;
-}
-
-.merchant-quest-btn.submit:hover {
-    background: rgba(0, 255, 100, 0.3);
-}
-
-/* 仓库区域 */
-.merchant-warehouse {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    flex: 0 0 40%;  /* 占整个弹窗高度的 40% */
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-@media (max-width: 768px) {
-    .merchant-warehouse {
-        padding: 8px;
-        flex: 0 0 40%;  /* 移动端同样占 40% */
-    }
-}
-
-.merchant-warehouse-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.merchant-warehouse-header h4 {
-    font-size: 0.95rem;
-    color: #fff;
-}
-
-.merchant-select-btn {
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    color: #A0B2C0;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.merchant-select-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-}
-
-.merchant-select-btn.active {
-    background: rgba(0, 255, 100, 0.2);
-    border-color: #00FF64;
-    color: #00FF64;
-}
-
-.merchant-warehouse-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    overflow-y: auto;
-    align-content: start;
-}
-
-@media (max-width: 768px) {
-    .merchant-warehouse-grid {
-        gap: 6px;
-    }
-}
-
-.merchant-warehouse-item {
-    padding: 8px 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 70px;
-}
-
-.merchant-warehouse-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-@media (max-width: 768px) {
-    .merchant-warehouse-item {
-        padding: 6px 4px;
-        min-height: 60px;
-    }
-}
-
-.merchant-warehouse-item.selected {
-    border-color: #00FF64;
-    background: rgba(0, 255, 100, 0.1);
-}
-
-.merchant-warehouse-item.selected::after {
-    content: '✓';
-    position: absolute;
-    bottom: 2px;
-    right: 4px;
-    font-size: 1rem;
-    color: #00FF64;
-    font-weight: bold;
-}
-
-.merchant-warehouse-item-icon {
-    font-size: 1.5rem;
-    text-align: center;
-    margin-bottom: 4px;
-}
-
-.merchant-warehouse-item-name {
-    font-size: 0.7rem;
-    color: #A0B2C0;
-    text-align: center;
-}
-
-.merchant-warehouse-item-count {
-    font-size: 0.75rem;
-    color: #fff;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* 出售按钮栏 */
-.merchant-sell-bar {
-    margin-top: 12px;
-    padding: 12px;
-    background: rgba(255, 215, 0, 0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.merchant-sell-total {
-    font-size: 0.9rem;
-    color: #FFD700;
-    font-weight: bold;
-}
-
-.merchant-sell-btn {
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    border: none;
-    border-radius: 6px;
-    color: #1B2A3A;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.merchant-sell-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-}
-
-.merchant-sell-btn.confirming {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%);
-}
-
-/* ============ 移动端优化 ============ */
-@media (max-width: 768px) {
-    body {
-        font-size: 11px;
-    }
-    
-    .panel-title {
-        font-size: 0.9rem;
-    }
-    
-    .merchant-modal {
-        width: 100vw;
-    }
-    
-    .merchant-modal-panel {
-        width: 75vw !important;
-        max-width: 75vw !important;
-        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.25);
-    }
-    
-    .merchant-modal-header {
-        padding: 10px 12px;
-    }
-    
-    .merchant-modal-header h3 {
-        font-size: 0.85rem;
-    }
-    
-    .merchant-modal-favorability {
-        font-size: 0.7rem;
-    }
-    
-    .merchant-tab {
-        font-size: 0.75rem;
-        padding: 8px;
-    }
-    
-    .merchant-goods-item {
-        padding: 8px;
-    }
-    
-    .merchant-goods-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
-    }
-    
-    .merchant-goods-name {
-        font-size: 0.75rem;
-    }
-    
-    .merchant-goods-price {
-        font-size: 0.65rem;
-    }
-    
-    .merchant-buy-btn {
-        padding: 6px 12px;
-        font-size: 0.7rem;
-    }
-    
-    .merchant-quest-item {
-        padding: 8px;
-    }
-    
-    .merchant-quest-name {
-        font-size: 0.75rem;
-    }
-    
-    .merchant-quest-reward {
-        font-size: 0.65rem;
-    }
-    
-    .merchant-quest-desc {
-        font-size: 0.65rem;
-    }
-    
-    .merchant-quest-btn {
-        padding: 4px 8px;
-        font-size: 0.65rem;
-    }
-    
-    .merchant-warehouse-header h4 {
-        font-size: 0.75rem;
-    }
-    
-    .merchant-select-btn {
-        padding: 4px 8px;
-        font-size: 0.65rem;
-    }
-    
-    .merchant-warehouse-grid {
-        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-        gap: 4px;
-    }
-    
-    .merchant-warehouse-item {
-        padding: 6px 4px;
-        min-height: 60px;
-    }
-    
-    .merchant-warehouse-item-icon {
-        font-size: 1.3rem;
-    }
-    
-    .merchant-warehouse-item-name {
-        font-size: 0.6rem;
-    }
-    
-    .merchant-warehouse-item-count {
-        font-size: 0.65rem;
-    }
-    
-    .merchant-sell-bar {
-        padding: 8px;
-    }
-    
-    .merchant-sell-total {
-        font-size: 0.75rem;
-    }
-    
-    .merchant-sell-btn {
-        padding: 6px 12px;
-        font-size: 0.7rem;
     }
 }
