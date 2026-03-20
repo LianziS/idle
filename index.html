@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <title>中世纪雇佣兵 - 放置游戏</title>
-    <link rel="stylesheet" href="style.css?v=202603210052">
+    <link rel="stylesheet" href="style.css?v=202603210100">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1B2A3A;color:#A0B2C0;min-height:100vh;padding:0;font-size:14px;overflow-x:hidden}
@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-21 00:52</span>
+            <span class="update-time-badge">代码更新: 2026-03-21 01:13</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -148,6 +148,22 @@
                 </div>
             </div>
             
+            <!-- 缝制 -->
+            <div class="nav-item nav-item-skill" data-page="tailoring">
+                <span class="nav-icon">🧵</span>
+                <div class="nav-skill-wrapper">
+                    <div class="nav-text-row">
+                        <span class="nav-text">缝制</span>
+                        <span class="nav-exp-level" id="nav-tailoring-lvl">1</span>
+                    </div>
+                    <div class="nav-exp-bar">
+                        <div class="nav-exp-bg">
+                            <div class="nav-exp-fill" id="nav-tailoring-exp"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </nav>
 
@@ -197,6 +213,10 @@
                 <!-- 矿锭 -->
                 <h3 class="storage-section-title">矿锭</h3>
                 <div class="storage-items-grid" id="storage-ingots-items"></div>
+                
+                <!-- 布料 -->
+                <h3 class="storage-section-title">布料</h3>
+                <div class="storage-items-grid" id="storage-fabrics-items"></div>
             </section>
         </main>
 
@@ -285,6 +305,26 @@
                 </div>
                 <!-- 矿锭列表 -->
                 <div class="gathering-items-list" id="forging-ingots-list"></div>
+            </section>
+        </main>
+
+        <!-- 缝制页 -->
+        <main class="page" id="page-tailoring">
+            <section class="panel">
+                <h2 class="panel-title">🧵 缝制</h2>
+                <div class="skill-exp-bar">
+                    <div class="skill-exp-bg">
+                        <div class="skill-exp-fill" id="tailoring-exp-fill"></div>
+                    </div>
+                    <span class="skill-exp-level" id="tailoring-level">1</span>
+                </div>
+                <!-- 缝制标签页 -->
+                <div class="gathering-tabs" id="tailoring-tabs">
+                    <button class="gathering-tab active" data-tab="fabrics">布料</button>
+                    <button class="gathering-tab" data-tab="equipment">装备</button>
+                </div>
+                <!-- 布料列表 -->
+                <div class="gathering-items-list" id="tailoring-fabrics-list"></div>
             </section>
         </main>
 
@@ -409,6 +449,6 @@
         </div>
     </div>
 
-    <script src="game.js?v=202603210052"></script>
+    <script src="game.js?v=202603210100"></script>
 </body>
 </html>

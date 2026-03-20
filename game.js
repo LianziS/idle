@@ -206,6 +206,15 @@ const CONFIG = {
         { id: 'brilliant_crystal', name: '璀璨水晶', icon: '💎', reqLevel: 80, duration: 18000, exp: 9, materials: { brilliant: 2 } },
         { id: 'star_crystal', name: '星辉水晶', icon: '✨', reqLevel: 95, duration: 30000, exp: 12, materials: { star_ore: 2 } }
     ],
+    // 布料配置
+    fabrics: [
+        { id: 'jute_cloth', name: '黄麻布料', icon: '🧵', reqLevel: 1, duration: 6000, exp: 3, materials: { jute: 2 } },
+        { id: 'linen_cloth', name: '亚麻布料', icon: '🧶', reqLevel: 15, duration: 8000, exp: 4, materials: { flax: 2 } },
+        { id: 'wool_cloth', name: '羊毛布料', icon: '🧶', reqLevel: 35, duration: 12000, exp: 6, materials: { wool: 2 } },
+        { id: 'silk_cloth', name: '丝绸布料', icon: '🎀', reqLevel: 55, duration: 15000, exp: 8, materials: { silk: 2 } },
+        { id: 'wind_silk', name: '风语绸', icon: '💨', reqLevel: 75, duration: 18000, exp: 10, materials: { wind_wool: 2 } },
+        { id: 'dream_cloth', name: '梦幻布料', icon: '✨', reqLevel: 95, duration: 25000, exp: 12, materials: { life_fiber: 2 } }
+    ],
     // 商人配置
     merchants: [
         { 
@@ -319,7 +328,15 @@ let gameState = {
     forgingCount: 0,
     forgingRemaining: 0,
     // 矿锭存储
-    ingotsInventory: {}
+    ingotsInventory: {},
+    // 缝制状态
+    tailoringLevel: 1,
+    tailoringExp: 0,
+    activeTailoring: null,
+    tailoringCount: 0,
+    tailoringRemaining: 0,
+    // 布料存储
+    fabricsInventory: {}
 };
 
 CONFIG.buildings.forEach(b => { gameState.buildings[b.id] = { level: 0 }; });
@@ -368,12 +385,18 @@ const elements = {
     forgingExpFill: document.getElementById('forging-exp-fill'),
     forgingLevel: document.getElementById('forging-level'),
     forgingIngotsList: document.getElementById('forging-ingots-list'),
+    // 缝制
+    tailoringExpFill: document.getElementById('tailoring-exp-fill'),
+    tailoringLevel: document.getElementById('tailoring-level'),
+    tailoringFabricsList: document.getElementById('tailoring-fabrics-list'),
     navGatheringExp: document.getElementById('nav-gathering-exp'),
     navGatheringLvl: document.getElementById('nav-gathering-lvl'),
     navCraftingExp: document.getElementById('nav-crafting-exp'),
     navCraftingLvl: document.getElementById('nav-crafting-lvl'),
     navForgingExp: document.getElementById('nav-forging-exp'),
     navForgingLvl: document.getElementById('nav-forging-lvl'),
+    navTailoringExp: document.getElementById('nav-tailoring-exp'),
+    navTailoringLvl: document.getElementById('nav-tailoring-lvl'),
     playTime: document.getElementById('play-time'),
     modal: document.getElementById('modal'),
     modalBody: document.getElementById('modal-body'),
@@ -446,6 +469,7 @@ function init() {
     renderGathering();
     renderCrafting();
     renderForging();
+    renderTailoring();
     renderCombatZones();
     renderMerchants();
     setupEventListeners();
@@ -457,6 +481,7 @@ function init() {
     renderGatheringInventory();
     renderPlanksInventory();
     renderIngotsInventory();
+    renderFabricsInventory();
     
     // 修复刷新页面后进度条异常：如果有进行中的行动，重置进度条和开始时间
     if (gameState.currentAction) {
@@ -1063,7 +1088,8 @@ function openActionModal(type, id, name, itemId = null) {
         gathering_item: '采集',
         gathering_all: '全采集',
         crafting: '制作',
-        forging: '锻造'
+        forging: '锻造',
+        tailoring: '缝制'
     };
     elements.actionModalTitle.textContent = `选择${typeNames[type] || '行动'}次数 - ${name}`;
     elements.actionCountInput.value = '';
@@ -1115,6 +1141,8 @@ function executePendingAction() {
         startCraftingWithCount(id, count);
     } else if (type === 'forging') {
         startForgingWithCount(id, count);
+    } else if (type === 'tailoring') {
+        startTailoringWithCount(id, count);
     }
     
     pendingAction = null;
@@ -1607,6 +1635,7 @@ function updateUI() {
     renderGathering();
     renderCrafting();
     renderForging();
+    renderTailoring();
     renderCombatZones();
     
     // 渲染仓库物品
@@ -1615,6 +1644,7 @@ function updateUI() {
     renderGatheringInventory();
     renderPlanksInventory();
     renderIngotsInventory();
+    renderFabricsInventory();
 }
 
 function formatNumber(num) {
@@ -1669,7 +1699,8 @@ function updateTotalLevel() {
                       (gameState.gatheringLevel || 1) + 
                       (gameState.craftingLevel || 1) + 
                       (gameState.forgingLevel || 1) + 
-                      (gameState.combatLevel || 1) - 5; // 减去初始的6个1级
+                      (gameState.tailoringLevel || 1) + 
+                      (gameState.combatLevel || 1) - 6; // 减去初始的7个1级
     if (gameState.level < 1) gameState.level = 1;
 }
 
@@ -1898,6 +1929,7 @@ function addSkillExp(skill, amount) {
             gathering: '采集',
             crafting: '制作',
             forging: '锻造',
+            tailoring: '缝制',
             combat: '战斗'
         };
         showToast(`🎉 ${skillNames[skill] || '技能'}升级了！当前等级：${gameState[levelKey]}`);
@@ -2535,6 +2567,255 @@ function renderIngotsInventory() {
         .join('');
     
     container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无矿锭</div>';
+}
+
+// ============ 缝制系统 ============
+
+function renderTailoring() {
+    // 更新缝制经验条
+    if (elements.tailoringExpFill && elements.tailoringLevel) {
+        const currentExp = getSkillExpForLevel(gameState.tailoringLevel);
+        const nextExp = getSkillExpForLevel(gameState.tailoringLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.tailoringExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.tailoringExpFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.tailoringLevel.textContent = gameState.tailoringLevel;
+    }
+    
+    // 更新侧边栏缝制经验条
+    if (elements.navTailoringExp && elements.navTailoringLvl) {
+        const currentExp = getSkillExpForLevel(gameState.tailoringLevel);
+        const nextExp = getSkillExpForLevel(gameState.tailoringLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.tailoringExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.navTailoringExp.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.navTailoringLvl.textContent = gameState.tailoringLevel;
+    }
+    
+    // 渲染布料列表
+    renderFabricsList();
+}
+
+function renderFabricsList() {
+    if (!elements.tailoringFabricsList) return;
+    
+    const html = CONFIG.fabrics.map(fabric => {
+        const isUnlocked = gameState.tailoringLevel >= fabric.reqLevel;
+        const isActive = gameState.activeTailoring === fabric.id;
+        const canTailor = canTailorFabric(fabric);
+        
+        // 获取材料名称
+        const materialNames = Object.entries(fabric.materials).map(([itemId, count]) => {
+            const owned = gameState.gatheringInventory[itemId] || 0;
+            // 查找材料名称
+            let materialName = itemId;
+            for (const loc of CONFIG.gatheringLocations) {
+                const item = loc.items.find(i => i.id === itemId);
+                if (item) {
+                    materialName = item.name;
+                    break;
+                }
+            }
+            return `${materialName}×${count} (${owned}/${count})`;
+        }).join(', ');
+        
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.tailoringRemaining || 0;
+            const total = gameState.tailoringCount || 1;
+            const countText = total >= 99999 ? '∞' : `${remaining}/${total}`;
+            actionStatus = `<div class="action-timer">缝制中... ${countText}</div>`;
+        }
+        
+        return `
+            <div class="gathering-item-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''}" data-fabric-id="${fabric.id}">
+                <div class="gathering-item-icon">${fabric.icon}</div>
+                <div class="gathering-item-info">
+                    <div class="gathering-item-name">${fabric.name}</div>
+                    <div class="gathering-item-desc">${materialNames}</div>
+                    <div class="gathering-item-meta">${fabric.duration/1000}秒 | +${fabric.exp} EXP | Lv.${fabric.reqLevel}</div>
+                </div>
+                ${actionStatus}
+                ${!isUnlocked ? '<div class="gathering-item-locked">🔒 等级不足</div>' : ''}
+                ${isUnlocked && !canTailor ? '<div class="gathering-item-locked">📦 材料不足</div>' : ''}
+            </div>
+        `;
+    }).join('');
+    
+    elements.tailoringFabricsList.innerHTML = html;
+    
+    // 绑定点击事件
+    elements.tailoringFabricsList.querySelectorAll('.gathering-item-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            const fabricId = this.dataset.fabricId;
+            const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
+            
+            // 检查等级
+            if (gameState.tailoringLevel < fabric.reqLevel) {
+                showToast(`❌ 需要缝制等级 ${fabric.reqLevel}`);
+                return;
+            }
+            
+            // 检查材料
+            if (!canTailorFabric(fabric)) {
+                showToast('❌ 材料不足');
+                return;
+            }
+            
+            // 检查是否正在进行中
+            if (this.classList.contains('active')) {
+                showToast('⏳ 正在缝制中');
+                return;
+            }
+            
+            openActionModal('tailoring', fabricId, fabric.name);
+        });
+    });
+}
+
+function canTailorFabric(fabric) {
+    for (const [itemId, count] of Object.entries(fabric.materials)) {
+        const owned = gameState.gatheringInventory[itemId] || 0;
+        if (owned < count) return false;
+    }
+    return true;
+}
+
+function startTailoringWithCount(fabricId, count) {
+    const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
+    if (!fabric) return;
+    
+    // 检查材料是否足够
+    if (!canTailorFabric(fabric)) {
+        showToast('❌ 材料不足');
+        return;
+    }
+    
+    gameState.activeTailoring = fabricId;
+    gameState.tailoringCount = count;
+    gameState.tailoringRemaining = count;
+    
+    // 重置进度条
+    if (elements.actionProgressFill) {
+        elements.actionProgressFill.style.width = '0%';
+    }
+    setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration);
+    renderTailoring();
+    
+    // 启动进度条动画
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    lastActionStartTime = gameState.actionStartTime;
+    animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+    
+    scheduleTailoring(fabricId);
+}
+
+function scheduleTailoring(fabricId) {
+    const isInfinite = gameState.tailoringCount >= 99999;
+    if (!gameState.activeTailoring || (!isInfinite && gameState.tailoringRemaining <= 0)) {
+        gameState.activeTailoring = null;
+        gameState.tailoringCount = 0;
+        gameState.tailoringRemaining = 0;
+        setActionState(null, 0);
+        renderTailoring();
+        return;
+    }
+    
+    const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
+    if (!fabric) return;
+    
+    // 检查材料
+    if (!canTailorFabric(fabric)) {
+        showToast('❌ 材料不足，缝制停止');
+        gameState.activeTailoring = null;
+        gameState.tailoringCount = 0;
+        gameState.tailoringRemaining = 0;
+        setActionState(null, 0);
+        renderTailoring();
+        return;
+    }
+    
+    if (!isInfinite) {
+        gameState.tailoringRemaining--;
+    }
+    
+    if (gameState.activeTailoring === fabricId) {
+        setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration);
+        if (elements.actionProgressFill) {
+            elements.actionProgressFill.style.width = '0%';
+        }
+        updateActionStatusBar();
+        renderTailoring();
+        
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        lastActionStartTime = gameState.actionStartTime;
+        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+        
+        setTimeout(() => {
+            if (gameState.activeTailoring === fabricId) {
+                completeTailoringOnce(fabricId);
+                scheduleTailoring(fabricId);
+            }
+        }, fabric.duration);
+    }
+}
+
+function completeTailoringOnce(fabricId) {
+    const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
+    if (!fabric) return;
+    
+    // 消耗材料
+    for (const [itemId, count] of Object.entries(fabric.materials)) {
+        gameState.gatheringInventory[itemId] -= count;
+    }
+    
+    // 添加布料到存储
+    if (!gameState.fabricsInventory[fabricId]) {
+        gameState.fabricsInventory[fabricId] = 0;
+    }
+    gameState.fabricsInventory[fabricId]++;
+    
+    addSkillExp('tailoring', fabric.exp);
+    updateUI();
+    saveGame();
+    
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${fabric.icon} ${fabric.name}</span>`;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
+}
+
+function renderFabricsInventory() {
+    const container = document.getElementById('storage-fabrics-items');
+    if (!container) return;
+    
+    if (!gameState.fabricsInventory || Object.keys(gameState.fabricsInventory).length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无布料</div>';
+        return;
+    }
+    
+    const html = Object.entries(gameState.fabricsInventory)
+        .filter(([id, count]) => count > 0)
+        .map(([id, count]) => {
+            const fabric = CONFIG.fabrics.find(f => f.id === id);
+            const name = fabric ? fabric.name : id;
+            const icon = fabric ? fabric.icon : '🧵';
+            return `
+                <div class="storage-item-small">
+                    <div class="storage-item-small-icon">${icon}</div>
+                    <div class="storage-item-small-name">${name}</div>
+                    <div class="storage-item-small-count">×${count}</div>
+                </div>
+            `;
+        })
+        .join('');
+    
+    container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无布料</div>';
 }
 
 function renderGatheringTabs() {
