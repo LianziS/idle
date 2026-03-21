@@ -3374,6 +3374,243 @@ function loadGame() {
             // 更新玩家总等级
             updateTotalLevel();
             
+            // 离线计算 - 采集
+            if (gameState.activeGathering && gameState.gatheringRemaining > 0) {
+                const location = CONFIG.gatheringLocations.find(l => l.id === gameState.gatheringLocationId);
+                if (location) {
+                    const offlineTime = now - gameState.actionStartTime;
+                    const actionDuration = location.duration;
+                    const completedCount = Math.floor(offlineTime / actionDuration);
+                    const remainingTime = offlineTime % actionDuration;
+                    
+                    const actualCompleted = Math.min(completedCount, gameState.gatheringRemaining);
+                    for (let i = 0; i < actualCompleted; i++) {
+                        // 模拟采集奖励
+                        if (!gameState.gatheringInventory) gameState.gatheringInventory = {};
+                        if (gameState.gatheringItemId) {
+                            if (!gameState.gatheringInventory[gameState.gatheringItemId]) {
+                                gameState.gatheringInventory[gameState.gatheringItemId] = 0;
+                            }
+                            gameState.gatheringInventory[gameState.gatheringItemId]++;
+                        } else {
+                            // 全采集逻辑
+                            location.items.forEach(item => {
+                                if (Math.random() < 0.3) {
+                                    if (!gameState.gatheringInventory[item.id]) {
+                                        gameState.gatheringInventory[item.id] = 0;
+                                    }
+                                    gameState.gatheringInventory[item.id]++;
+                                }
+                            });
+                        }
+                        addExp(location.exp);
+                        addSkillExp('gathering', location.exp);
+                    }
+                    gameState.gatheringRemaining -= actualCompleted;
+                    
+                    gameState.actionStartTime = now - remainingTime;
+                    
+                    if (actualCompleted > 0) {
+                        showToast(`⏰ 离线完成 ${actualCompleted} 次采集！`);
+                    }
+                    
+                    if (gameState.gatheringRemaining > 0 || gameState.gatheringCount >= 99999) {
+                        setActionState({ name: `采集`, icon: '🌾' }, actionDuration);
+                        
+                        if (remainingTime > 0) {
+                            setTimeout(() => {
+                                if (gameState.activeGathering) {
+                                    completeGatheringOnce(gameState.activeGathering, gameState.gatheringLocationId, gameState.gatheringItemId);
+                                    scheduleGathering(gameState.activeGathering, gameState.gatheringLocationId, gameState.gatheringItemId);
+                                }
+                            }, actionDuration - remainingTime);
+                        } else {
+                            scheduleGathering(gameState.activeGathering, gameState.gatheringLocationId, gameState.gatheringItemId);
+                        }
+                        
+                        if (animationFrame) cancelAnimationFrame(animationFrame);
+                        lastActionStartTime = gameState.actionStartTime;
+                        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+                        renderGathering();
+                    } else {
+                        gameState.activeGathering = null;
+                        gameState.gatheringCount = 0;
+                        setActionState(null, 0);
+                    }
+                }
+            }
+            
+            // 离线计算 - 制作
+            if (gameState.activeCrafting && gameState.craftingRemaining > 0) {
+                const plank = CONFIG.woodPlanks.find(p => p.id === gameState.activeCrafting);
+                if (plank && canCraftPlank(plank)) {
+                    const offlineTime = now - gameState.actionStartTime;
+                    const actionDuration = plank.duration;
+                    const completedCount = Math.floor(offlineTime / actionDuration);
+                    const remainingTime = offlineTime % actionDuration;
+                    
+                    const actualCompleted = Math.min(completedCount, gameState.craftingRemaining);
+                    for (let i = 0; i < actualCompleted; i++) {
+                        if (canCraftPlank(plank)) {
+                            for (const [woodId, count] of Object.entries(plank.materials)) {
+                                gameState.woodcuttingInventory[woodId] -= count;
+                            }
+                            if (!gameState.planksInventory[plank.id]) {
+                                gameState.planksInventory[plank.id] = 0;
+                            }
+                            gameState.planksInventory[plank.id]++;
+                            addExp(plank.exp);
+                            addSkillExp('crafting', plank.exp);
+                        }
+                    }
+                    gameState.craftingRemaining -= actualCompleted;
+                    
+                    gameState.actionStartTime = now - remainingTime;
+                    
+                    if (actualCompleted > 0) {
+                        showToast(`⏰ 离线完成 ${actualCompleted} 次制作！`);
+                    }
+                    
+                    if (canCraftPlank(plank) && (gameState.craftingRemaining > 0 || gameState.craftingCount >= 99999)) {
+                        setActionState({ name: `制作${plank.name}`, icon: plank.icon }, actionDuration);
+                        
+                        if (remainingTime > 0) {
+                            setTimeout(() => {
+                                if (gameState.activeCrafting === plank.id) {
+                                    completeCraftingOnce(plank.id);
+                                    scheduleCrafting(plank.id);
+                                }
+                            }, actionDuration - remainingTime);
+                        } else {
+                            scheduleCrafting(plank.id);
+                        }
+                        
+                        if (animationFrame) cancelAnimationFrame(animationFrame);
+                        lastActionStartTime = gameState.actionStartTime;
+                        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+                        renderCrafting();
+                    } else {
+                        gameState.activeCrafting = null;
+                        gameState.craftingCount = 0;
+                        setActionState(null, 0);
+                    }
+                }
+            }
+            
+            // 离线计算 - 锻造
+            if (gameState.activeForging && gameState.forgingRemaining > 0) {
+                const ingot = CONFIG.ingots.find(i => i.id === gameState.activeForging);
+                if (ingot && canForgeIngot(ingot)) {
+                    const offlineTime = now - gameState.actionStartTime;
+                    const actionDuration = ingot.duration;
+                    const completedCount = Math.floor(offlineTime / actionDuration);
+                    const remainingTime = offlineTime % actionDuration;
+                    
+                    const actualCompleted = Math.min(completedCount, gameState.forgingRemaining);
+                    for (let i = 0; i < actualCompleted; i++) {
+                        if (canForgeIngot(ingot)) {
+                            for (const [oreId, count] of Object.entries(ingot.materials)) {
+                                gameState.miningInventory[oreId] -= count;
+                            }
+                            if (!gameState.ingotsInventory[ingot.id]) {
+                                gameState.ingotsInventory[ingot.id] = 0;
+                            }
+                            gameState.ingotsInventory[ingot.id]++;
+                            addExp(ingot.exp);
+                            addSkillExp('forging', ingot.exp);
+                        }
+                    }
+                    gameState.forgingRemaining -= actualCompleted;
+                    
+                    gameState.actionStartTime = now - remainingTime;
+                    
+                    if (actualCompleted > 0) {
+                        showToast(`⏰ 离线完成 ${actualCompleted} 次锻造！`);
+                    }
+                    
+                    if (canForgeIngot(ingot) && (gameState.forgingRemaining > 0 || gameState.forgingCount >= 99999)) {
+                        setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actionDuration);
+                        
+                        if (remainingTime > 0) {
+                            setTimeout(() => {
+                                if (gameState.activeForging === ingot.id) {
+                                    completeForgingOnce(ingot.id);
+                                    scheduleForging(ingot.id);
+                                }
+                            }, actionDuration - remainingTime);
+                        } else {
+                            scheduleForging(ingot.id);
+                        }
+                        
+                        if (animationFrame) cancelAnimationFrame(animationFrame);
+                        lastActionStartTime = gameState.actionStartTime;
+                        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+                        renderForging();
+                    } else {
+                        gameState.activeForging = null;
+                        gameState.forgingCount = 0;
+                        setActionState(null, 0);
+                    }
+                }
+            }
+            
+            // 离线计算 - 缝制
+            if (gameState.activeTailoring && gameState.tailoringRemaining > 0) {
+                const fabric = CONFIG.fabrics.find(f => f.id === gameState.activeTailoring);
+                if (fabric && canTailorFabric(fabric)) {
+                    const offlineTime = now - gameState.actionStartTime;
+                    const actionDuration = fabric.duration;
+                    const completedCount = Math.floor(offlineTime / actionDuration);
+                    const remainingTime = offlineTime % actionDuration;
+                    
+                    const actualCompleted = Math.min(completedCount, gameState.tailoringRemaining);
+                    for (let i = 0; i < actualCompleted; i++) {
+                        if (canTailorFabric(fabric)) {
+                            for (const [itemId, count] of Object.entries(fabric.materials)) {
+                                gameState.gatheringInventory[itemId] -= count;
+                            }
+                            if (!gameState.fabricsInventory[fabric.id]) {
+                                gameState.fabricsInventory[fabric.id] = 0;
+                            }
+                            gameState.fabricsInventory[fabric.id]++;
+                            addExp(fabric.exp);
+                            addSkillExp('tailoring', fabric.exp);
+                        }
+                    }
+                    gameState.tailoringRemaining -= actualCompleted;
+                    
+                    gameState.actionStartTime = now - remainingTime;
+                    
+                    if (actualCompleted > 0) {
+                        showToast(`⏰ 离线完成 ${actualCompleted} 次缝制！`);
+                    }
+                    
+                    if (canTailorFabric(fabric) && (gameState.tailoringRemaining > 0 || gameState.tailoringCount >= 99999)) {
+                        setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, actionDuration);
+                        
+                        if (remainingTime > 0) {
+                            setTimeout(() => {
+                                if (gameState.activeTailoring === fabric.id) {
+                                    completeTailoringOnce(fabric.id);
+                                    scheduleTailoring(fabric.id);
+                                }
+                            }, actionDuration - remainingTime);
+                        } else {
+                            scheduleTailoring(fabric.id);
+                        }
+                        
+                        if (animationFrame) cancelAnimationFrame(animationFrame);
+                        lastActionStartTime = gameState.actionStartTime;
+                        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+                        renderTailoring();
+                    } else {
+                        gameState.activeTailoring = null;
+                        gameState.tailoringCount = 0;
+                        setActionState(null, 0);
+                    }
+                }
+            }
+            
             console.log('💾 游戏已加载');
         } catch (e) { console.error('加载失败:', e); }
     }
@@ -3406,7 +3643,14 @@ window.addEventListener('DOMContentLoaded', () => {
     if (loading) loading.style.display = 'none';
     init();
 });
-window.addEventListener('beforeunload', saveGame);
+window.addEventListener('beforeunload', () => {
+    // 取消动画帧，防止内存泄漏
+    if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+    }
+    saveGame();
+});
 
 // ============ 装备系统 ============
 
