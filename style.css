@@ -2489,3 +2489,126 @@ body::after {
     color: #6b7f90;
     font-size: 1rem;
 }
+
+/* ============ 行动队列 ============ */
+.action-queue-btn {
+    background: rgba(107, 79, 60, 0.6);
+    border: 1px solid rgba(107, 79, 60, 0.8);
+    color: #E8C57F;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+}
+
+.action-queue-btn:hover {
+    background: rgba(107, 79, 60, 0.8);
+}
+
+.queue-modal-content {
+    min-width: 400px;
+    max-width: 500px;
+}
+
+.queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.queue-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(107, 79, 60, 0.2);
+    border: 2px solid rgba(107, 79, 60, 0.3);
+    border-radius: 8px;
+}
+
+.queue-item-order {
+    font-size: 0.85rem;
+    color: #6b7f90;
+    min-width: 30px;
+}
+
+.queue-item-icon {
+    font-size: 1.5rem;
+}
+
+.queue-item-info {
+    flex: 1;
+}
+
+.queue-item-name {
+    font-size: 0.95rem;
+    color: #fff;
+    font-weight: bold;
+}
+
+.queue-item-count {
+    font-size: 0.8rem;
+    color: #6b7f90;
+}
+
+.queue-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.queue-action-btn {
+    background: rgba(107, 79, 60, 0.3);
+    border: none;
+    color: #A0B2C0;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.queue-action-btn:hover {
+    background: rgba(107, 79, 60, 0.5);
+    color: #fff;
+}
+
+.queue-action-btn.delete:hover {
+    background: rgba(139, 44, 45, 0.5);
+    color: #ff6b6b;
+}
+
+.queue-empty-message {
+    text-align: center;
+    padding: 40px;
+    color: #6b7f90;
+    font-size: 1rem;
+}
+
+.modal-btn.danger {
+    background: rgba(139, 44, 45, 0.6);
+    border-color: rgba(139, 44, 45, 0.8);
+}
+
+.modal-btn.danger:hover {
+    background: rgba(139, 44, 45, 0.8);
+}
+
+#action-modal-queue {
+    background: rgba(74, 124, 45, 0.3);
+    border-color: rgba(74, 124, 45, 0.5);
+}
+
+#action-modal-queue:hover:not(:disabled) {
+    background: rgba(74, 124, 45, 0.5);
+}
+
+#action-modal-queue:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(100, 100, 100, 0.3);
+    border-color: rgba(100, 100, 100, 0.5);
+}

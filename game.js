@@ -426,7 +426,10 @@ let gameState = {
     toolsInventory: {
         axes: [],        // 拥有的斧头列表
         pickaxes: []     // 拥有的镐子列表
-    }
+    },
+    // 行动队列系统
+    actionQueue: [],     // 行动队列（最多5个）
+    maxQueueSize: 5
 };
 
 CONFIG.buildings.forEach(b => { gameState.buildings[b.id] = { level: 0 }; });
@@ -536,12 +539,25 @@ const elements = {
     actionModalClose: document.getElementById('action-modal-close'),
     actionModalCancel: document.getElementById('action-modal-cancel'),
     actionModalConfirm: document.getElementById('action-modal-confirm'),
+    actionModalQueue: document.getElementById('action-modal-queue'),
     actionCountInput: document.getElementById('action-count-input'),
     // 替换行动确认弹窗
     replaceModal: document.getElementById('replace-modal'),
     replaceModalClose: document.getElementById('replace-modal-close'),
     replaceModalCancel: document.getElementById('replace-modal-cancel'),
-    replaceModalConfirm: document.getElementById('replace-modal-confirm')
+    replaceModalConfirm: document.getElementById('replace-modal-confirm'),
+    replaceModalText: document.getElementById('replace-modal-text'),
+    // 行动队列
+    actionQueueBtn: document.getElementById('action-queue-btn'),
+    queueModal: document.getElementById('queue-modal'),
+    queueList: document.getElementById('queue-list'),
+    queueModalClose: document.getElementById('queue-modal-close'),
+    queueModalCloseBtn: document.getElementById('queue-modal-close-btn'),
+    queueClearBtn: document.getElementById('queue-clear-btn'),
+    clearQueueModal: document.getElementById('clear-queue-modal'),
+    clearQueueModalClose: document.getElementById('clear-queue-modal-close'),
+    clearQueueCancel: document.getElementById('clear-queue-cancel'),
+    clearQueueConfirm: document.getElementById('clear-queue-confirm')
 };
 
 // 临时存储待执行的行动
@@ -584,6 +600,12 @@ function init() {
     
     // 初始化锻造标签页
     setupForgingTabs();
+    
+    // 初始化行动队列
+    setupActionQueue();
+    
+    // 更新队列按钮显示
+    updateQueueButton();
     
     // 修复刷新页面后进度条异常：如果有进行中的行动，重置进度条和开始时间
     if (gameState.currentAction) {
@@ -1156,6 +1178,10 @@ function setupEventListeners() {
         elements.replaceModalConfirm.addEventListener('click', () => {
             elements.replaceModal.classList.remove('show');
             if (pendingAction) {
+                // 清空队列
+                gameState.actionQueue = [];
+                updateQueueButton();
+                
                 cancelCurrentAction();
                 executePendingAction();
             }
@@ -1198,6 +1224,10 @@ function openActionModal(type, id, name, itemId = null) {
     elements.actionCountInput.value = '';
     document.querySelectorAll('.count-option').forEach(o => o.classList.remove('selected'));
     pendingAction = { type, id, name, itemId };
+    
+    // 更新队列按钮状态
+    updateQueueButtonInModal();
+    
     elements.actionModal.classList.add('show');
 }
 
@@ -1224,6 +1254,13 @@ function confirmActionCount() {
     
     // 检查是否有行动正在进行
     if (hasActiveAction()) {
+        // 更新替换弹窗文本
+        const hasQueue = gameState.actionQueue.length > 0;
+        if (hasQueue) {
+            elements.replaceModalText.textContent = '当前已有行动正在进行，是否清空队列并替换为新的行动？';
+        } else {
+            elements.replaceModalText.textContent = '当前已有行动正在进行，是否要替换为新的行动？';
+        }
         elements.replaceModal.classList.add('show');
     } else {
         executePendingAction();
@@ -1282,6 +1319,8 @@ function scheduleWoodcutting(treeId) {
         gameState.woodcuttingRemaining = 0;
         setActionState(null, 0);
         renderWoodcutting();
+        // 行动完成，检查队列
+        onActionComplete();
         return;
     }
     
@@ -1369,6 +1408,7 @@ function scheduleMining(oreId) {
         gameState.miningRemaining = 0;
         setActionState(null, 0);
         renderMining();
+        onActionComplete();
         return;
     }
     
@@ -1474,6 +1514,7 @@ function scheduleGathering(type, locationId, itemId) {
         gameState.gatheringRemaining = 0;
         setActionState(null, 0);
         renderGathering();
+        onActionComplete();
         return;
     }
     
@@ -2370,6 +2411,7 @@ function scheduleCrafting(plankId) {
         gameState.craftingRemaining = 0;
         setActionState(null, 0);
         renderCrafting();
+        onActionComplete();
         return;
     }
     
@@ -2777,6 +2819,7 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
         gameState.forgingToolRemaining = 0;
         setActionState(null, 0);
         renderToolsList();
+        onActionComplete();
         return;
     }
     
@@ -2899,6 +2942,7 @@ function scheduleForging(ingotId) {
         gameState.forgingRemaining = 0;
         setActionState(null, 0);
         renderForging();
+        onActionComplete();
         return;
     }
     
@@ -3149,6 +3193,7 @@ function scheduleTailoring(fabricId) {
         gameState.tailoringRemaining = 0;
         setActionState(null, 0);
         renderTailoring();
+        onActionComplete();
         return;
     }
     
@@ -4336,4 +4381,269 @@ function getEquipmentBonus(type) {
     }
     
     return bonus;
+}
+
+// ============ 行动队列系统 ============
+
+function setupActionQueue() {
+    // 队列按钮点击
+    if (elements.actionQueueBtn) {
+        elements.actionQueueBtn.addEventListener('click', openQueueModal);
+    }
+    
+    // 队列弹窗关闭
+    if (elements.queueModalClose) {
+        elements.queueModalClose.addEventListener('click', () => {
+            elements.queueModal.classList.remove('show');
+        });
+    }
+    if (elements.queueModalCloseBtn) {
+        elements.queueModalCloseBtn.addEventListener('click', () => {
+            elements.queueModal.classList.remove('show');
+        });
+    }
+    if (elements.queueModal) {
+        elements.queueModal.addEventListener('click', (e) => {
+            if (e.target === elements.queueModal) {
+                elements.queueModal.classList.remove('show');
+            }
+        });
+    }
+    
+    // 清空队列按钮
+    if (elements.queueClearBtn) {
+        elements.queueClearBtn.addEventListener('click', () => {
+            elements.clearQueueModal.classList.add('show');
+        });
+    }
+    
+    // 清空确认弹窗
+    if (elements.clearQueueModalClose) {
+        elements.clearQueueModalClose.addEventListener('click', () => {
+            elements.clearQueueModal.classList.remove('show');
+        });
+    }
+    if (elements.clearQueueCancel) {
+        elements.clearQueueCancel.addEventListener('click', () => {
+            elements.clearQueueModal.classList.remove('show');
+        });
+    }
+    if (elements.clearQueueConfirm) {
+        elements.clearQueueConfirm.addEventListener('click', () => {
+            gameState.actionQueue = [];
+            saveGame();
+            updateQueueButton();
+            renderQueueList();
+            elements.clearQueueModal.classList.remove('show');
+            showToast('✅ 队列已清空');
+        });
+    }
+    if (elements.clearQueueModal) {
+        elements.clearQueueModal.addEventListener('click', (e) => {
+            if (e.target === elements.clearQueueModal) {
+                elements.clearQueueModal.classList.remove('show');
+            }
+        });
+    }
+    
+    // 添加到队列按钮
+    if (elements.actionModalQueue) {
+        elements.actionModalQueue.addEventListener('click', addToQueue);
+    }
+}
+
+function updateQueueButton() {
+    if (!elements.actionQueueBtn) return;
+    
+    const queueLength = gameState.actionQueue.length;
+    
+    if (queueLength === 0) {
+        elements.actionQueueBtn.style.display = 'none';
+    } else {
+        elements.actionQueueBtn.style.display = 'inline-block';
+        elements.actionQueueBtn.textContent = `+${queueLength}`;
+    }
+}
+
+function updateQueueButtonInModal() {
+    if (!elements.actionModalQueue) return;
+    
+    const queueLength = gameState.actionQueue.length;
+    const hasCurrentAction = gameState.currentAction !== null;
+    
+    // 如果队列已满（5个），按钮不可用
+    if (queueLength >= gameState.maxQueueSize) {
+        elements.actionModalQueue.disabled = true;
+        elements.actionModalQueue.textContent = '添加到队列';
+        elements.actionModalQueue.style.opacity = '0.5';
+    } else if (!hasCurrentAction) {
+        // 如果没有正在进行的行动，按钮不可用
+        elements.actionModalQueue.disabled = true;
+        elements.actionModalQueue.textContent = '添加到队列';
+        elements.actionModalQueue.style.opacity = '0.5';
+    } else {
+        // 正常状态
+        elements.actionModalQueue.disabled = false;
+        elements.actionModalQueue.textContent = `添加到队列#${queueLength + 2}`;
+        elements.actionModalQueue.style.opacity = '1';
+    }
+}
+
+function openQueueModal() {
+    if (!elements.queueModal) return;
+    
+    renderQueueList();
+    elements.queueModal.classList.add('show');
+}
+
+function renderQueueList() {
+    if (!elements.queueList) return;
+    
+    if (gameState.actionQueue.length === 0) {
+        elements.queueList.innerHTML = '<div class="queue-empty-message">队列中没有等待的行动</div>';
+        return;
+    }
+    
+    const html = gameState.actionQueue.map((action, index) => {
+        const countText = action.count >= 99999 ? '∞' : `${action.count}次`;
+        return `
+            <div class="queue-item" data-index="${index}">
+                <span class="queue-item-order">#${index + 2}</span>
+                <span class="queue-item-icon">${action.icon}</span>
+                <div class="queue-item-info">
+                    <div class="queue-item-name">${action.name}</div>
+                    <div class="queue-item-count">${countText}</div>
+                </div>
+                <div class="queue-item-actions">
+                    <button class="queue-action-btn" onclick="moveQueueItem(${index}, 'top')" title="置顶">⏫</button>
+                    <button class="queue-action-btn" onclick="moveQueueItem(${index}, 'up')" title="上移">▲</button>
+                    <button class="queue-action-btn" onclick="moveQueueItem(${index}, 'down')" title="下移">▼</button>
+                    <button class="queue-action-btn" onclick="moveQueueItem(${index}, 'bottom')" title="置底">⏬</button>
+                    <button class="queue-action-btn delete" onclick="removeQueueItem(${index})" title="删除">✕</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    elements.queueList.innerHTML = html;
+}
+
+function addToQueue() {
+    if (!pendingAction) return;
+    
+    const queueLength = gameState.actionQueue.length;
+    
+    // 检查队列是否已满
+    if (queueLength >= gameState.maxQueueSize) {
+        showToast('❌ 队列已满（最多5个）');
+        return;
+    }
+    
+    // 检查是否有正在进行的行动
+    if (!gameState.currentAction) {
+        showToast('❌ 没有正在进行的行动');
+        return;
+    }
+    
+    // 添加到队列
+    const action = {
+        ...pendingAction,
+        icon: getActionIcon(pendingAction.type, pendingAction.id)
+    };
+    
+    gameState.actionQueue.push(action);
+    saveGame();
+    
+    // 更新UI
+    updateQueueButton();
+    updateQueueButtonInModal();
+    
+    // 关闭弹窗
+    elements.actionModal.classList.remove('show');
+    
+    showToast(`✅ 已添加到队列 #${queueLength + 2}`);
+    pendingAction = null;
+}
+
+function getActionIcon(type, id) {
+    switch (type) {
+        case 'woodcutting':
+            const tree = CONFIG.trees.find(t => t.id === id);
+            return tree ? tree.icon : '🪓';
+        case 'mining':
+            const ore = CONFIG.ores.find(o => o.id === id);
+            return ore ? ore.icon : '⛏️';
+        case 'gathering_item':
+        case 'gathering_all':
+            return '🌾';
+        case 'crafting':
+            const plank = CONFIG.woodPlanks.find(p => p.id === id);
+            return plank ? plank.icon : '🔨';
+        case 'forging':
+            const ingot = CONFIG.ingots.find(i => i.id === id);
+            return ingot ? ingot.icon : '⚒️';
+        case 'forging_tool':
+            const tools = CONFIG.tools[pendingAction.itemId?.toolType === 'axe' ? 'axes' : 'pickaxes'];
+            const tool = tools?.find(t => t.id === id);
+            return tool ? tool.icon : '⚒️';
+        case 'tailoring':
+            const fabric = CONFIG.fabrics.find(f => f.id === id);
+            return fabric ? fabric.icon : '🧵';
+        default:
+            return '⚔️';
+    }
+}
+
+function moveQueueItem(index, direction) {
+    const queue = gameState.actionQueue;
+    const maxIndex = queue.length - 1;
+    
+    if (direction === 'top') {
+        if (index === 0) return;
+        const item = queue.splice(index, 1)[0];
+        queue.unshift(item);
+    } else if (direction === 'bottom') {
+        if (index === maxIndex) return;
+        const item = queue.splice(index, 1)[0];
+        queue.push(item);
+    } else if (direction === 'up') {
+        if (index === 0) return;
+        [queue[index - 1], queue[index]] = [queue[index], queue[index - 1]];
+    } else if (direction === 'down') {
+        if (index === maxIndex) return;
+        [queue[index], queue[index + 1]] = [queue[index + 1], queue[index]];
+    }
+    
+    saveGame();
+    renderQueueList();
+}
+
+function removeQueueItem(index) {
+    gameState.actionQueue.splice(index, 1);
+    saveGame();
+    updateQueueButton();
+    renderQueueList();
+    showToast('✅ 已从队列中移除');
+}
+
+function startNextQueueAction() {
+    if (gameState.actionQueue.length === 0) return;
+    
+    const action = gameState.actionQueue.shift();
+    saveGame();
+    updateQueueButton();
+    
+    // 执行行动
+    pendingAction = action;
+    executePendingAction();
+}
+
+// 当行动完成时调用
+function onActionComplete() {
+    // 检查队列中是否有等待的行动
+    if (gameState.actionQueue.length > 0) {
+        setTimeout(() => {
+            startNextQueueAction();
+        }, 500); // 短暂延迟后开始下一个
+    }
 }

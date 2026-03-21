@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-21 18:35</span>
+            <span class="update-time-badge">代码更新: 2026-03-21 21:16</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -37,6 +37,7 @@
                         <span class="action-progress-time" id="action-progress-time">-</span>
                     </div>
                     <button class="action-cancel-btn" id="action-cancel-btn">停止</button>
+                    <button class="action-queue-btn" id="action-queue-btn" style="display: none;">+0</button>
                 </div>
                 <div class="action-rewards" id="action-rewards"></div>
             </div>
@@ -485,7 +486,43 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-btn secondary" id="action-modal-cancel">取消</button>
-                <button class="modal-btn primary" id="action-modal-confirm">确认</button>
+                <button class="modal-btn secondary" id="action-modal-queue">添加到队列#1</button>
+                <button class="modal-btn primary" id="action-modal-confirm">立即开始</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 行动队列弹窗 -->
+    <div class="modal" id="queue-modal">
+        <div class="modal-content queue-modal-content">
+            <div class="modal-header">
+                <h2>📋 行动队列</h2>
+                <span class="modal-close" id="queue-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="queue-list" id="queue-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn danger" id="queue-clear-btn">清空队列</button>
+                <button class="modal-btn secondary" id="queue-modal-close-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 清空队列确认弹窗 -->
+    <div class="modal" id="clear-queue-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>清空队列</h2>
+                <span class="modal-close" id="clear-queue-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>确定要清空所有排队中的行动吗？</p>
+                <p style="color: #8B2C2D; margin-top: 10px;">⚠️ 正在进行的行动不会受影响</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="clear-queue-cancel">取消</button>
+                <button class="modal-btn danger" id="clear-queue-confirm">确认</button>
             </div>
         </div>
     </div>
@@ -498,7 +535,7 @@
                 <span class="modal-close" id="replace-modal-close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>当前已有行动正在进行，是否要替换为新的行动？</p>
+                <p id="replace-modal-text">当前已有行动正在进行，是否要替换为新的行动？</p>
                 <p style="color: #8B2C2D; margin-top: 10px;">⚠️ 当前行动将被取消，不会获得奖励</p>
             </div>
             <div class="modal-footer">
