@@ -4435,6 +4435,7 @@ function setupActionQueue() {
             updateQueueButton();
             renderQueueList();
             elements.clearQueueModal.classList.remove('show');
+            elements.queueModal.classList.remove('show');
             showToast('✅ 队列已清空');
         });
     }
@@ -4461,7 +4462,7 @@ function updateQueueButton() {
         elements.actionQueueBtn.style.display = 'none';
     } else {
         elements.actionQueueBtn.style.display = 'inline-block';
-        elements.actionQueueBtn.textContent = `+${queueLength}`;
+        elements.actionQueueBtn.textContent = `+${queueLength}行动`;
     }
 }
 
@@ -4598,6 +4599,31 @@ function moveQueueItem(index, direction) {
     const queue = gameState.actionQueue;
     const maxIndex = queue.length - 1;
     
+    // 特殊处理：第一个行动上移/置顶时，需要替换当前行动
+    if ((direction === 'up' || direction === 'top') && index === 0) {
+        // 将当前行动保存到队列末尾
+        const currentAction = getCurrentActionInfo();
+        if (currentAction) {
+            // 取消当前行动
+            cancelCurrentAction();
+            
+            // 将当前行动添加到队列末尾
+            queue.push(currentAction);
+        }
+        
+        // 取出队列第一个行动
+        const newAction = queue.shift();
+        
+        // 执行新行动
+        pendingAction = newAction;
+        executePendingAction();
+        
+        saveGame();
+        updateQueueButton();
+        showToast('✅ 已替换当前行动');
+        return;
+    }
+    
     if (direction === 'top') {
         if (index === 0) return;
         const item = queue.splice(index, 1)[0];
@@ -4616,6 +4642,84 @@ function moveQueueItem(index, direction) {
     
     saveGame();
     renderQueueList();
+}
+
+function getCurrentActionInfo() {
+    // 获取当前正在进行的行动信息
+    if (gameState.activeWoodcutting) {
+        const tree = CONFIG.trees.find(t => t.id === gameState.activeWoodcutting);
+        return {
+            type: 'woodcutting',
+            id: gameState.activeWoodcutting,
+            name: tree ? tree.name : '伐木',
+            count: gameState.woodcuttingRemaining,
+            icon: tree ? tree.icon : '🪓'
+        };
+    }
+    if (gameState.activeMining) {
+        const ore = CONFIG.ores.find(o => o.id === gameState.activeMining);
+        return {
+            type: 'mining',
+            id: gameState.activeMining,
+            name: ore ? ore.name : '挖矿',
+            count: gameState.miningRemaining,
+            icon: ore ? ore.icon : '⛏️'
+        };
+    }
+    if (gameState.activeGathering) {
+        const location = CONFIG.gatheringLocations.find(l => l.id === gameState.gatheringLocationId);
+        return {
+            type: 'gathering_item',
+            id: gameState.activeGathering,
+            name: location ? location.name : '采集',
+            count: gameState.gatheringRemaining,
+            icon: '🌾',
+            itemId: gameState.gatheringItemId
+        };
+    }
+    if (gameState.activeCrafting) {
+        const plank = CONFIG.woodPlanks.find(p => p.id === gameState.activeCrafting);
+        return {
+            type: 'crafting',
+            id: gameState.activeCrafting,
+            name: plank ? plank.name : '制作',
+            count: gameState.craftingRemaining,
+            icon: plank ? plank.icon : '🔨'
+        };
+    }
+    if (gameState.activeForging) {
+        const ingot = CONFIG.ingots.find(i => i.id === gameState.activeForging);
+        return {
+            type: 'forging',
+            id: gameState.activeForging,
+            name: ingot ? ingot.name : '锻造',
+            count: gameState.forgingRemaining,
+            icon: ingot ? ingot.icon : '⚒️'
+        };
+    }
+    if (gameState.activeForgingTool) {
+        const tools = CONFIG.tools[gameState.forgingToolType === 'axe' ? 'axes' : 'pickaxes'];
+        const tool = tools[gameState.forgingToolIndex];
+        return {
+            type: 'forging_tool',
+            id: gameState.activeForgingTool,
+            name: tool ? tool.name : '锻造工具',
+            count: gameState.forgingToolRemaining,
+            icon: tool ? tool.icon : '⚒️',
+            itemId: { toolType: gameState.forgingToolType, toolIndex: gameState.forgingToolIndex }
+        };
+    }
+    if (gameState.activeTailoring) {
+        const fabric = CONFIG.fabrics.find(f => f.id === gameState.activeTailoring);
+        return {
+            type: 'tailoring',
+            id: gameState.activeTailoring,
+            name: fabric ? fabric.name : '缝制',
+            count: gameState.tailoringRemaining,
+            icon: fabric ? fabric.icon : '🧵'
+        };
+    }
+    return null;
 }
 
 function removeQueueItem(index) {
