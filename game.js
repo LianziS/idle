@@ -549,10 +549,9 @@ const elements = {
     replaceModalText: document.getElementById('replace-modal-text'),
     // 行动队列
     actionQueueBtn: document.getElementById('action-queue-btn'),
-    queueModal: document.getElementById('queue-modal'),
+    queuePopover: document.getElementById('queue-popover'),
     queueList: document.getElementById('queue-list'),
-    queueModalClose: document.getElementById('queue-modal-close'),
-    queueModalCloseBtn: document.getElementById('queue-modal-close-btn'),
+    queuePopoverClose: document.getElementById('queue-popover-close'),
     queueClearBtn: document.getElementById('queue-clear-btn'),
     clearQueueModal: document.getElementById('clear-queue-modal'),
     clearQueueModalClose: document.getElementById('clear-queue-modal-close'),
@@ -4388,27 +4387,27 @@ function getEquipmentBonus(type) {
 function setupActionQueue() {
     // 队列按钮点击
     if (elements.actionQueueBtn) {
-        elements.actionQueueBtn.addEventListener('click', openQueueModal);
+        elements.actionQueueBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleQueuePopover();
+        });
     }
     
-    // 队列弹窗关闭
-    if (elements.queueModalClose) {
-        elements.queueModalClose.addEventListener('click', () => {
-            elements.queueModal.classList.remove('show');
+    // 队列弹出卡片关闭按钮
+    if (elements.queuePopoverClose) {
+        elements.queuePopoverClose.addEventListener('click', () => {
+            elements.queuePopover.classList.remove('show');
         });
     }
-    if (elements.queueModalCloseBtn) {
-        elements.queueModalCloseBtn.addEventListener('click', () => {
-            elements.queueModal.classList.remove('show');
-        });
-    }
-    if (elements.queueModal) {
-        elements.queueModal.addEventListener('click', (e) => {
-            if (e.target === elements.queueModal) {
-                elements.queueModal.classList.remove('show');
+    
+    // 点击外部关闭弹出卡片
+    document.addEventListener('click', (e) => {
+        if (elements.queuePopover && elements.queuePopover.classList.contains('show')) {
+            if (!elements.queuePopover.contains(e.target) && e.target !== elements.actionQueueBtn) {
+                elements.queuePopover.classList.remove('show');
             }
-        });
-    }
+        }
+    });
     
     // 清空队列按钮
     if (elements.queueClearBtn) {
@@ -4435,7 +4434,7 @@ function setupActionQueue() {
             updateQueueButton();
             renderQueueList();
             elements.clearQueueModal.classList.remove('show');
-            elements.queueModal.classList.remove('show');
+            elements.queuePopover.classList.remove('show');
             showToast('✅ 队列已清空');
         });
     }
@@ -4490,11 +4489,15 @@ function updateQueueButtonInModal() {
     }
 }
 
-function openQueueModal() {
-    if (!elements.queueModal) return;
+function toggleQueuePopover() {
+    if (!elements.queuePopover) return;
     
-    renderQueueList();
-    elements.queueModal.classList.add('show');
+    if (elements.queuePopover.classList.contains('show')) {
+        elements.queuePopover.classList.remove('show');
+    } else {
+        renderQueueList();
+        elements.queuePopover.classList.add('show');
+    }
 }
 
 function renderQueueList() {

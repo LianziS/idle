@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-21 22:47</span>
+            <span class="update-time-badge">代码更新: 2026-03-21 23:05</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -492,20 +492,17 @@
         </div>
     </div>
     
-    <!-- 行动队列弹窗 -->
-    <div class="modal" id="queue-modal">
-        <div class="modal-content queue-modal-content">
-            <div class="modal-header">
-                <h2>📋 行动队列</h2>
-                <span class="modal-close" id="queue-modal-close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="queue-list" id="queue-list"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn danger" id="queue-clear-btn">清空队列</button>
-                <button class="modal-btn secondary" id="queue-modal-close-btn">关闭</button>
-            </div>
+    <!-- 行动队列弹出卡片 -->
+    <div class="queue-popover" id="queue-popover">
+        <div class="queue-popover-header">
+            <h3>📋 行动队列</h3>
+            <span class="queue-popover-close" id="queue-popover-close">&times;</span>
+        </div>
+        <div class="queue-popover-body">
+            <div class="queue-list" id="queue-list"></div>
+        </div>
+        <div class="queue-popover-footer">
+            <button class="modal-btn danger" id="queue-clear-btn">清空队列</button>
         </div>
     </div>
     

@@ -2513,9 +2513,76 @@ body::after {
     background: rgba(107, 79, 60, 0.8);
 }
 
-.queue-modal-content {
-    min-width: 400px;
-    max-width: 500px;
+/* ============ 行动队列弹出卡片 ============ */
+.queue-popover {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    width: 380px;
+    max-height: 500px;
+    background: linear-gradient(180deg, rgba(27, 42, 58, 0.98) 0%, rgba(45, 63, 82, 0.98) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(107, 79, 60, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 1200;
+    display: none;
+    /* 弹窗字体和侧边栏一致：最大14px，最小9.8px */
+    font-size: clamp(9.8px, 0.9vw + 8px, 14px) !important;
+}
+
+.queue-popover.show {
+    display: block;
+    animation: popoverFadeIn 0.2s ease-out;
+}
+
+@keyframes popoverFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.queue-popover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(107, 79, 60, 0.3);
+}
+
+.queue-popover-header h3 {
+    font-size: 1.1rem;
+    color: #E8C57F;
+    margin: 0;
+}
+
+.queue-popover-close {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7f90;
+    transition: color 0.2s;
+}
+
+.queue-popover-close:hover {
+    color: #8B2C2D;
+}
+
+.queue-popover-body {
+    padding: 12px 16px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.queue-popover-footer {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(107, 79, 60, 0.3);
+    display: flex;
+    justify-content: center;
 }
 
 .queue-list {
