@@ -4603,8 +4603,34 @@ function moveQueueItem(index, direction) {
     const queue = gameState.actionQueue;
     const maxIndex = queue.length - 1;
     
-    // 特殊处理：第一个行动上移/置顶时，需要替换当前行动
-    if ((direction === 'up' || direction === 'top') && index === 0) {
+    // 特殊处理：置顶操作，直接替换当前行动
+    if (direction === 'top') {
+        // 获取要置顶的行动
+        const topAction = queue.splice(index, 1)[0];
+        
+        // 将当前行动保存到队列第一个
+        const currentAction = getCurrentActionInfo();
+        if (currentAction) {
+            // 取消当前行动（跳过队列检查，因为我们会手动执行）
+            cancelCurrentAction(true);
+            
+            // 将当前行动添加到队列第一个
+            queue.unshift(currentAction);
+        }
+        
+        // 执行被置顶的行动
+        pendingAction = topAction;
+        executePendingAction();
+        
+        saveGame();
+        updateQueueButton();
+        renderQueueList();
+        showToast('✅ 已替换当前行动');
+        return;
+    }
+    
+    // 第一个行动上移，也需要替换当前行动
+    if (direction === 'up' && index === 0) {
         // 将当前行动保存到队列第一个
         const currentAction = getCurrentActionInfo();
         if (currentAction) {
@@ -4629,11 +4655,8 @@ function moveQueueItem(index, direction) {
         return;
     }
     
-    if (direction === 'top') {
-        if (index === 0) return;
-        const item = queue.splice(index, 1)[0];
-        queue.unshift(item);
-    } else if (direction === 'bottom') {
+    // 普通的移动操作
+    if (direction === 'bottom') {
         if (index === maxIndex) return;
         const item = queue.splice(index, 1)[0];
         queue.push(item);
