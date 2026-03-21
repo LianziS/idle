@@ -16,6 +16,23 @@ body {
     overflow-x: hidden;
 }
 
+/* ============ 响应式字体 ============ */
+/* 侧边栏、顶部栏：最大14px，最小9.8px */
+.sidebar,
+.sidebar *,
+.top-fixed,
+.top-fixed * {
+    font-size: clamp(9.8px, 0.9vw + 8px, 14px) !important;
+}
+
+/* 主页栏：最大13px，最小9.1px */
+.game-container,
+.game-container *,
+.page,
+.page * {
+    font-size: clamp(9.1px, 0.85vw + 7px, 13px) !important;
+}
+
 /* ============ 背景 + 噪点纹理 ============ */
 body::before {
     content: '';
@@ -1206,22 +1223,6 @@ body::after {
         font-size: 13px;
     }
     
-    /* 移动端侧边栏、顶部栏统一字体 9.8px */
-    .sidebar,
-    .sidebar *,
-    .top-fixed,
-    .top-fixed * {
-        font-size: 9.8px !important;
-    }
-    
-    /* 主页栏统一字体 9.1px */
-    .game-container,
-    .game-container *,
-    .page,
-    .page * {
-        font-size: 9.1px !important;
-    }
-    
     .top-fixed {
         min-height: 85px;
     }
@@ -2013,22 +2014,6 @@ body::after {
 @media (max-width: 768px) {
     body {
         font-size: 11px;
-    }
-    
-    /* 移动端侧边栏、顶部栏统一字体 9.8px */
-    .sidebar,
-    .sidebar *,
-    .top-fixed,
-    .top-fixed * {
-        font-size: 9.8px !important;
-    }
-    
-    /* 主页栏统一字体 9.1px */
-    .game-container,
-    .game-container *,
-    .page,
-    .page * {
-        font-size: 9.1px !important;
     }
     
     .panel-title {
