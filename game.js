@@ -3362,7 +3362,7 @@ function renderGatheringItems() {
         `;
     }).join('');
     
-    elements.gatheringItemsList.innerHTML = allGatherCard + itemsHtml;
+    elements.gatheringItemsList.innerHTML = itemsHtml + allGatherCard;
     
     // 绑定点击事件
     elements.gatheringItemsList.querySelectorAll('.gathering-item-card').forEach(card => {
