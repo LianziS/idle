@@ -2827,7 +2827,8 @@ function renderToolsList() {
         const isUnlocked = gameState.forgingLevel >= chisel.reqForgeLevel;
         const isActive = gameState.activeForgingTool === chisel.id;
         const canForge = canForgeTool('chisel', index);
-        const isOwned = gameState.toolsInventory.chisels.includes(chisel.id);
+        const chiselInventory = gameState.toolsInventory.chisels || [];
+        const isOwned = chiselInventory.includes(chisel.id);
         
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
@@ -2836,7 +2837,7 @@ function renderToolsList() {
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
-            const hasPrev = gameState.toolsInventory.chisels.includes(materials.prevTool);
+            const hasPrev = chiselInventory.includes(materials.prevTool);
             materialDesc += `, 上一级(${hasPrev ? '✓' : '✗'})`;
         }
         
@@ -2870,7 +2871,8 @@ function renderToolsList() {
         const isUnlocked = gameState.forgingLevel >= needle.reqForgeLevel;
         const isActive = gameState.activeForgingTool === needle.id;
         const canForge = canForgeTool('needle', index);
-        const isOwned = gameState.toolsInventory.needles.includes(needle.id);
+        const needleInventory = gameState.toolsInventory.needles || [];
+        const isOwned = needleInventory.includes(needle.id);
         
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
@@ -2879,7 +2881,7 @@ function renderToolsList() {
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
-            const hasPrev = gameState.toolsInventory.needles.includes(materials.prevTool);
+            const hasPrev = needleInventory.includes(materials.prevTool);
             materialDesc += `, 上一级(${hasPrev ? '✓' : '✗'})`;
         }
         
@@ -2962,7 +2964,7 @@ function canForgeTool(toolType, index) {
         if (ownedPlank < materials.plank) return false;
         
         if (materials.prevTool) {
-            const inventory = toolType === 'chisel' ? gameState.toolsInventory.chisels : gameState.toolsInventory.needles;
+            const inventory = toolType === 'chisel' ? (gameState.toolsInventory.chisels || []) : (gameState.toolsInventory.needles || []);
             if (!inventory.includes(materials.prevTool)) return false;
         }
     } else {
@@ -3082,13 +3084,24 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
         gameState.planksInventory[plankId] -= materials.plank;
         
         if (materials.prevTool) {
-            const inventory = toolType === 'chisel' ? gameState.toolsInventory.chisels : gameState.toolsInventory.needles;
-            const idx = inventory.indexOf(materials.prevTool);
-            if (idx > -1) inventory.splice(idx, 1);
+            if (toolType === 'chisel') {
+                if (!gameState.toolsInventory.chisels) gameState.toolsInventory.chisels = [];
+                const idx = gameState.toolsInventory.chisels.indexOf(materials.prevTool);
+                if (idx > -1) gameState.toolsInventory.chisels.splice(idx, 1);
+            } else {
+                if (!gameState.toolsInventory.needles) gameState.toolsInventory.needles = [];
+                const idx = gameState.toolsInventory.needles.indexOf(materials.prevTool);
+                if (idx > -1) gameState.toolsInventory.needles.splice(idx, 1);
+            }
         }
         
-        const inventory = toolType === 'chisel' ? gameState.toolsInventory.chisels : gameState.toolsInventory.needles;
-        if (!inventory.includes(toolId)) inventory.push(toolId);
+        if (toolType === 'chisel') {
+            if (!gameState.toolsInventory.chisels) gameState.toolsInventory.chisels = [];
+            if (!gameState.toolsInventory.chisels.includes(toolId)) gameState.toolsInventory.chisels.push(toolId);
+        } else {
+            if (!gameState.toolsInventory.needles) gameState.toolsInventory.needles = [];
+            if (!gameState.toolsInventory.needles.includes(toolId)) gameState.toolsInventory.needles.push(toolId);
+        }
     } else {
         const ingotId = CONFIG.ingotIdMapping[toolIndex];
         gameState.ingotsInventory[ingotId] -= materials.ore;
