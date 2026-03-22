@@ -480,8 +480,11 @@ let gameState = {
     fabricsInventory: {},
     // 装备系统
     equipment: {
-        axe: null,       // 当前装备的斧头
-        pickaxe: null    // 当前装备的镐子
+        axe: null,
+        pickaxe: null,
+        chisel: null,
+        needle: null,
+        scythe: null
     },
     toolsInventory: {
         axes: [],
@@ -651,6 +654,7 @@ function init() {
     renderPlanksInventory();
     renderIngotsInventory();
     renderFabricsInventory();
+    renderToolsInventory();
     
     // 初始化仓库二级菜单
     setupStorageTabs();
@@ -1902,6 +1906,7 @@ function updateUI() {
     renderPlanksInventory();
     renderIngotsInventory();
     renderFabricsInventory();
+    renderToolsInventory();
 }
 
 function formatNumber(num) {
@@ -3587,6 +3592,49 @@ function renderFabricsInventory() {
     container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无布料</div>';
 }
 
+function renderToolsInventory() {
+    const container = document.getElementById('storage-tools-items');
+    if (!container) return;
+    
+    const toolTypes = [
+        { key: 'axes', config: 'axes', name: '斧头' },
+        { key: 'pickaxes', config: 'pickaxes', name: '镐子' },
+        { key: 'chisels', config: 'chisels', name: '凿子' },
+        { key: 'needles', config: 'needles', name: '针' },
+        { key: 'scythes', config: 'scythes', name: '镰刀' }
+    ];
+    
+    let hasTools = false;
+    let html = '';
+    
+    toolTypes.forEach(type => {
+        const inventory = gameState.toolsInventory[type.key] || [];
+        if (inventory.length > 0) {
+            hasTools = true;
+            inventory.forEach(toolId => {
+                const tool = CONFIG.tools[type.config].find(t => t.id === toolId);
+                if (tool) {
+                    const isEquipped = gameState.equipment[type.key.slice(0, -1)] === toolId || 
+                                       (type.key === 'axes' && gameState.equipment.axe === toolId) ||
+                                       (type.key === 'pickaxes' && gameState.equipment.pickaxe === toolId) ||
+                                       (type.key === 'chisels' && gameState.equipment.chisel === toolId) ||
+                                       (type.key === 'needles' && gameState.equipment.needle === toolId) ||
+                                       (type.key === 'scythes' && gameState.equipment.scythe === toolId);
+                    html += `
+                        <div class="storage-item-small ${isEquipped ? 'equipped' : ''}">
+                            <div class="storage-item-small-icon">${tool.icon}</div>
+                            <div class="storage-item-small-name">${tool.name} ${isEquipped ? '✓' : ''}</div>
+                            <div class="storage-item-small-count">${isEquipped ? '已装备' : ''}</div>
+                        </div>
+                    `;
+                }
+            });
+        }
+    });
+    
+    container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无锻造工具</div>';
+}
+
 function renderGatheringTabs() {
     const html = CONFIG.gatheringLocations.map((loc, index) => {
         const isUnlocked = gameState.level >= loc.reqLevel;
@@ -4500,7 +4548,7 @@ function renderEquipmentSlots() {
     if (gameState.equipment.axe) {
         const tool = CONFIG.tools.axes.find(t => t.id === gameState.equipment.axe);
         if (tool) {
-            axeSlot.textContent = tool.icon;
+            axeSlot.textContent = tool.icon + ' ✓';
             axeName.textContent = tool.name;
         }
     } else {
@@ -4514,7 +4562,7 @@ function renderEquipmentSlots() {
     if (gameState.equipment.pickaxe) {
         const tool = CONFIG.tools.pickaxes.find(t => t.id === gameState.equipment.pickaxe);
         if (tool) {
-            pickaxeSlot.textContent = tool.icon;
+            pickaxeSlot.textContent = tool.icon + ' ✓';
             pickaxeName.textContent = tool.name;
         }
     } else {
@@ -4522,12 +4570,52 @@ function renderEquipmentSlots() {
         pickaxeName.textContent = '空';
     }
     
+    // 渲染凿子槽位
+    const chiselSlot = document.getElementById('equipment-slot-chisel');
+    const chiselName = document.getElementById('equipment-slot-chisel-name');
+    if (gameState.equipment.chisel) {
+        const tool = CONFIG.tools.chisels.find(t => t.id === gameState.equipment.chisel);
+        if (tool) {
+            chiselSlot.textContent = tool.icon + ' ✓';
+            chiselName.textContent = tool.name;
+        }
+    } else {
+        chiselSlot.textContent = '🔨';
+        chiselName.textContent = '空';
+    }
+    
+    // 渲染针槽位
+    const needleSlot = document.getElementById('equipment-slot-needle');
+    const needleName = document.getElementById('equipment-slot-needle-name');
+    if (gameState.equipment.needle) {
+        const tool = CONFIG.tools.needles.find(t => t.id === gameState.equipment.needle);
+        if (tool) {
+            needleSlot.textContent = tool.icon + ' ✓';
+            needleName.textContent = tool.name;
+        }
+    } else {
+        needleSlot.textContent = '🪡';
+        needleName.textContent = '空';
+    }
+    
+    // 渲染镰刀槽位
+    const scytheSlot = document.getElementById('equipment-slot-scythe');
+    const scytheName = document.getElementById('equipment-slot-scythe-name');
+    if (gameState.equipment.scythe) {
+        const tool = CONFIG.tools.scythes.find(t => t.id === gameState.equipment.scythe);
+        if (tool) {
+            scytheSlot.textContent = tool.icon + ' ✓';
+            scytheName.textContent = tool.name;
+        }
+    } else {
+        scytheSlot.textContent = '🗡️';
+        scytheName.textContent = '空';
+    }
+    
     // 更新槽位状态
     document.querySelectorAll('.equipment-slot').forEach(slot => {
         const slotType = slot.dataset.slot;
-        if (slotType === 'axe' && gameState.equipment.axe) {
-            slot.classList.add('equipped');
-        } else if (slotType === 'pickaxe' && gameState.equipment.pickaxe) {
+        if (gameState.equipment[slotType]) {
             slot.classList.add('equipped');
         } else {
             slot.classList.remove('equipped');
@@ -4541,7 +4629,8 @@ function setupEquipmentListeners() {
             if (this.classList.contains('locked')) return;
             
             const slotType = this.dataset.slot;
-            if (slotType === 'axe' || slotType === 'pickaxe') {
+            const validSlots = ['axe', 'pickaxe', 'chisel', 'needle', 'scythe'];
+            if (validSlots.includes(slotType)) {
                 openToolSelectModal(slotType);
             }
         });
@@ -4580,11 +4669,32 @@ function openToolSelectModal(slotType) {
     const title = document.getElementById('tool-select-title');
     const list = document.getElementById('tool-select-list');
     
-    const slotNames = { axe: '斧头', pickaxe: '镐子' };
+    const slotNames = { 
+        axe: '斧头', 
+        pickaxe: '镐子', 
+        chisel: '凿子', 
+        needle: '针', 
+        scythe: '镰刀' 
+    };
+    const slotSkills = {
+        axe: 'woodcuttingLevel',
+        pickaxe: 'miningLevel',
+        chisel: 'craftingLevel',
+        needle: 'tailoringLevel',
+        scythe: 'gatheringLevel'
+    };
+    const slotBonusNames = {
+        axe: '伐木',
+        pickaxe: '挖矿',
+        chisel: '制作',
+        needle: '缝制',
+        scythe: '采集'
+    };
+    
     title.textContent = `选择${slotNames[slotType] || '工具'}`;
     
-    const tools = slotType === 'axe' ? CONFIG.tools.axes : CONFIG.tools.pickaxes;
-    const inventory = slotType === 'axe' ? (gameState.toolsInventory.axes || []) : (gameState.toolsInventory.pickaxes || []);
+    const tools = CONFIG.tools[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : 'scythes'];
+    const inventory = gameState.toolsInventory[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : 'scythes'] || [];
     const currentEquipped = gameState.equipment[slotType];
     
     if (inventory.length === 0) {
@@ -4592,8 +4702,8 @@ function openToolSelectModal(slotType) {
     } else {
         const html = tools.filter(t => inventory.includes(t.id)).map(tool => {
             const isEquipped = currentEquipped === tool.id;
-            const canEquip = gameState[slotType === 'axe' ? 'woodcuttingLevel' : 'miningLevel'] >= tool.reqEquipLevel;
-            const bonusText = `${slotType === 'axe' ? '伐木' : '挖矿'}速度+${Math.round(tool.speedBonus * 100)}%`;
+            const canEquip = gameState[slotSkills[slotType]] >= tool.reqEquipLevel;
+            const bonusText = `${slotBonusNames[slotType]}速度+${Math.round(tool.speedBonus * 100)}%`;
             
             return `
                 <div class="tool-select-item ${isEquipped ? 'equipped' : ''} ${!canEquip ? 'locked' : ''}" 
@@ -4601,7 +4711,7 @@ function openToolSelectModal(slotType) {
                     data-slot-type="${slotType}">
                     <div class="tool-select-icon">${tool.icon}</div>
                     <div class="tool-select-info">
-                        <div class="tool-select-name">${tool.name}</div>
+                        <div class="tool-select-name">${tool.name} ${isEquipped ? '✓' : ''}</div>
                         <div class="tool-select-desc">${bonusText} | 装备需求: Lv.${tool.reqEquipLevel}</div>
                     </div>
                     ${isEquipped ? '<span class="tool-select-badge">已装备</span>' : ''}
