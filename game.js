@@ -4513,7 +4513,7 @@ function openToolSelectModal(slotType) {
     title.textContent = `选择${slotNames[slotType] || '工具'}`;
     
     const tools = slotType === 'axe' ? CONFIG.tools.axes : CONFIG.tools.pickaxes;
-    const inventory = slotType === 'axe' ? gameState.toolsInventory.axes : gameState.toolsInventory.pickaxes;
+    const inventory = slotType === 'axe' ? (gameState.toolsInventory.axes || []) : (gameState.toolsInventory.pickaxes || []);
     const currentEquipped = gameState.equipment[slotType];
     
     if (inventory.length === 0) {
