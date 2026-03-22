@@ -309,6 +309,16 @@ const CONFIG = {
             { id: 'thunder_needle', name: '雷鸣针', icon: '🪡', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_needle', name: '璀璨针', icon: '🪡', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_needle', name: '星辉针', icon: '🪡', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
+        ],
+        scythes: [
+            { id: 'cyan_scythe', name: '青闪镰刀', icon: '🗡️', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_scythe', name: '赤铁镰刀', icon: '🗡️', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_scythe', name: '轻羽镰刀', icon: '🗡️', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_scythe', name: '白银镰刀', icon: '🗡️', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_scythe', name: '狱岩镰刀', icon: '🗡️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_scythe', name: '雷鸣镰刀', icon: '🗡️', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_scythe', name: '璀璨镰刀', icon: '🗡️', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_scythe', name: '星辉镰刀', icon: '🗡️', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ]
     },
     // 工具锻造材料配置
@@ -352,6 +362,16 @@ const CONFIG = {
             { ore: 76, plank: 50, prevTool: 'hell_needle' },
             { ore: 106, plank: 70, prevTool: 'thunder_needle' },
             { ore: 142, plank: 94, prevTool: 'brilliant_needle' }
+        ],
+        scythes: [
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_scythe' },
+            { ore: 22, plank: 14, prevTool: 'red_scythe' },
+            { ore: 34, plank: 22, prevTool: 'feather_scythe' },
+            { ore: 52, plank: 34, prevTool: 'white_scythe' },
+            { ore: 76, plank: 50, prevTool: 'hell_scythe' },
+            { ore: 106, plank: 70, prevTool: 'thunder_scythe' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_scythe' }
         ]
     },
     // 矿石与矿锭的映射（用于工具锻造）
@@ -467,7 +487,8 @@ let gameState = {
         axes: [],
         pickaxes: [],
         chisels: [],
-        needles: []
+        needles: [],
+        scythes: []
     },
     // 行动队列系统
     actionQueue: [],     // 行动队列（最多5个）
@@ -2909,10 +2930,55 @@ function renderToolsList() {
         `;
     }).join('');
     
+    // 渲染镰刀部分
+    const scythesHtml = CONFIG.tools.scythes.map((scythe, index) => {
+        const materials = CONFIG.toolCraftingMaterials.scythes[index];
+        const isUnlocked = gameState.forgingLevel >= scythe.reqForgeLevel;
+        const isActive = gameState.activeForgingTool === scythe.id;
+        const canForge = canForgeTool('scythe', index);
+        const scytheInventory = gameState.toolsInventory.scythes || [];
+        const isOwned = scytheInventory.includes(scythe.id);
+        
+        const oreId = oreIds[index];
+        const plankId = CONFIG.plankIdMapping[index];
+        const ownedOre = gameState.miningInventory[oreId] || 0;
+        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        
+        let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
+        if (materials.prevTool) {
+            const hasPrev = scytheInventory.includes(materials.prevTool);
+            materialDesc += `, 上一级(${hasPrev ? '✓' : '✗'})`;
+        }
+        
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.forgingToolRemaining || 0;
+            const total = gameState.forgingToolCount || 1;
+            actionStatus = `<div class="action-timer">锻造中... ${total >= 99999 ? '∞' : remaining + '/' + total}</div>`;
+        }
+        
+        return `
+            <div class="gathering-item-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''} ${isOwned ? 'owned' : ''}" 
+                data-tool-type="scythe" data-tool-index="${index}" data-tool-id="${scythe.id}">
+                <div class="gathering-item-icon">${scythe.icon}</div>
+                <div class="gathering-item-info">
+                    <div class="gathering-item-name">${scythe.name} ${isOwned ? '✓' : ''}</div>
+                    <div class="gathering-item-desc">${materialDesc}</div>
+                    <div class="gathering-item-meta">${Math.floor(scythe.duration/1000)}秒 | +${scythe.exp} EXP | 锻造Lv.${scythe.reqForgeLevel}</div>
+                    <div class="gathering-item-meta" style="color: #6b4f3c;">采集速度+${Math.round(scythe.speedBonus * 100)}% | 装备需求: 采集Lv.${scythe.reqEquipLevel}</div>
+                </div>
+                ${actionStatus}
+                ${!isUnlocked ? '<div class="gathering-item-locked">🔒 等级不足</div>' : ''}
+                ${isUnlocked && !canForge ? '<div class="gathering-item-locked">📦 材料不足</div>' : ''}
+            </div>
+        `;
+    }).join('');
+    
     elements.forgingToolsList.innerHTML = '<h4 style="margin: 10px 0; color: #E8C57F;">斧头</h4>' + axesHtml + 
                                            '<h4 style="margin: 20px 0 10px; color: #E8C57F;">镐子</h4>' + pickaxesHtml +
                                            '<h4 style="margin: 20px 0 10px; color: #E8C57F;">凿子</h4>' + chiselsHtml +
-                                           '<h4 style="margin: 20px 0 10px; color: #E8C57F;">针</h4>' + needlesHtml;
+                                           '<h4 style="margin: 20px 0 10px; color: #E8C57F;">针</h4>' + needlesHtml +
+                                           '<h4 style="margin: 20px 0 10px; color: #E8C57F;">镰刀</h4>' + scythesHtml;
     
     // 绑定点击事件
     elements.forgingToolsList.querySelectorAll('.gathering-item-card').forEach(card => {
@@ -2922,7 +2988,7 @@ function renderToolsList() {
             const toolType = this.dataset.toolType;
             const toolIndex = parseInt(this.dataset.toolIndex);
             const toolId = this.dataset.toolId;
-            const toolConfigKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : 'needles';
+            const toolConfigKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
             const tool = CONFIG.tools[toolConfigKey][toolIndex];
             
             // 检查等级
@@ -2949,11 +3015,11 @@ function renderToolsList() {
 }
 
 function canForgeTool(toolType, index) {
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : 'needles';
+    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
     const materials = CONFIG.toolCraftingMaterials[materialsKey][index];
     
-    // 凿子和针使用矿石，斧头和镐子使用矿锭
-    if (toolType === 'chisel' || toolType === 'needle') {
+    // 凿子、针、镰刀使用矿石，斧头和镐子使用矿锭
+    if (toolType === 'chisel' || toolType === 'needle' || toolType === 'scythe') {
         const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
         const oreId = oreIds[index];
         const ownedOre = gameState.miningInventory[oreId] || 0;
@@ -2964,7 +3030,9 @@ function canForgeTool(toolType, index) {
         if (ownedPlank < materials.plank) return false;
         
         if (materials.prevTool) {
-            const inventory = toolType === 'chisel' ? (gameState.toolsInventory.chisels || []) : (gameState.toolsInventory.needles || []);
+            const inventory = toolType === 'chisel' ? (gameState.toolsInventory.chisels || []) : 
+                              toolType === 'needle' ? (gameState.toolsInventory.needles || []) : 
+                              (gameState.toolsInventory.scythes || []);
             if (!inventory.includes(materials.prevTool)) return false;
         }
     } else {
@@ -2986,7 +3054,7 @@ function canForgeTool(toolType, index) {
 }
 
 function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : 'needles';
+    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -3027,7 +3095,7 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
         return;
     }
     
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : 'needles';
+    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -3067,15 +3135,15 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
 }
 
 function completeForgingToolOnce(toolId, toolType, toolIndex) {
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : 'needles';
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : 'needles';
+    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
+    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
     const materials = CONFIG.toolCraftingMaterials[materialsKey][toolIndex];
     
-    // 凿子和针使用矿石，斧头和镐子使用矿锭
-    if (toolType === 'chisel' || toolType === 'needle') {
+    // 凿子、针、镰刀使用矿石，斧头和镐子使用矿锭
+    if (toolType === 'chisel' || toolType === 'needle' || toolType === 'scythe') {
         const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
         const oreId = oreIds[toolIndex];
         gameState.miningInventory[oreId] -= materials.ore;
@@ -3084,24 +3152,27 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
         gameState.planksInventory[plankId] -= materials.plank;
         
         if (materials.prevTool) {
-            if (toolType === 'chisel') {
-                if (!gameState.toolsInventory.chisels) gameState.toolsInventory.chisels = [];
-                const idx = gameState.toolsInventory.chisels.indexOf(materials.prevTool);
-                if (idx > -1) gameState.toolsInventory.chisels.splice(idx, 1);
-            } else {
-                if (!gameState.toolsInventory.needles) gameState.toolsInventory.needles = [];
-                const idx = gameState.toolsInventory.needles.indexOf(materials.prevTool);
-                if (idx > -1) gameState.toolsInventory.needles.splice(idx, 1);
+            const inventory = toolType === 'chisel' ? gameState.toolsInventory.chisels : 
+                              toolType === 'needle' ? gameState.toolsInventory.needles : 
+                              gameState.toolsInventory.scythes;
+            if (inventory) {
+                const idx = inventory.indexOf(materials.prevTool);
+                if (idx > -1) inventory.splice(idx, 1);
             }
         }
         
-        if (toolType === 'chisel') {
-            if (!gameState.toolsInventory.chisels) gameState.toolsInventory.chisels = [];
-            if (!gameState.toolsInventory.chisels.includes(toolId)) gameState.toolsInventory.chisels.push(toolId);
-        } else {
-            if (!gameState.toolsInventory.needles) gameState.toolsInventory.needles = [];
-            if (!gameState.toolsInventory.needles.includes(toolId)) gameState.toolsInventory.needles.push(toolId);
+        const inventory = toolType === 'chisel' ? gameState.toolsInventory.chisels : 
+                          toolType === 'needle' ? gameState.toolsInventory.needles : 
+                          gameState.toolsInventory.scythes;
+        if (!inventory) {
+            if (toolType === 'chisel') gameState.toolsInventory.chisels = [];
+            else if (toolType === 'needle') gameState.toolsInventory.needles = [];
+            else gameState.toolsInventory.scythes = [];
         }
+        const targetInventory = toolType === 'chisel' ? gameState.toolsInventory.chisels : 
+                                toolType === 'needle' ? gameState.toolsInventory.needles : 
+                                gameState.toolsInventory.scythes;
+        if (!targetInventory.includes(toolId)) targetInventory.push(toolId);
     } else {
         const ingotId = CONFIG.ingotIdMapping[toolIndex];
         gameState.ingotsInventory[ingotId] -= materials.ore;
