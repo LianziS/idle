@@ -2855,14 +2855,6 @@ function renderToolsList() {
         `;
     }).join('');
     
-    // 矿石名称映射（凿子和针使用矿石而非矿锭）
-    const oreNames = {
-        'cyan_ore': '青闪石', 'red_iron': '赤铁石', 'feather_ore': '羽石',
-        'hell_ore': '白鸠石', 'white_ore': '狱炎石', 'thunder_ore': '雷鸣石',
-        'brilliant': '璀璨原石', 'star_ore': '星辉原石'
-    };
-    const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
-    
     // 渲染凿子部分
     const chiselsHtml = CONFIG.tools.chisels.map((chisel, index) => {
         const materials = CONFIG.toolCraftingMaterials.chisels[index];
