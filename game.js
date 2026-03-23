@@ -41,25 +41,25 @@ const CONFIG = {
     ],
     // 树木配置
     trees: [
-        { id: 'pine', name: '青杉', icon: '🌲', reqLevel: 1, duration: 6000, drop: '青杉木', dropIcon: '🪵', exp: 2 },
-        { id: 'iron_birch', name: '铁桦', icon: '🌳', reqLevel: 10, duration: 8000, drop: '铁桦木', dropIcon: '🪵', exp: 3 },
-        { id: 'wind_tree', name: '风啸树', icon: '🌴', reqLevel: 20, duration: 10000, drop: '风啸木', dropIcon: '🪵', exp: 4 },
-        { id: 'flame_tree', name: '焰心树', icon: '🔥', reqLevel: 35, duration: 12000, drop: '焰心木', dropIcon: '🪵', exp: 5 },
-        { id: 'frost_maple', name: '霜叶枫', icon: '❄️', reqLevel: 50, duration: 14000, drop: '霜叶枫木', dropIcon: '🪵', exp: 6 },
-        { id: 'thunder_tree', name: '雷鸣树', icon: '⚡', reqLevel: 65, duration: 16000, drop: '雷鸣木', dropIcon: '🪵', exp: 7 },
-        { id: 'ancient_oak', name: '古橡', icon: '🌳', reqLevel: 80, duration: 18000, drop: '古橡木', dropIcon: '🪵', exp: 8 },
-        { id: 'world_tree', name: '世界树', icon: '🌍', reqLevel: 95, duration: 30000, drop: '世界树枝', dropIcon: '🌿', exp: 10 }
+        { id: 'pine', name: '青杉', icon: '🌲', reqLevel: 1, duration: 6000, drop: '青杉木', dropIcon: '🪵', exp: 5 },
+        { id: 'iron_birch', name: '铁桦', icon: '🌳', reqLevel: 10, duration: 8000, drop: '铁桦木', dropIcon: '🪵', exp: 7.5 },
+        { id: 'wind_tree', name: '风啸树', icon: '🌴', reqLevel: 20, duration: 10000, drop: '风啸木', dropIcon: '🪵', exp: 12.5 },
+        { id: 'flame_tree', name: '焰心树', icon: '🔥', reqLevel: 35, duration: 12000, drop: '焰心木', dropIcon: '🪵', exp: 20 },
+        { id: 'frost_maple', name: '霜叶枫', icon: '❄️', reqLevel: 50, duration: 14000, drop: '霜叶枫木', dropIcon: '🪵', exp: 30 },
+        { id: 'thunder_tree', name: '雷鸣树', icon: '⚡', reqLevel: 65, duration: 16000, drop: '雷鸣木', dropIcon: '🪵', exp: 40 },
+        { id: 'ancient_oak', name: '古橡', icon: '🌳', reqLevel: 80, duration: 18000, drop: '古橡木', dropIcon: '🪵', exp: 55 },
+        { id: 'world_tree', name: '世界树', icon: '🌍', reqLevel: 95, duration: 30000, drop: '世界树枝', dropIcon: '🌿', exp: 73 }
     ],
     // 矿石配置
     ores: [
-        { id: 'cyan_ore', name: '青闪矿', icon: '💎', reqLevel: 1, duration: 6000, drop: '青闪石', dropIcon: '💎', exp: 2 },
-        { id: 'red_iron', name: '赤铁矿', icon: '🔴', reqLevel: 10, duration: 8000, drop: '赤铁石', dropIcon: '🪨', exp: 3 },
-        { id: 'feather_ore', name: '羽石矿', icon: '🪶', reqLevel: 20, duration: 10000, drop: '羽石', dropIcon: '🪨', exp: 4 },
-        { id: 'hell_ore', name: '白鸠矿', icon: '⚪', reqLevel: 35, duration: 12000, drop: '白鸠石', dropIcon: '🪨', exp: 5 },
-        { id: 'white_ore', name: '狱炎矿', icon: '🔥', reqLevel: 50, duration: 14000, drop: '狱炎石', dropIcon: '🪨', exp: 6 },
-        { id: 'thunder_ore', name: '雷鸣矿', icon: '⚡', reqLevel: 65, duration: 16000, drop: '雷鸣石', dropIcon: '🪨', exp: 7 },
-        { id: 'brilliant', name: '曜光结晶', icon: '✨', reqLevel: 80, duration: 18000, drop: '璀璨原石', dropIcon: '💎', exp: 8 },
-        { id: 'star_ore', name: '月华结晶', icon: '⭐', reqLevel: 95, duration: 30000, drop: '星辉原石', dropIcon: '💎', exp: 10 }
+        { id: 'cyan_ore', name: '青闪矿', icon: '💎', reqLevel: 1, duration: 6000, drop: '青闪石', dropIcon: '💎', exp: 5 },
+        { id: 'red_iron', name: '赤铁矿', icon: '🔴', reqLevel: 10, duration: 8000, drop: '赤铁石', dropIcon: '🪨', exp: 7.5 },
+        { id: 'feather_ore', name: '羽石矿', icon: '🪶', reqLevel: 20, duration: 10000, drop: '羽石', dropIcon: '🪨', exp: 12.5 },
+        { id: 'hell_ore', name: '白鸠矿', icon: '⚪', reqLevel: 35, duration: 12000, drop: '白鸠石', dropIcon: '🪨', exp: 20 },
+        { id: 'white_ore', name: '狱炎矿', icon: '🔥', reqLevel: 50, duration: 14000, drop: '狱炎石', dropIcon: '🪨', exp: 30 },
+        { id: 'thunder_ore', name: '雷鸣矿', icon: '⚡', reqLevel: 65, duration: 16000, drop: '雷鸣石', dropIcon: '🪨', exp: 40 },
+        { id: 'brilliant', name: '曜光结晶', icon: '✨', reqLevel: 80, duration: 18000, drop: '璀璨原石', dropIcon: '💎', exp: 55 },
+        { id: 'star_ore', name: '月华结晶', icon: '⭐', reqLevel: 95, duration: 30000, drop: '星辉原石', dropIcon: '💎', exp: 73 }
     ],
     // 采集地点配置
     gatheringLocations: [
@@ -186,34 +186,34 @@ const CONFIG = {
     ],
     // 木板制作配置
     woodPlanks: [
-        { id: 'pine_plank', name: '青杉木板', icon: '🪵', reqLevel: 1, duration: 6000, exp: 3, materials: { pine: 2 } },
-        { id: 'iron_birch_plank', name: '铁桦木板', icon: '🪵', reqLevel: 10, duration: 8000, exp: 4, materials: { iron_birch: 2 } },
-        { id: 'wind_tree_plank', name: '风啸木板', icon: '🪵', reqLevel: 20, duration: 10000, exp: 5, materials: { wind_tree: 2 } },
-        { id: 'flame_tree_plank', name: '焰心木板', icon: '🪵', reqLevel: 35, duration: 12000, exp: 6, materials: { flame_tree: 2 } },
-        { id: 'frost_maple_plank', name: '霜叶木板', icon: '🪵', reqLevel: 50, duration: 14000, exp: 7, materials: { frost_maple: 2 } },
-        { id: 'thunder_tree_plank', name: '雷鸣木板', icon: '🪵', reqLevel: 65, duration: 16000, exp: 8, materials: { thunder_tree: 2 } },
-        { id: 'ancient_oak_plank', name: '古橡木板', icon: '🪵', reqLevel: 80, duration: 18000, exp: 9, materials: { ancient_oak: 2 } },
-        { id: 'world_tree_plank', name: '世界木板', icon: '🪵', reqLevel: 95, duration: 30000, exp: 12, materials: { world_tree: 2 } }
+        { id: 'pine_plank', name: '青杉木板', icon: '🪵', reqLevel: 1, duration: 6000, exp: 5, materials: { pine: 2 } },
+        { id: 'iron_birch_plank', name: '铁桦木板', icon: '🪵', reqLevel: 10, duration: 8000, exp: 7.5, materials: { iron_birch: 2 } },
+        { id: 'wind_tree_plank', name: '风啸木板', icon: '🪵', reqLevel: 20, duration: 10000, exp: 12.5, materials: { wind_tree: 2 } },
+        { id: 'flame_tree_plank', name: '焰心木板', icon: '🪵', reqLevel: 35, duration: 12000, exp: 20, materials: { flame_tree: 2 } },
+        { id: 'frost_maple_plank', name: '霜叶木板', icon: '🪵', reqLevel: 50, duration: 14000, exp: 30, materials: { frost_maple: 2 } },
+        { id: 'thunder_tree_plank', name: '雷鸣木板', icon: '🪵', reqLevel: 65, duration: 16000, exp: 40, materials: { thunder_tree: 2 } },
+        { id: 'ancient_oak_plank', name: '古橡木板', icon: '🪵', reqLevel: 80, duration: 18000, exp: 55, materials: { ancient_oak: 2 } },
+        { id: 'world_tree_plank', name: '世界木板', icon: '🪵', reqLevel: 95, duration: 30000, exp: 73, materials: { world_tree: 2 } }
     ],
     // 矿锭配置
     ingots: [
-        { id: 'cyan_ingot', name: '青闪铁锭', icon: '🔩', reqLevel: 1, duration: 6000, exp: 3, materials: { cyan_ore: 2 } },
-        { id: 'red_copper_ingot', name: '赤铜锭', icon: '🥉', reqLevel: 10, duration: 8000, exp: 4, materials: { red_iron: 2 } },
-        { id: 'feather_ingot', name: '轻羽锭', icon: '🪶', reqLevel: 20, duration: 10000, exp: 5, materials: { feather_ore: 2 } },
-        { id: 'white_silver_ingot', name: '白银锭', icon: '🪙', reqLevel: 35, duration: 12000, exp: 6, materials: { hell_ore: 2 } },
-        { id: 'hell_steel_ingot', name: '狱炎钢', icon: '🔥', reqLevel: 50, duration: 14000, exp: 7, materials: { white_ore: 2 } },
-        { id: 'thunder_steel_ingot', name: '雷鸣钢', icon: '⚡', reqLevel: 65, duration: 16000, exp: 8, materials: { thunder_ore: 2 } },
-        { id: 'brilliant_crystal', name: '璀璨水晶', icon: '💎', reqLevel: 80, duration: 18000, exp: 9, materials: { brilliant: 2 } },
-        { id: 'star_crystal', name: '星辉水晶', icon: '✨', reqLevel: 95, duration: 30000, exp: 12, materials: { star_ore: 2 } }
+        { id: 'cyan_ingot', name: '青闪铁锭', icon: '🔩', reqLevel: 1, duration: 6000, exp: 5, materials: { cyan_ore: 2 } },
+        { id: 'red_copper_ingot', name: '赤铜锭', icon: '🥉', reqLevel: 10, duration: 8000, exp: 7.5, materials: { red_iron: 2 } },
+        { id: 'feather_ingot', name: '轻羽锭', icon: '🪶', reqLevel: 20, duration: 10000, exp: 12.5, materials: { feather_ore: 2 } },
+        { id: 'white_silver_ingot', name: '白银锭', icon: '🪙', reqLevel: 35, duration: 12000, exp: 20, materials: { hell_ore: 2 } },
+        { id: 'hell_steel_ingot', name: '狱炎钢', icon: '🔥', reqLevel: 50, duration: 14000, exp: 30, materials: { white_ore: 2 } },
+        { id: 'thunder_steel_ingot', name: '雷鸣钢', icon: '⚡', reqLevel: 65, duration: 16000, exp: 40, materials: { thunder_ore: 2 } },
+        { id: 'brilliant_crystal', name: '璀璨水晶', icon: '💎', reqLevel: 80, duration: 18000, exp: 55, materials: { brilliant: 2 } },
+        { id: 'star_crystal', name: '星辉水晶', icon: '✨', reqLevel: 95, duration: 30000, exp: 73, materials: { star_ore: 2 } }
     ],
     // 布料配置
     fabrics: [
-        { id: 'jute_cloth', name: '黄麻布料', icon: '🧵', reqLevel: 1, duration: 6000, exp: 3, materials: { jute: 2 } },
-        { id: 'linen_cloth', name: '亚麻布料', icon: '🧶', reqLevel: 15, duration: 8000, exp: 4, materials: { flax: 2 } },
-        { id: 'wool_cloth', name: '羊毛布料', icon: '🧶', reqLevel: 35, duration: 12000, exp: 6, materials: { wool: 2 } },
-        { id: 'silk_cloth', name: '丝绸布料', icon: '🎀', reqLevel: 55, duration: 15000, exp: 8, materials: { silk: 2 } },
-        { id: 'wind_silk', name: '风语绸', icon: '💨', reqLevel: 75, duration: 18000, exp: 10, materials: { wind_wool: 2 } },
-        { id: 'dream_cloth', name: '梦幻布料', icon: '✨', reqLevel: 95, duration: 25000, exp: 12, materials: { life_fiber: 2 } }
+        { id: 'jute_cloth', name: '黄麻布料', icon: '🧵', reqLevel: 1, duration: 6000, exp: 5, materials: { jute: 2 } },
+        { id: 'linen_cloth', name: '亚麻布料', icon: '🧶', reqLevel: 15, duration: 8000, exp: 10, materials: { flax: 2 } },
+        { id: 'wool_cloth', name: '羊毛布料', icon: '🧶', reqLevel: 35, duration: 12000, exp: 20, materials: { wool: 2 } },
+        { id: 'silk_cloth', name: '丝绸布料', icon: '🎀', reqLevel: 55, duration: 15000, exp: 32.5, materials: { silk: 2 } },
+        { id: 'wind_silk', name: '风语绸', icon: '💨', reqLevel: 75, duration: 18000, exp: 50, materials: { wind_wool: 2 } },
+        { id: 'dream_cloth', name: '梦幻布料', icon: '✨', reqLevel: 95, duration: 25000, exp: 72.5, materials: { life_fiber: 2 } }
     ],
     // 商人配置
     merchants: [
