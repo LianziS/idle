@@ -324,24 +324,24 @@ const CONFIG = {
     // 工具锻造材料配置
     toolCraftingMaterials: {
         axes: [
-            { ore: 10, plank: 6, prevTool: null },                                                      // 青闪斧
-            { ore: 16, plank: 10, prevTool: 'cyan_axe' },                                               // 赤铁斧
-            { ore: 22, plank: 14, prevTool: 'red_axe' },                                                // 羽斧
-            { ore: 34, plank: 22, prevTool: 'feather_axe' },                                            // 白鸠斧
-            { ore: 52, plank: 34, prevTool: 'white_axe' },                                              // 狱岩斧
-            { ore: 76, plank: 50, prevTool: 'hell_axe' },                                               // 雷鸣斧
-            { ore: 106, plank: 70, prevTool: 'thunder_axe' },                                           // 璀璨斧
-            { ore: 142, plank: 94, prevTool: 'brilliant_axe' }                                          // 星辉斧
+            { stone: 10, plank: 6, prevTool: null },                                                      // 青闪斧
+            { stone: 16, plank: 10, prevTool: 'cyan_axe' },                                               // 赤铁斧
+            { stone: 22, plank: 14, prevTool: 'red_axe' },                                                // 羽斧
+            { stone: 34, plank: 22, prevTool: 'feather_axe' },                                            // 白鸠斧
+            { stone: 52, plank: 34, prevTool: 'white_axe' },                                              // 狱岩斧
+            { stone: 76, plank: 50, prevTool: 'hell_axe' },                                               // 雷鸣斧
+            { stone: 106, plank: 70, prevTool: 'thunder_axe' },                                           // 璀璨斧
+            { stone: 142, plank: 94, prevTool: 'brilliant_axe' }                                          // 星辉斧
         ],
         pickaxes: [
-            { ore: 10, plank: 6, prevTool: null },                                                      // 青闪镐
-            { ore: 16, plank: 10, prevTool: 'cyan_pickaxe' },                                           // 赤铁镐
-            { ore: 22, plank: 14, prevTool: 'red_pickaxe' },                                            // 羽镐
-            { ore: 34, plank: 22, prevTool: 'feather_pickaxe' },                                        // 白鸠镐
-            { ore: 52, plank: 34, prevTool: 'white_pickaxe' },                                          // 狱岩镐
-            { ore: 76, plank: 50, prevTool: 'hell_pickaxe' },                                           // 雷鸣镐
-            { ore: 106, plank: 70, prevTool: 'thunder_pickaxe' },                                       // 璀璨镐
-            { ore: 142, plank: 94, prevTool: 'brilliant_pickaxe' }                                      // 星辉镐
+            { stone: 10, plank: 6, prevTool: null },                                                      // 青闪镐
+            { stone: 16, plank: 10, prevTool: 'cyan_pickaxe' },                                           // 赤铁镐
+            { stone: 22, plank: 14, prevTool: 'red_pickaxe' },                                            // 羽镐
+            { stone: 34, plank: 22, prevTool: 'feather_pickaxe' },                                        // 白鸠镐
+            { stone: 52, plank: 34, prevTool: 'white_pickaxe' },                                          // 狱岩镐
+            { stone: 76, plank: 50, prevTool: 'hell_pickaxe' },                                           // 雷鸣镐
+            { stone: 106, plank: 70, prevTool: 'thunder_pickaxe' },                                       // 璀璨镐
+            { stone: 142, plank: 94, prevTool: 'brilliant_pickaxe' }                                      // 星辉镐
         ],
         chisels: [
             { ore: 10, plank: 6, prevTool: null },
