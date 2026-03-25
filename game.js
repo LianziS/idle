@@ -1967,6 +1967,7 @@ function updateUI() {
     renderPlanksInventory();
     renderIngotsInventory();
     renderFabricsInventory();
+    renderPotionsInventory();
     renderToolsInventory();
 }
 
