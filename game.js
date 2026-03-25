@@ -406,7 +406,28 @@ const CONFIG = {
         5: 'thunder_steel_ingot',
         6: 'brilliant_crystal',
         7: 'star_crystal'
-    }
+    },
+    // 药水配置
+    potions: [
+        // HP药水
+        { id: 'hp_potion_1', name: '素级生命药水', icon: '🧪', type: 'hp', reqLevel: 1, duration: 6000, exp: 4, materials: { sweet_berry: 1, blood_rose: 1, honey: 4 } },
+        { id: 'hp_potion_2', name: '良级生命药水', icon: '🧪', type: 'hp', reqLevel: 10, duration: 6750, exp: 8, materials: { wheat: 1, blood_rose: 1, honey: 4 } },
+        { id: 'hp_potion_3', name: '中级生命药水', icon: '🧪', type: 'hp', reqLevel: 20, duration: 7500, exp: 12, materials: { hops: 1, red_serpent_fruit: 1, blossom_honey: 4 } },
+        { id: 'hp_potion_4', name: '优级生命药水', icon: '🧪', type: 'hp', reqLevel: 35, duration: 8250, exp: 18, materials: { apple: 1, red_serpent_fruit: 1, blossom_honey: 4 } },
+        { id: 'hp_potion_5', name: '高级生命药水', icon: '🧪', type: 'hp', reqLevel: 50, duration: 9000, exp: 24, materials: { grape: 1, wild_heart: 1, moonlight_honey: 4 } },
+        { id: 'hp_potion_6', name: '特级生命药水', icon: '🧪', type: 'hp', reqLevel: 65, duration: 10500, exp: 32, materials: { rye: 1, wild_heart: 1, moonlight_honey: 4 } },
+        { id: 'hp_potion_7', name: '珍级生命药水', icon: '🧪', type: 'hp', reqLevel: 80, duration: 12000, exp: 40, materials: { mist_fruit: 1, bewitch_berry: 1, rock_rose_honey: 4 } },
+        { id: 'hp_potion_8', name: '至级生命药水', icon: '🧪', type: 'hp', reqLevel: 95, duration: 13500, exp: 50, materials: { dragon_blood_fruit: 1, bewitch_berry: 1, rock_rose_honey: 4 } },
+        // MP药水
+        { id: 'mp_potion_1', name: '素级魔法药水', icon: '💧', type: 'mp', reqLevel: 1, duration: 6000, exp: 4, materials: { sweet_berry: 1, star_dew_herb: 1, honey: 4 } },
+        { id: 'mp_potion_2', name: '良级魔法药水', icon: '💧', type: 'mp', reqLevel: 10, duration: 6750, exp: 8, materials: { wheat: 1, star_dew_herb: 1, honey: 4 } },
+        { id: 'mp_potion_3', name: '中级魔法药水', icon: '💧', type: 'mp', reqLevel: 20, duration: 7500, exp: 12, materials: { hops: 1, moonlight_mushroom: 1, blossom_honey: 4 } },
+        { id: 'mp_potion_4', name: '优级魔法药水', icon: '💧', type: 'mp', reqLevel: 35, duration: 8250, exp: 18, materials: { apple: 1, moonlight_mushroom: 1, blossom_honey: 4 } },
+        { id: 'mp_potion_5', name: '高级魔法药水', icon: '💧', type: 'mp', reqLevel: 50, duration: 9000, exp: 24, materials: { grape: 1, soul_herb: 1, moonlight_honey: 4 } },
+        { id: 'mp_potion_6', name: '特级魔法药水', icon: '💧', type: 'mp', reqLevel: 65, duration: 10500, exp: 32, materials: { rye: 1, soul_herb: 1, moonlight_honey: 4 } },
+        { id: 'mp_potion_7', name: '珍级魔法药水', icon: '💧', type: 'mp', reqLevel: 80, duration: 12000, exp: 40, materials: { mist_fruit: 1, bewitch_berry: 1, rock_rose_honey: 4 } },
+        { id: 'mp_potion_8', name: '至级魔法药水', icon: '💧', type: 'mp', reqLevel: 95, duration: 13500, exp: 50, materials: { dragon_blood_fruit: 1, bewitch_berry: 1, rock_rose_honey: 4 } }
+    ]
 };
 
 let gameState = {
@@ -478,6 +499,14 @@ let gameState = {
     tailoringRemaining: 0,
     // 布料存储
     fabricsInventory: {},
+    // 炼金状态
+    alchemyLevel: 1,
+    alchemyExp: 0,
+    activeAlchemy: null,
+    alchemyCount: 0,
+    alchemyRemaining: 0,
+    // 药水存储
+    potionsInventory: {},
     // 装备系统
     equipment: {
         axe: null,
@@ -551,6 +580,10 @@ const elements = {
     tailoringExpFill: document.getElementById('tailoring-exp-fill'),
     tailoringLevel: document.getElementById('tailoring-level'),
     tailoringFabricsList: document.getElementById('tailoring-fabrics-list'),
+    // 炼金
+    alchemyExpFill: document.getElementById('alchemy-exp-fill'),
+    alchemyLevel: document.getElementById('alchemy-level'),
+    alchemyPotionsList: document.getElementById('alchemy-potions-list'),
     navGatheringExp: document.getElementById('nav-gathering-exp'),
     navGatheringLvl: document.getElementById('nav-gathering-lvl'),
     navCraftingExp: document.getElementById('nav-crafting-exp'),
@@ -559,6 +592,8 @@ const elements = {
     navForgingLvl: document.getElementById('nav-forging-lvl'),
     navTailoringExp: document.getElementById('nav-tailoring-exp'),
     navTailoringLvl: document.getElementById('nav-tailoring-lvl'),
+    navAlchemyExp: document.getElementById('nav-alchemy-exp'),
+    navAlchemyLvl: document.getElementById('nav-alchemy-lvl'),
     playTime: document.getElementById('play-time'),
     modal: document.getElementById('modal'),
     modalBody: document.getElementById('modal-body'),
@@ -645,6 +680,7 @@ function init() {
     renderForging();
     renderTailoring();
     renderCombatZones();
+    renderAlchemy();
     renderMerchants();
     setupEventListeners();
     setupMerchantListeners();
@@ -655,6 +691,7 @@ function init() {
     renderGatheringInventory();
     renderPlanksInventory();
     renderIngotsInventory();
+    renderPotionsInventory();
     renderFabricsInventory();
     renderToolsInventory();
     
@@ -668,6 +705,9 @@ function init() {
     
     // 初始化锻造标签页
     setupForgingTabs();
+    
+    // 初始化炼金标签页
+    setupAlchemyTabs();
     
     // 初始化行动队列
     setupActionQueue();
@@ -1360,6 +1400,8 @@ function executePendingAction() {
         startForgingToolWithCount(id, count, itemId.toolType, itemId.toolIndex);
     } else if (type === 'tailoring') {
         startTailoringWithCount(id, count);
+    } else if (type === 'alchemy') {
+        startAlchemyWithCount(id, count);
     }
     
     pendingAction = null;
@@ -1739,6 +1781,11 @@ function cancelCurrentAction(skipQueue = false) {
         gameState.tailoringCount = 0;
         gameState.tailoringRemaining = 0;
     }
+    if (gameState.activeAlchemy) {
+        gameState.activeAlchemy = null;
+        gameState.alchemyCount = 0;
+        gameState.alchemyRemaining = 0;
+    }
     for (const actionId in gameState.activeActions) {
         delete gameState.activeActions[actionId];
     }
@@ -1970,7 +2017,8 @@ function updateTotalLevel() {
                       (gameState.craftingLevel || 1) + 
                       (gameState.forgingLevel || 1) + 
                       (gameState.tailoringLevel || 1) + 
-                      (gameState.combatLevel || 1) - 6; // 减去初始的7个1级
+                      (gameState.alchemyLevel || 1) + 
+                      (gameState.combatLevel || 1) - 7; // 减去初始的8个1级
     if (gameState.level < 1) gameState.level = 1;
 }
 
@@ -3577,6 +3625,282 @@ function renderFabricsInventory() {
 }
 
 function renderToolsInventory() {
+
+// ============ 炼金系统 ============
+
+function renderAlchemy() {
+    // 更新炼金经验条
+    if (elements.alchemyExpFill && elements.alchemyLevel) {
+        const currentExp = getSkillExpForLevel(gameState.alchemyLevel);
+        const nextExp = getSkillExpForLevel(gameState.alchemyLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.alchemyExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.alchemyExpFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.alchemyLevel.textContent = gameState.alchemyLevel;
+    }
+    
+    // 更新侧边栏炼金经验条
+    if (elements.navAlchemyExp && elements.navAlchemyLvl) {
+        const currentExp = getSkillExpForLevel(gameState.alchemyLevel);
+        const nextExp = getSkillExpForLevel(gameState.alchemyLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.alchemyExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.navAlchemyExp.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.navAlchemyLvl.textContent = gameState.alchemyLevel;
+    }
+    
+    // 渲染药水列表
+    renderPotionsList();
+}
+
+function renderPotionsList() {
+    if (!elements.alchemyPotionsList) return;
+    
+    const html = CONFIG.potions.map(potion => {
+        const isUnlocked = gameState.alchemyLevel >= potion.reqLevel;
+        const isActive = gameState.activeAlchemy === potion.id;
+        const canBrew = canBrewPotion(potion);
+        
+        // 获取材料名称
+        const materialNames = Object.entries(potion.materials).map(([itemId, count]) => {
+            const owned = gameState.gatheringInventory[itemId] || 0;
+            // 查找材料名称
+            let materialName = itemId;
+            let materialIcon = '🌿';
+            for (const loc of CONFIG.gatheringLocations) {
+                const item = loc.items.find(i => i.id === itemId);
+                if (item) {
+                    materialName = item.name;
+                    materialIcon = item.icon;
+                    break;
+                }
+            }
+            return `${materialIcon}${materialName}×${count}(${owned})`;
+        }).join(', ');
+        
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.alchemyRemaining || 0;
+            const total = gameState.alchemyCount || 1;
+            const countText = total >= 99999 ? '∞' : `${remaining}/${total}`;
+            actionStatus = `<div class="action-timer">炼制中... ${countText}</div>`;
+        }
+        
+        const typeText = potion.type === 'hp' ? '生命药水' : '魔法药水';
+        
+        return `
+            <div class="gathering-item-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''}" data-potion-id="${potion.id}">
+                <div class="gathering-item-icon">${potion.icon}</div>
+                <div class="gathering-item-info">
+                    <div class="gathering-item-name">${potion.name}</div>
+                    <div class="gathering-item-desc">${materialNames}</div>
+                    <div class="gathering-item-meta">${potion.duration/1000}秒 | +${potion.exp} EXP | Lv.${potion.reqLevel}</div>
+                </div>
+                ${actionStatus}
+                ${!isUnlocked ? '<div class="gathering-item-locked">🔒 等级不足</div>' : ''}
+                ${isUnlocked && !canBrew ? '<div class="gathering-item-locked">📦 材料不足</div>' : ''}
+            </div>
+        `;
+    }).join('');
+    
+    elements.alchemyPotionsList.innerHTML = html;
+    
+    // 绑定点击事件
+    elements.alchemyPotionsList.querySelectorAll('.gathering-item-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            const potionId = this.dataset.potionId;
+            const potion = CONFIG.potions.find(p => p.id === potionId);
+            
+            // 检查等级
+            if (gameState.alchemyLevel < potion.reqLevel) {
+                showToast(`❌ 需要炼金等级 ${potion.reqLevel}`);
+                return;
+            }
+            
+            // 检查材料
+            if (!canBrewPotion(potion)) {
+                showToast('❌ 材料不足');
+                return;
+            }
+            
+            // 检查是否正在进行中
+            if (this.classList.contains('active')) {
+                showToast('⏳ 正在炼制中');
+                return;
+            }
+            
+            openActionModal('alchemy', potionId, potion.name);
+        });
+    });
+}
+
+function canBrewPotion(potion) {
+    for (const [itemId, count] of Object.entries(potion.materials)) {
+        const owned = gameState.gatheringInventory[itemId] || 0;
+        if (owned < count) return false;
+    }
+    return true;
+}
+
+function startAlchemyWithCount(potionId, count) {
+    const potion = CONFIG.potions.find(p => p.id === potionId);
+    if (!potion) return;
+    
+    // 检查材料是否足够
+    if (!canBrewPotion(potion)) {
+        showToast('❌ 材料不足');
+        return;
+    }
+    
+    gameState.activeAlchemy = potionId;
+    gameState.alchemyCount = count;
+    gameState.alchemyRemaining = count;
+    
+    // 重置进度条
+    if (elements.actionProgressFill) {
+        elements.actionProgressFill.style.width = '0%';
+    }
+    setActionState({ name: `炼制${potion.name}`, icon: potion.icon }, potion.duration);
+    renderAlchemy();
+    
+    // 启动进度条动画
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    lastActionStartTime = gameState.actionStartTime;
+    animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+    
+    scheduleAlchemy(potionId);
+}
+
+function scheduleAlchemy(potionId) {
+    const isInfinite = gameState.alchemyCount >= 99999;
+    if (!gameState.activeAlchemy || (!isInfinite && gameState.alchemyRemaining <= 0)) {
+        gameState.activeAlchemy = null;
+        gameState.alchemyCount = 0;
+        gameState.alchemyRemaining = 0;
+        setActionState(null, 0);
+        renderAlchemy();
+        onActionComplete();
+        return;
+    }
+    
+    const potion = CONFIG.potions.find(p => p.id === potionId);
+    if (!potion) return;
+    
+    // 检查材料
+    if (!canBrewPotion(potion)) {
+        showToast('❌ 材料不足，炼制停止');
+        gameState.activeAlchemy = null;
+        gameState.alchemyCount = 0;
+        gameState.alchemyRemaining = 0;
+        setActionState(null, 0);
+        renderAlchemy();
+        return;
+    }
+    
+    if (!isInfinite) {
+        gameState.alchemyRemaining--;
+    }
+    
+    if (gameState.activeAlchemy === potionId) {
+        setActionState({ name: `炼制${potion.name}`, icon: potion.icon }, potion.duration);
+        if (elements.actionProgressFill) {
+            elements.actionProgressFill.style.width = '0%';
+        }
+        updateActionStatusBar();
+        renderAlchemy();
+        
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        lastActionStartTime = gameState.actionStartTime;
+        animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+        
+        gameState.actionTimerId = setTimeout(() => {
+            if (gameState.activeAlchemy === potionId) {
+                completeAlchemyOnce(potionId);
+                scheduleAlchemy(potionId);
+            }
+        }, potion.duration);
+    }
+}
+
+function completeAlchemyOnce(potionId) {
+    const potion = CONFIG.potions.find(p => p.id === potionId);
+    if (!potion) return;
+    
+    // 消耗材料
+    for (const [itemId, count] of Object.entries(potion.materials)) {
+        gameState.gatheringInventory[itemId] -= count;
+    }
+    
+    // 添加药水到存储
+    if (!gameState.potionsInventory[potionId]) {
+        gameState.potionsInventory[potionId] = 0;
+    }
+    gameState.potionsInventory[potionId]++;
+    
+    addExp(potion.exp);
+    addSkillExp('alchemy', potion.exp);
+    updateUI();
+    saveGame();
+    
+    // 显示奖励
+    if (elements.actionRewards) {
+        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${potion.icon} ${potion.name}</span>`;
+        setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
+    }
+}
+
+function renderPotionsInventory() {
+    const container = document.getElementById('storage-potions-items');
+    if (!container) return;
+    
+    if (!gameState.potionsInventory || Object.keys(gameState.potionsInventory).length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无药水</div>';
+        return;
+    }
+    
+    const html = Object.entries(gameState.potionsInventory)
+        .filter(([id, count]) => count > 0)
+        .map(([id, count]) => {
+            const potion = CONFIG.potions.find(p => p.id === id);
+            const name = potion ? potion.name : id;
+            const icon = potion ? potion.icon : '🧪';
+            return `
+                <div class="storage-item-small">
+                    <div class="storage-item-small-icon">${icon}</div>
+                    <div class="storage-item-small-name">${name}</div>
+                    <div class="storage-item-small-count">×${count}</div>
+                </div>
+            `;
+        })
+        .join('');
+    
+    container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无药水</div>';
+}
+
+function setupAlchemyTabs() {
+    const tabs = document.querySelectorAll('#alchemy-tabs .gathering-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const tabName = this.dataset.tab;
+            
+            // 更新标签状态
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 切换内容显示
+            const potionsList = document.getElementById('alchemy-potions-list');
+            if (potionsList) {
+                potionsList.style.display = tabName === 'potions' ? 'block' : 'none';
+            }
+        });
+    });
+}
+
     const container = document.getElementById('storage-tools-items');
     if (!container) return;
     
@@ -5163,6 +5487,17 @@ function getCurrentActionInfo() {
             name: fabric ? fabric.name : '缝制',
             count: totalCount,
             icon: fabric ? fabric.icon : '🧵'
+        };
+    }
+    if (gameState.activeAlchemy) {
+        const potion = CONFIG.potions.find(p => p.id === gameState.activeAlchemy);
+        const totalCount = gameState.alchemyCount >= 99999 ? 99999 : gameState.alchemyRemaining + 1;
+        return {
+            type: 'alchemy',
+            id: gameState.activeAlchemy,
+            name: potion ? potion.name : '炼金',
+            count: totalCount,
+            icon: potion ? potion.icon : '⚗️'
         };
     }
     return null;
