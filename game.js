@@ -284,8 +284,8 @@ const CONFIG = {
             { id: 'cyan_axe', name: '青闪斧', icon: '🪓', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
             { id: 'red_axe', name: '赤铁斧', icon: '🪓', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
             { id: 'feather_axe', name: '羽斧', icon: '🪓', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
-            { id: 'white_axe', name: '白鸠斧', icon: '🪓', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
-            { id: 'hell_axe', name: '狱岩斧', icon: '🪓', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'white_axe', name: '白银斧', icon: '🪓', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_axe', name: '狱炎斧', icon: '🪓', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
             { id: 'thunder_axe', name: '雷鸣斧', icon: '🪓', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_axe', name: '璀璨斧', icon: '🪓', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_axe', name: '星辉斧', icon: '🪓', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
@@ -294,8 +294,8 @@ const CONFIG = {
             { id: 'cyan_pickaxe', name: '青闪镐', icon: '⛏️', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
             { id: 'red_pickaxe', name: '赤铁镐', icon: '⛏️', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
             { id: 'feather_pickaxe', name: '羽镐', icon: '⛏️', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
-            { id: 'white_pickaxe', name: '白鸠镐', icon: '⛏️', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
-            { id: 'hell_pickaxe', name: '狱岩镐', icon: '⛏️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'white_pickaxe', name: '白银镐', icon: '⛏️', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_pickaxe', name: '狱炎镐', icon: '⛏️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
             { id: 'thunder_pickaxe', name: '雷鸣镐', icon: '⛏️', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_pickaxe', name: '璀璨镐', icon: '⛏️', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_pickaxe', name: '星辉镐', icon: '⛏️', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
@@ -305,7 +305,7 @@ const CONFIG = {
             { id: 'red_chisel', name: '赤铁凿子', icon: '🔨', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
             { id: 'feather_chisel', name: '轻羽凿子', icon: '🔨', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
             { id: 'white_chisel', name: '白银凿子', icon: '🔨', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
-            { id: 'hell_chisel', name: '狱岩凿子', icon: '🔨', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'hell_chisel', name: '狱炎凿子', icon: '🔨', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
             { id: 'thunder_chisel', name: '雷鸣凿子', icon: '🔨', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_chisel', name: '璀璨凿子', icon: '🔨', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_chisel', name: '星辉凿子', icon: '🔨', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
@@ -315,7 +315,7 @@ const CONFIG = {
             { id: 'red_needle', name: '赤铁针', icon: '🪡', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
             { id: 'feather_needle', name: '轻羽针', icon: '🪡', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
             { id: 'white_needle', name: '白银针', icon: '🪡', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
-            { id: 'hell_needle', name: '狱岩针', icon: '🪡', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'hell_needle', name: '狱炎针', icon: '🪡', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
             { id: 'thunder_needle', name: '雷鸣针', icon: '🪡', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_needle', name: '璀璨针', icon: '🪡', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_needle', name: '星辉针', icon: '🪡', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
@@ -325,7 +325,7 @@ const CONFIG = {
             { id: 'red_scythe', name: '赤铁镰刀', icon: '🗡️', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
             { id: 'feather_scythe', name: '轻羽镰刀', icon: '🗡️', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
             { id: 'white_scythe', name: '白银镰刀', icon: '🗡️', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
-            { id: 'hell_scythe', name: '狱岩镰刀', icon: '🗡️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'hell_scythe', name: '狱炎镰刀', icon: '🗡️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
             { id: 'thunder_scythe', name: '雷鸣镰刀', icon: '🗡️', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_scythe', name: '璀璨镰刀', icon: '🗡️', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_scythe', name: '星辉镰刀', icon: '🗡️', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
@@ -347,8 +347,8 @@ const CONFIG = {
             { ore: 10, plank: 6, prevTool: null },                                                      // 青闪斧
             { ore: 16, plank: 10, prevTool: 'cyan_axe' },                                               // 赤铁斧
             { ore: 22, plank: 14, prevTool: 'red_axe' },                                                // 羽斧
-            { ore: 34, plank: 22, prevTool: 'feather_axe' },                                            // 白鸠斧
-            { ore: 52, plank: 34, prevTool: 'white_axe' },                                              // 狱岩斧
+            { ore: 34, plank: 22, prevTool: 'feather_axe' },                                            // 白银斧
+            { ore: 52, plank: 34, prevTool: 'white_axe' },                                              // 狱炎斧
             { ore: 76, plank: 50, prevTool: 'hell_axe' },                                               // 雷鸣斧
             { ore: 106, plank: 70, prevTool: 'thunder_axe' },                                           // 璀璨斧
             { ore: 142, plank: 94, prevTool: 'brilliant_axe' }                                          // 星辉斧
@@ -357,8 +357,8 @@ const CONFIG = {
             { ore: 10, plank: 6, prevTool: null },                                                      // 青闪镐
             { ore: 16, plank: 10, prevTool: 'cyan_pickaxe' },                                           // 赤铁镐
             { ore: 22, plank: 14, prevTool: 'red_pickaxe' },                                            // 羽镐
-            { ore: 34, plank: 22, prevTool: 'feather_pickaxe' },                                        // 白鸠镐
-            { ore: 52, plank: 34, prevTool: 'white_pickaxe' },                                          // 狱岩镐
+            { ore: 34, plank: 22, prevTool: 'feather_pickaxe' },                                        // 白银镐
+            { ore: 52, plank: 34, prevTool: 'white_pickaxe' },                                          // 狱炎镐
             { ore: 76, plank: 50, prevTool: 'hell_pickaxe' },                                           // 雷鸣镐
             { ore: 106, plank: 70, prevTool: 'thunder_pickaxe' },                                       // 璀璨镐
             { ore: 142, plank: 94, prevTool: 'brilliant_pickaxe' }                                      // 星辉镐
@@ -2904,15 +2904,15 @@ function renderToolsList() {
         'cyan_axe': '青闪斧',
         'red_axe': '赤铁斧',
         'feather_axe': '羽斧',
-        'white_axe': '白鸠斧',
-        'hell_axe': '狱岩斧',
+        'white_axe': '白银斧',
+        'hell_axe': '狱炎斧',
         'thunder_axe': '雷鸣斧',
         'brilliant_axe': '璀璨斧',
         'cyan_pickaxe': '青闪镐',
         'red_pickaxe': '赤铁镐',
         'feather_pickaxe': '羽镐',
-        'white_pickaxe': '白鸠镐',
-        'hell_pickaxe': '狱岩镐',
+        'white_pickaxe': '白银镐',
+        'hell_pickaxe': '狱炎镐',
         'thunder_pickaxe': '雷鸣镐',
         'brilliant_pickaxe': '璀璨镐'
     };
