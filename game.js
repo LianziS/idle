@@ -239,6 +239,17 @@ const CONFIG = {
             ]
         },
         { 
+            id: 'carpenter', 
+            name: '木匠', 
+            title: '木工大师',
+            avatar: '🪚', 
+            favorability: 0,
+            goods: [{ id: 'carpenter_scroll', name: '木工大师卷轴', icon: '📜', price: 1000, currency: 'gold' }],
+            quests: [
+                { id: 'carpenter_quest_1', name: '木板订单', desc: '提交 20 木板', reward: { gold: 150, favorability: 0.5 }, requirement: { plank: 20 } }
+            ]
+        },
+        { 
             id: 'armorsmith', 
             name: '铸甲师', 
             title: '锻造大师',
@@ -269,6 +280,17 @@ const CONFIG = {
             goods: [{ id: 'alchemist_scroll', name: '药剂大师卷轴', icon: '📜', price: 1000, currency: 'gold' }],
             quests: [
                 { id: 'alchemist_quest_1', name: '草药采集', desc: '提交 25 草药', reward: { gold: 100, favorability: 0.5 }, requirement: { herb: 25 } }
+            ]
+        },
+        { 
+            id: 'tavern', 
+            name: '酒馆', 
+            title: '美酒佳酿',
+            avatar: '🍺', 
+            favorability: 0,
+            goods: [{ id: 'tavern_scroll', name: '酿酒秘方', icon: '📜', price: 1000, currency: 'gold' }],
+            quests: [
+                { id: 'tavern_quest_1', name: '酿造材料', desc: '提交 10 蜂蜜', reward: { gold: 180, favorability: 0.5 }, requirement: { honey: 10 } }
             ]
         }
     ],
