@@ -1081,30 +1081,80 @@ function handleQuest(merchant, quest, data) {
 function renderMerchantWarehouse() {
     if (!elements.merchantWarehouseGrid) return;
     
-    const resources = CONFIG.resources.filter(r => r !== 'gold');
+    let allItems = [];
     
-    // 只显示有物品的格子（数量>0）
-    const items = resources.filter(res => gameState.resources[res] > 0);
+    // 基本资源
+    const resourceIcons = { wood: '🪵', stone: '🪨', herb: '🌿' };
+    const resourceNames = { wood: '木材', stone: '石头', herb: '草药' };
+    CONFIG.resources.filter(r => r !== 'gold').forEach(res => {
+        const count = gameState.resources[res] || 0;
+        if (count > 0) {
+            allItems.push({ id: res, type: 'resource', icon: resourceIcons[res], name: resourceNames[res], count });
+        }
+    });
     
-    if (items.length === 0) {
+    // 矿锭
+    const ingotIcons = { cyan_ingot: '🔩', red_copper_ingot: '🥉', feather_ingot: '🪶', white_silver_ingot: '🪙', hell_steel_ingot: '🔥', thunder_steel_ingot: '⚡', brilliant_crystal: '💎', star_crystal: '✨' };
+    const ingotNames = { cyan_ingot: '青闪铁锭', red_copper_ingot: '赤铜锭', feather_ingot: '轻羽锭', white_silver_ingot: '白银锭', hell_steel_ingot: '狱炎钢', thunder_steel_ingot: '雷鸣钢', brilliant_crystal: '璀璨水晶', star_crystal: '星辉水晶' };
+    Object.entries(gameState.ingotsInventory || {}).forEach(([id, count]) => {
+        if (count > 0) allItems.push({ id, type: 'ingot', icon: ingotIcons[id] || '🔩', name: ingotNames[id] || id, count });
+    });
+    
+    // 木板
+    const plankIcons = { pine_plank: '🪵', iron_birch_plank: '🪵', wind_tree_plank: '🪵', frost_maple_plank: '🪵', flame_tree_plank: '🪵', thunder_tree_plank: '🪵', ancient_oak_plank: '🪵', world_tree_plank: '🪵' };
+    const plankNames = { pine_plank: '青杉木板', iron_birch_plank: '铁桦木板', wind_tree_plank: '风啸木板', frost_maple_plank: '霜叶木板', flame_tree_plank: '焰心木板', thunder_tree_plank: '雷鸣木板', ancient_oak_plank: '古橡木板', world_tree_plank: '世界木板' };
+    Object.entries(gameState.planksInventory || {}).forEach(([id, count]) => {
+        if (count > 0) allItems.push({ id, type: 'plank', icon: plankIcons[id] || '🪵', name: plankNames[id] || id, count });
+    });
+    
+    // 布料
+    const fabricIcons = { jute_cloth: '🧵', linen_cloth: '🧶', wool_cloth: '🧶', silk_cloth: '🎀', wind_silk: '💨', dream_cloth: '✨' };
+    const fabricNames = { jute_cloth: '黄麻布料', linen_cloth: '亚麻布料', wool_cloth: '羊毛布料', silk_cloth: '丝绸布料', wind_silk: '风语绸', dream_cloth: '梦幻布料' };
+    Object.entries(gameState.fabricsInventory || {}).forEach(([id, count]) => {
+        if (count > 0) allItems.push({ id, type: 'fabric', icon: fabricIcons[id] || '🧵', name: fabricNames[id] || id, count });
+    });
+    
+    // 采集物品
+    const gatheringItemInfo = {};
+    CONFIG.gatheringLocations.forEach(loc => {
+        loc.items.forEach(item => {
+            gatheringItemInfo[item.id] = { icon: item.icon, name: item.name };
+        });
+    });
+    Object.entries(gameState.gatheringInventory || {}).forEach(([id, count]) => {
+        if (count > 0) {
+            const info = gatheringItemInfo[id] || {};
+            allItems.push({ id, type: 'gathering', icon: info.icon || '🌿', name: info.name || id, count });
+        }
+    });
+    
+    // 药水
+    const potionInfo = {};
+    CONFIG.potions.forEach(p => { potionInfo[p.id] = { icon: p.icon, name: p.name }; });
+    Object.entries(gameState.potionsInventory || {}).forEach(([id, count]) => {
+        if (count > 0) {
+            const info = potionInfo[id] || {};
+            allItems.push({ id, type: 'potion', icon: info.icon || '🧪', name: info.name || id, count });
+        }
+    });
+    
+    if (allItems.length === 0) {
         elements.merchantWarehouseGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">仓库空空如也</div>';
         elements.merchantSellBar.style.display = 'none';
         return;
     }
     
-    const html = items.map(res => {
-        const count = gameState.resources[res];
-        const isSelected = gameState.warehouseSelection.includes(res);
-        const icons = { wood: '🪵', stone: '🪨', herb: '🌿' };
-        const names = { wood: '木材', stone: '石头', herb: '草药' };
+    const html = allItems.map(item => {
+        const isSelected = gameState.warehouseSelection.some(s => s.id === item.id && s.type === item.type);
+        const itemKey = `${item.type}:${item.id}`;
         
         return `
             <div class="merchant-warehouse-item ${isSelected ? 'selected' : ''}" 
-                data-resource="${res}"
+                data-item-type="${item.type}" data-item-id="${item.id}"
                 ${!gameState.isSelectMode ? 'style="pointer-events: none;"' : ''}>
-                <div class="merchant-warehouse-item-icon">${icons[res]}</div>
-                <div class="merchant-warehouse-item-name">${names[res]}</div>
-                <div class="merchant-warehouse-item-count">${count}</div>
+                <div class="merchant-warehouse-item-icon">${item.icon}</div>
+                <div class="merchant-warehouse-item-name">${item.name}</div>
+                <div class="merchant-warehouse-item-count">×${item.count}</div>
             </div>
         `;
     }).join('');
@@ -1115,8 +1165,9 @@ function renderMerchantWarehouse() {
     elements.merchantWarehouseGrid.querySelectorAll('.merchant-warehouse-item').forEach(item => {
         item.addEventListener('click', function(e) {
             e.stopPropagation();
-            const res = this.dataset.resource;
-            toggleWarehouseSelection(res);
+            const type = this.dataset.itemType;
+            const id = this.dataset.itemId;
+            toggleWarehouseSelection({ type, id });
         });
     });
     
@@ -1124,12 +1175,12 @@ function renderMerchantWarehouse() {
     updateSellBar();
 }
 
-function toggleWarehouseSelection(resource) {
-    const index = gameState.warehouseSelection.indexOf(resource);
+function toggleWarehouseSelection(item) {
+    const index = gameState.warehouseSelection.findIndex(s => s.type === item.type && s.id === item.id);
     if (index > -1) {
         gameState.warehouseSelection.splice(index, 1);
     } else {
-        gameState.warehouseSelection.push(resource);
+        gameState.warehouseSelection.push(item);
     }
     renderMerchantWarehouse();
 }
@@ -1143,8 +1194,10 @@ function updateSellBar() {
     }
     
     let total = 0;
-    gameState.warehouseSelection.forEach(res => {
-        total += gameState.resources[res] * CONFIG.resourcePrices[res];
+    gameState.warehouseSelection.forEach(item => {
+        const price = getItemSellPrice(item);
+        const count = getItemCount(item);
+        total += count * price;
     });
     
     elements.merchantSellTotal.textContent = total;
@@ -1157,6 +1210,28 @@ function updateSellBar() {
         elements.merchantSellBtn.textContent = '出售';
         elements.merchantSellBtn.classList.remove('confirming');
     }
+}
+
+function getItemCount(item) {
+    if (item.type === 'resource') return gameState.resources[item.id] || 0;
+    if (item.type === 'ingot') return gameState.ingotsInventory[item.id] || 0;
+    if (item.type === 'plank') return gameState.planksInventory[item.id] || 0;
+    if (item.type === 'fabric') return gameState.fabricsInventory[item.id] || 0;
+    if (item.type === 'gathering') return gameState.gatheringInventory[item.id] || 0;
+    if (item.type === 'potion') return gameState.potionsInventory[item.id] || 0;
+    return 0;
+}
+
+function getItemSellPrice(item) {
+    // 基本资源使用配置价格
+    if (item.type === 'resource') return CONFIG.resourcePrices[item.id] || 1;
+    // 其他物品根据类型定价
+    if (item.type === 'ingot') return 5;
+    if (item.type === 'plank') return 3;
+    if (item.type === 'fabric') return 4;
+    if (item.type === 'gathering') return 2;
+    if (item.type === 'potion') return 8;
+    return 1;
 }
 
 function switchMerchantTab(tab) {
@@ -1218,10 +1293,18 @@ function setupMerchantListeners() {
             if (gameState.sellConfirming) {
                 // 确认出售
                 let total = 0;
-                gameState.warehouseSelection.forEach(res => {
-                    const count = gameState.resources[res];
-                    total += count * CONFIG.resourcePrices[res];
-                    gameState.resources[res] = 0;
+                gameState.warehouseSelection.forEach(item => {
+                    const count = getItemCount(item);
+                    const price = getItemSellPrice(item);
+                    total += count * price;
+                    
+                    // 从对应库存中扣除
+                    if (item.type === 'resource') gameState.resources[item.id] = 0;
+                    else if (item.type === 'ingot') gameState.ingotsInventory[item.id] = 0;
+                    else if (item.type === 'plank') gameState.planksInventory[item.id] = 0;
+                    else if (item.type === 'fabric') gameState.fabricsInventory[item.id] = 0;
+                    else if (item.type === 'gathering') gameState.gatheringInventory[item.id] = 0;
+                    else if (item.type === 'potion') gameState.potionsInventory[item.id] = 0;
                 });
                 gameState.resources.gold += total;
                 
