@@ -301,6 +301,25 @@ const CONFIG = {
         stone: 3,
         herb: 5
     },
+    // 代币配置
+    tokens: {
+        wood_token: { id: 'wood_token', name: '伐木代币', icon: '🪙' },
+        mining_token: { id: 'mining_token', name: '挖矿代币', icon: '🪙' },
+        gathering_token: { id: 'gathering_token', name: '采集代币', icon: '🪙' },
+        forging_token: { id: 'forging_token', name: '锻造代币', icon: '🪙' },
+        crafting_token: { id: 'crafting_token', name: '制作代币', icon: '🪙' },
+        alchemy_token: { id: 'alchemy_token', name: '制药代币', icon: '🪙' },
+        tailoring_token: { id: 'tailoring_token', name: '缝制代币', icon: '🪙' }
+    },
+    // 代币获取概率配置
+    tokenDropRates: {
+        // 伐木、挖矿、采集、锻造矿锭、制作木板、制药: 1-8级概率
+        standard: [0.017, 0.024, 0.037, 0.053, 0.071, 0.092, 0.149, 0.210],
+        // 锻造工具: 1-8级概率
+        tool: [0.017, 0.033, 0.061, 0.110, 0.196, 0.343, 0.590, 0.990],
+        // 缝制布料: 1-6级概率
+        tailoring: [0.017, 0.032, 0.053, 0.078, 0.126, 0.195]
+    },
     // 工具配置
     tools: {
         axes: [
@@ -566,6 +585,16 @@ let gameState = {
     alchemyRemaining: 0,
     // 药水存储
     potionsInventory: {},
+    // 代币存储
+    tokensInventory: {
+        wood_token: 0,        // 伐木代币
+        mining_token: 0,      // 挖矿代币
+        gathering_token: 0,   // 采集代币
+        forging_token: 0,     // 锻造代币
+        crafting_token: 0,    // 制作代币
+        alchemy_token: 0,     // 制药代币
+        tailoring_token: 0    // 缝制代币
+    },
     // 装备系统
     equipment: {
         axe: null,
@@ -1244,6 +1273,16 @@ function renderMerchantWarehouse() {
         });
     });
     
+    // 代币
+    Object.entries(gameState.tokensInventory || {}).forEach(([id, count]) => {
+        if (count > 0) {
+            const token = CONFIG.tokens[id];
+            if (token) {
+                allItems.push({ id, type: 'token', icon: token.icon, name: token.name, count });
+            }
+        }
+    });
+    
     if (allItems.length === 0) {
         elements.merchantWarehouseGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">仓库空空如也</div>';
         elements.merchantSellBar.style.display = 'none';
@@ -1330,6 +1369,7 @@ function getItemCount(item) {
         const inventory = gameState.toolsInventory[item.subtype] || [];
         return inventory.includes(item.id) ? 1 : 0;
     }
+    if (item.type === 'token') return gameState.tokensInventory[item.id] || 0;
     return 0;
 }
 
@@ -1341,6 +1381,7 @@ function getItemSellPrice(item) {
     if (item.type === 'fabric') return 4;
     if (item.type === 'gathering') return 2;
     if (item.type === 'potion') return 8;
+    if (item.type === 'token') return 10; // 代币售价
     if (item.type === 'tool') {
         // 工具根据等级定价
         const allTools = [...CONFIG.tools.axes, ...CONFIG.tools.pickaxes, ...CONFIG.tools.chisels, ...CONFIG.tools.needles, ...CONFIG.tools.scythes, ...CONFIG.tools.hammers];
@@ -1736,12 +1777,16 @@ function scheduleWoodcutting(treeId) {
 
 function completeWoodcuttingOnce(treeId) {
     const tree = CONFIG.trees.find(t => t.id === treeId);
+    const treeIndex = CONFIG.trees.findIndex(t => t.id === treeId);
     
     // 添加对应的木材到物品存储
     if (!gameState.woodcuttingInventory[treeId]) {
         gameState.woodcuttingInventory[treeId] = 0;
     }
     gameState.woodcuttingInventory[treeId]++;
+    
+    // 检查是否获得伐木代币
+    tryGetToken('wood_token', treeIndex, 'standard');
     
     addExp(tree.exp);
     addSkillExp('woodcutting', tree.exp);
@@ -1824,12 +1869,16 @@ function scheduleMining(oreId) {
 
 function completeMiningOnce(oreId) {
     const ore = CONFIG.ores.find(o => o.id === oreId);
+    const oreIndex = CONFIG.ores.findIndex(o => o.id === oreId);
     
     // 添加对应的矿石到物品存储
     if (!gameState.miningInventory[oreId]) {
         gameState.miningInventory[oreId] = 0;
     }
     gameState.miningInventory[oreId]++;
+    
+    // 检查是否获得挖矿代币
+    tryGetToken('mining_token', oreIndex, 'standard');
     
     addExp(ore.exp);
     addSkillExp('mining', ore.exp);
@@ -1938,6 +1987,7 @@ function scheduleGathering(type, locationId, itemId) {
 
 function completeGatheringOnce(type, locationId, itemId) {
     const location = CONFIG.gatheringLocations.find(l => l.id === locationId);
+    const locationIndex = CONFIG.gatheringLocations.findIndex(l => l.id === locationId);
     
     // 初始化物品仓库（如果不存在）
     if (!gameState.gatheringInventory) {
@@ -1975,6 +2025,9 @@ function completeGatheringOnce(type, locationId, itemId) {
             rewards.push({ icon: randomItem.icon, name: randomItem.name, amount: 1 });
         }
     }
+    
+    // 检查是否获得采集代币（根据采集地点索引）
+    tryGetToken('gathering_token', locationIndex, 'standard');
     
     // 增加经验
     addExp(location.exp);
@@ -2296,6 +2349,23 @@ function getExpToNextLevel() {
 function addExp(amount) {
     // 玩家总等级由所有技能等级相加，不再有独立经验
     // 此函数保留但不做任何操作
+}
+
+// 检查是否获得代币
+function tryGetToken(tokenType, levelIndex, rateType = 'standard') {
+    const rates = CONFIG.tokenDropRates[rateType];
+    const rate = rates[Math.min(levelIndex, rates.length - 1)];
+    
+    if (Math.random() < rate) {
+        const token = CONFIG.tokens[tokenType];
+        if (!gameState.tokensInventory[tokenType]) {
+            gameState.tokensInventory[tokenType] = 0;
+        }
+        gameState.tokensInventory[tokenType]++;
+        showToast(`✨ 获得代币！${token.icon} ${token.name}`);
+        return true;
+    }
+    return false;
 }
 
 function updateTotalLevel() {
@@ -2923,6 +2993,7 @@ function scheduleCrafting(plankId) {
 
 function completeCraftingOnce(plankId) {
     const plank = CONFIG.woodPlanks.find(p => p.id === plankId);
+    const plankIndex = CONFIG.woodPlanks.findIndex(p => p.id === plankId);
     if (!plank) return;
     
     // 消耗材料
@@ -2935,6 +3006,9 @@ function completeCraftingOnce(plankId) {
         gameState.planksInventory[plankId] = 0;
     }
     gameState.planksInventory[plankId]++;
+    
+    // 检查是否获得制作代币
+    tryGetToken('crafting_token', plankIndex, 'standard');
     
     addExp(plank.exp);
     addSkillExp('crafting', plank.exp);
@@ -3643,6 +3717,9 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
                             gameState.toolsInventory.scythes;
     if (!targetInventory.includes(toolId)) targetInventory.push(toolId);
     
+    // 检查是否获得锻造代币（使用工具概率表）
+    tryGetToken('forging_token', toolIndex, 'tool');
+    
     addExp(tool.exp);
     addSkillExp('forging', tool.exp);
     updateUI();
@@ -3742,6 +3819,7 @@ function scheduleForging(ingotId) {
 
 function completeForgingOnce(ingotId) {
     const ingot = CONFIG.ingots.find(i => i.id === ingotId);
+    const ingotIndex = CONFIG.ingots.findIndex(i => i.id === ingotId);
     if (!ingot) return;
     
     // 消耗材料
@@ -3754,6 +3832,9 @@ function completeForgingOnce(ingotId) {
         gameState.ingotsInventory[ingotId] = 0;
     }
     gameState.ingotsInventory[ingotId]++;
+    
+    // 检查是否获得锻造代币
+    tryGetToken('forging_token', ingotIndex, 'standard');
     
     addExp(ingot.exp);
     addSkillExp('forging', ingot.exp);
@@ -3993,6 +4074,7 @@ function scheduleTailoring(fabricId) {
 
 function completeTailoringOnce(fabricId) {
     const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
+    const fabricIndex = CONFIG.fabrics.findIndex(f => f.id === fabricId);
     if (!fabric) return;
     
     // 消耗材料
@@ -4005,6 +4087,9 @@ function completeTailoringOnce(fabricId) {
         gameState.fabricsInventory[fabricId] = 0;
     }
     gameState.fabricsInventory[fabricId]++;
+    
+    // 检查是否获得缝制代币
+    tryGetToken('tailoring_token', fabricIndex, 'tailoring');
     
     addExp(fabric.exp);
     addSkillExp('tailoring', fabric.exp);
@@ -4283,6 +4368,7 @@ function scheduleAlchemy(potionId) {
 
 function completeAlchemyOnce(potionId) {
     const potion = CONFIG.potions.find(p => p.id === potionId);
+    const potionIndex = CONFIG.potions.findIndex(p => p.id === potionId);
     if (!potion) return;
     
     for (const [itemId, count] of Object.entries(potion.materials)) {
@@ -4293,6 +4379,9 @@ function completeAlchemyOnce(potionId) {
         gameState.potionsInventory[potionId] = 0;
     }
     gameState.potionsInventory[potionId]++;
+    
+    // 检查是否获得制药代币
+    tryGetToken('alchemy_token', potionIndex, 'standard');
     
     addExp(potion.exp);
     addSkillExp('alchemy', potion.exp);
