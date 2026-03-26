@@ -1083,6 +1083,18 @@ function renderMerchantWarehouse() {
     
     let allItems = [];
     
+    // 木材（伐木获得）
+    const woodNames = { pine: '青杉木', iron_birch: '铁桦木', wind_tree: '风啸木', flame_tree: '焰心木', frost_maple: '霜叶枫木', thunder_tree: '雷鸣木', ancient_oak: '古橡木', world_tree: '世界树枝' };
+    Object.entries(gameState.woodcuttingInventory || {}).forEach(([id, count]) => {
+        if (count > 0) allItems.push({ id, type: 'wood', icon: '🪵', name: woodNames[id] || id, count });
+    });
+    
+    // 矿石（挖矿获得）
+    const oreNames = { cyan_ore: '青闪石', red_iron: '赤铁石', feather_ore: '羽石', hell_ore: '白鸠石', white_ore: '狱炎石', thunder_ore: '雷鸣石', brilliant: '璀璨原石', star_ore: '星辉原石' };
+    Object.entries(gameState.miningInventory || {}).forEach(([id, count]) => {
+        if (count > 0) allItems.push({ id, type: 'ore', icon: '💎', name: oreNames[id] || id, count });
+    });
+    
     // 矿锭
     const ingotIcons = { cyan_ingot: '🔩', red_copper_ingot: '🥉', feather_ingot: '🪶', white_silver_ingot: '🪙', hell_steel_ingot: '🔥', thunder_steel_ingot: '⚡', brilliant_crystal: '💎', star_crystal: '✨' };
     const ingotNames = { cyan_ingot: '青闪铁锭', red_copper_ingot: '赤铜锭', feather_ingot: '轻羽锭', white_silver_ingot: '白银锭', hell_steel_ingot: '狱炎钢', thunder_steel_ingot: '雷鸣钢', brilliant_crystal: '璀璨水晶', star_crystal: '星辉水晶' };
@@ -1222,6 +1234,8 @@ function updateSellBar() {
 }
 
 function getItemCount(item) {
+    if (item.type === 'wood') return gameState.woodcuttingInventory[item.id] || 0;
+    if (item.type === 'ore') return gameState.miningInventory[item.id] || 0;
     if (item.type === 'ingot') return gameState.ingotsInventory[item.id] || 0;
     if (item.type === 'plank') return gameState.planksInventory[item.id] || 0;
     if (item.type === 'fabric') return gameState.fabricsInventory[item.id] || 0;
@@ -1235,6 +1249,8 @@ function getItemCount(item) {
 }
 
 function getItemSellPrice(item) {
+    if (item.type === 'wood') return 2;
+    if (item.type === 'ore') return 3;
     if (item.type === 'ingot') return 5;
     if (item.type === 'plank') return 3;
     if (item.type === 'fabric') return 4;
@@ -1318,7 +1334,9 @@ function setupMerchantListeners() {
                     total += count * price;
                     
                     // 从对应库存中扣除
-                    if (item.type === 'ingot') gameState.ingotsInventory[item.id] = 0;
+                    if (item.type === 'wood') gameState.woodcuttingInventory[item.id] = 0;
+                    else if (item.type === 'ore') gameState.miningInventory[item.id] = 0;
+                    else if (item.type === 'ingot') gameState.ingotsInventory[item.id] = 0;
                     else if (item.type === 'plank') gameState.planksInventory[item.id] = 0;
                     else if (item.type === 'fabric') gameState.fabricsInventory[item.id] = 0;
                     else if (item.type === 'gathering') gameState.gatheringInventory[item.id] = 0;
