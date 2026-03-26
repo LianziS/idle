@@ -1257,9 +1257,9 @@ function renderMerchantWarehouse() {
         return `
             <div class="merchant-warehouse-item ${isSelected ? 'selected' : ''}" 
                 data-item-type="${item.type}" data-item-id="${item.id}"
+                title="${item.name}"
                 ${!gameState.isSelectMode ? 'style="pointer-events: none;"' : ''}>
                 <div class="merchant-warehouse-item-icon">${item.icon}</div>
-                <div class="merchant-warehouse-item-name">${item.name}</div>
                 <div class="merchant-warehouse-item-count">×${item.count}</div>
             </div>
         `;
