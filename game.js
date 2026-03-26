@@ -329,6 +329,16 @@ const CONFIG = {
             { id: 'thunder_scythe', name: '雷鸣镰刀', icon: '🗡️', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
             { id: 'brilliant_scythe', name: '璀璨镰刀', icon: '🗡️', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
             { id: 'star_scythe', name: '星辉镰刀', icon: '🗡️', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
+        ],
+        hammers: [
+            { id: 'cyan_hammer', name: '青铁锤', icon: '🔨', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_hammer', name: '赤铜锤', icon: '🔨', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_hammer', name: '轻羽锤', icon: '🔨', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_hammer', name: '白银锤', icon: '🔨', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_hammer', name: '狱炎钢锤', icon: '🔨', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_hammer', name: '雷鸣钢锤', icon: '🔨', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_hammer', name: '璀璨之锤', icon: '🔨', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_hammer', name: '星辉之锤', icon: '🔨', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ]
     },
     // 工具锻造材料配置
@@ -382,6 +392,16 @@ const CONFIG = {
             { ore: 76, plank: 50, prevTool: 'hell_scythe' },
             { ore: 106, plank: 70, prevTool: 'thunder_scythe' },
             { ore: 142, plank: 94, prevTool: 'brilliant_scythe' }
+        ],
+        hammers: [
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_hammer' },
+            { ore: 22, plank: 14, prevTool: 'red_hammer' },
+            { ore: 34, plank: 22, prevTool: 'feather_hammer' },
+            { ore: 52, plank: 34, prevTool: 'white_hammer' },
+            { ore: 77, plank: 50, prevTool: 'hell_hammer' },
+            { ore: 107, plank: 70, prevTool: 'thunder_hammer' },
+            { ore: 143, plank: 94, prevTool: 'brilliant_hammer' }
         ]
     },
     // 矿石与矿锭的映射（用于工具锻造）
@@ -529,14 +549,16 @@ let gameState = {
         pickaxe: null,
         chisel: null,
         needle: null,
-        scythe: null
+        scythe: null,
+        hammer: null
     },
     toolsInventory: {
         axes: [],
         pickaxes: [],
         chisels: [],
         needles: [],
-        scythes: []
+        scythes: [],
+        hammers: []
     },
     // 行动队列系统
     actionQueue: [],     // 行动队列（最多5个）
@@ -3137,11 +3159,56 @@ function renderToolsList() {
         `;
     }).join('');
     
+    // 渲染锤子部分
+    const hammersHtml = CONFIG.tools.hammers.map((hammer, index) => {
+        const materials = CONFIG.toolCraftingMaterials.hammers[index];
+        const isUnlocked = gameState.forgingLevel >= hammer.reqForgeLevel;
+        const isActive = gameState.activeForgingTool === hammer.id;
+        const canForge = canForgeTool('hammer', index);
+        const hammerInventory = gameState.toolsInventory.hammers || [];
+        const isOwned = hammerInventory.includes(hammer.id);
+        
+        const oreId = oreIds[index];
+        const plankId = CONFIG.plankIdMapping[index];
+        const ownedOre = gameState.miningInventory[oreId] || 0;
+        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        
+        let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
+        if (materials.prevTool) {
+            const hasPrev = hammerInventory.includes(materials.prevTool);
+            materialDesc += `, 上一级(${hasPrev ? '✓' : '✗'})`;
+        }
+        
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.forgingToolRemaining || 0;
+            const total = gameState.forgingToolCount || 1;
+            actionStatus = `<div class="action-timer">锻造中... ${total >= 99999 ? '∞' : remaining + '/' + total}</div>`;
+        }
+        
+        return `
+            <div class="gathering-item-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''} ${isOwned ? 'owned' : ''}" 
+                data-tool-type="hammer" data-tool-index="${index}" data-tool-id="${hammer.id}">
+                <div class="gathering-item-icon">${hammer.icon}</div>
+                <div class="gathering-item-info">
+                    <div class="gathering-item-name">${hammer.name} ${isOwned ? '✓' : ''}</div>
+                    <div class="gathering-item-desc">${materialDesc}</div>
+                    <div class="gathering-item-meta">${Math.floor(hammer.duration/1000)}秒 | +${hammer.exp} EXP | 锻造Lv.${hammer.reqForgeLevel}</div>
+                    <div class="gathering-item-meta" style="color: #6b4f3c;">锻造速度+${Math.round(hammer.speedBonus * 100)}% | 装备需求: 锻造Lv.${hammer.reqEquipLevel}</div>
+                </div>
+                ${actionStatus}
+                ${!isUnlocked ? '<div class="gathering-item-locked">🔒 等级不足</div>' : ''}
+                ${isUnlocked && !canForge ? '<div class="gathering-item-locked">📦 材料不足</div>' : ''}
+            </div>
+        `;
+    }).join('');
+    
     elements.forgingToolsList.innerHTML = '<h4 style="margin: 10px 0; color: #E8C57F;">斧头</h4>' + axesHtml + 
                                            '<h4 style="margin: 20px 0 10px; color: #E8C57F;">镐子</h4>' + pickaxesHtml +
                                            '<h4 style="margin: 20px 0 10px; color: #E8C57F;">凿子</h4>' + chiselsHtml +
                                            '<h4 style="margin: 20px 0 10px; color: #E8C57F;">针</h4>' + needlesHtml +
-                                           '<h4 style="margin: 20px 0 10px; color: #E8C57F;">镰刀</h4>' + scythesHtml;
+                                           '<h4 style="margin: 20px 0 10px; color: #E8C57F;">镰刀</h4>' + scythesHtml +
+                                           '<h4 style="margin: 20px 0 10px; color: #E8C57F;">锤</h4>' + hammersHtml;
     
     // 绑定点击事件
     elements.forgingToolsList.querySelectorAll('.gathering-item-card').forEach(card => {
@@ -3151,7 +3218,7 @@ function renderToolsList() {
             const toolType = this.dataset.toolType;
             const toolIndex = parseInt(this.dataset.toolIndex);
             const toolId = this.dataset.toolId;
-            const toolConfigKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
+            const toolConfigKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
             const tool = CONFIG.tools[toolConfigKey][toolIndex];
             
             // 检查等级
@@ -3178,7 +3245,7 @@ function renderToolsList() {
 }
 
 function canForgeTool(toolType, index) {
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
+    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
     const materials = CONFIG.toolCraftingMaterials[materialsKey][index];
     
     // 所有工具都使用矿石
@@ -3196,6 +3263,7 @@ function canForgeTool(toolType, index) {
                           toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
                           toolType === 'chisel' ? (gameState.toolsInventory.chisels || []) : 
                           toolType === 'needle' ? (gameState.toolsInventory.needles || []) : 
+                          toolType === 'hammer' ? (gameState.toolsInventory.hammers || []) :
                           (gameState.toolsInventory.scythes || []);
         if (!inventory.includes(materials.prevTool)) return false;
     }
@@ -3204,7 +3272,7 @@ function canForgeTool(toolType, index) {
 }
 
 function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
+    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -3223,7 +3291,10 @@ function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
         elements.actionProgressFill.style.width = '0%';
     }
     
-    setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, tool.duration);
+    // 应用装备加成（锤子加速锻造）
+    const bonus = getEquipmentBonus('forging');
+    const actualDuration = Math.floor(tool.duration / (1 + bonus));
+    setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, actualDuration);
     renderToolsList();
     
     if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -3245,7 +3316,7 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
         return;
     }
     
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
+    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -3264,7 +3335,10 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
     }
     
     if (gameState.activeForgingTool === toolId) {
-        setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, tool.duration);
+        // 应用装备加成（锤子加速锻造）
+        const bonus = getEquipmentBonus('forging');
+        const actualDuration = Math.floor(tool.duration / (1 + bonus));
+        setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, actualDuration);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -3280,13 +3354,13 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
                 completeForgingToolOnce(toolId, toolType, toolIndex);
                 scheduleForgingTool(toolId, toolType, toolIndex);
             }
-        }, tool.duration);
+        }, actualDuration);
     }
 }
 
 function completeForgingToolOnce(toolId, toolType, toolIndex) {
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : 'scythes';
+    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
+    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -3305,6 +3379,7 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
                           toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
                           toolType === 'chisel' ? gameState.toolsInventory.chisels : 
                           toolType === 'needle' ? gameState.toolsInventory.needles : 
+                          toolType === 'hammer' ? gameState.toolsInventory.hammers :
                           gameState.toolsInventory.scythes;
         if (inventory) {
             const idx = inventory.indexOf(materials.prevTool);
@@ -3316,16 +3391,19 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
                       toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
                       toolType === 'chisel' ? gameState.toolsInventory.chisels : 
                       toolType === 'needle' ? gameState.toolsInventory.needles : 
+                      toolType === 'hammer' ? gameState.toolsInventory.hammers :
                       gameState.toolsInventory.scythes;
     if (!inventory) {
         if (toolType === 'chisel') gameState.toolsInventory.chisels = [];
         else if (toolType === 'needle') gameState.toolsInventory.needles = [];
         else if (toolType === 'scythe') gameState.toolsInventory.scythes = [];
+        else if (toolType === 'hammer') gameState.toolsInventory.hammers = [];
     }
     const targetInventory = toolType === 'axe' ? gameState.toolsInventory.axes : 
                             toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
                             toolType === 'chisel' ? gameState.toolsInventory.chisels : 
                             toolType === 'needle' ? gameState.toolsInventory.needles : 
+                            toolType === 'hammer' ? gameState.toolsInventory.hammers :
                             gameState.toolsInventory.scythes;
     if (!targetInventory.includes(toolId)) targetInventory.push(toolId);
     
@@ -3358,7 +3436,10 @@ function startForgingWithCount(ingotId, count) {
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, ingot.duration);
+    // 应用装备加成（锤子加速锻造）
+    const bonus = getEquipmentBonus('forging');
+    const actualDuration = Math.floor(ingot.duration / (1 + bonus));
+    setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actualDuration);
     renderForging();
     
     // 启动进度条动画
@@ -3400,7 +3481,10 @@ function scheduleForging(ingotId) {
     }
     
     if (gameState.activeForging === ingotId) {
-        setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, ingot.duration);
+        // 应用装备加成（锤子加速锻造）
+        const bonus = getEquipmentBonus('forging');
+        const actualDuration = Math.floor(ingot.duration / (1 + bonus));
+        setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actualDuration);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -3416,7 +3500,7 @@ function scheduleForging(ingotId) {
                 completeForgingOnce(ingotId);
                 scheduleForging(ingotId);
             }
-        }, ingot.duration);
+        }, actualDuration);
     }
 }
 
@@ -3735,7 +3819,8 @@ function renderToolsInventory() {
         { key: 'pickaxes', config: 'pickaxes', name: '镐子' },
         { key: 'chisels', config: 'chisels', name: '凿子' },
         { key: 'needles', config: 'needles', name: '针' },
-        { key: 'scythes', config: 'scythes', name: '镰刀' }
+        { key: 'scythes', config: 'scythes', name: '镰刀' },
+        { key: 'hammers', config: 'hammers', name: '锤' }
     ];
     
     let hasTools = false;
@@ -3753,7 +3838,8 @@ function renderToolsInventory() {
                                        (type.key === 'pickaxes' && gameState.equipment.pickaxe === toolId) ||
                                        (type.key === 'chisels' && gameState.equipment.chisel === toolId) ||
                                        (type.key === 'needles' && gameState.equipment.needle === toolId) ||
-                                       (type.key === 'scythes' && gameState.equipment.scythe === toolId);
+                                       (type.key === 'scythes' && gameState.equipment.scythe === toolId) ||
+                                       (type.key === 'hammers' && gameState.equipment.hammer === toolId);
                     html += `
                         <div class="storage-item-small ${isEquipped ? 'equipped' : ''}">
                             <div class="storage-item-small-icon">${tool.icon}</div>
@@ -5006,6 +5092,20 @@ function renderEquipmentSlots() {
         scytheName.textContent = '空';
     }
     
+    // 渲染锤子槽位
+    const hammerSlot = document.getElementById('equipment-slot-hammer');
+    const hammerName = document.getElementById('equipment-slot-hammer-name');
+    if (gameState.equipment.hammer) {
+        const tool = CONFIG.tools.hammers.find(t => t.id === gameState.equipment.hammer);
+        if (tool) {
+            hammerSlot.textContent = tool.icon + ' ✓';
+            hammerName.textContent = tool.name;
+        }
+    } else {
+        hammerSlot.textContent = '🔨';
+        hammerName.textContent = '空';
+    }
+    
     // 更新槽位状态
     document.querySelectorAll('.equipment-slot').forEach(slot => {
         const slotType = slot.dataset.slot;
@@ -5023,7 +5123,7 @@ function setupEquipmentListeners() {
             if (this.classList.contains('locked')) return;
             
             const slotType = this.dataset.slot;
-            const validSlots = ['axe', 'pickaxe', 'chisel', 'needle', 'scythe'];
+            const validSlots = ['axe', 'pickaxe', 'chisel', 'needle', 'scythe', 'hammer'];
             if (validSlots.includes(slotType)) {
                 openToolSelectModal(slotType);
             }
@@ -5068,27 +5168,30 @@ function openToolSelectModal(slotType) {
         pickaxe: '镐子', 
         chisel: '凿子', 
         needle: '针', 
-        scythe: '镰刀' 
+        scythe: '镰刀',
+        hammer: '锤'
     };
     const slotSkills = {
         axe: 'woodcuttingLevel',
         pickaxe: 'miningLevel',
         chisel: 'craftingLevel',
         needle: 'tailoringLevel',
-        scythe: 'gatheringLevel'
+        scythe: 'gatheringLevel',
+        hammer: 'forgingLevel'
     };
     const slotBonusNames = {
         axe: '伐木',
         pickaxe: '挖矿',
         chisel: '制作',
         needle: '缝制',
-        scythe: '采集'
+        scythe: '采集',
+        hammer: '锻造'
     };
     
     title.textContent = `选择${slotNames[slotType] || '工具'}`;
     
-    const tools = CONFIG.tools[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : 'scythes'];
-    const inventory = gameState.toolsInventory[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : 'scythes'] || [];
+    const tools = CONFIG.tools[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : slotType === 'hammer' ? 'hammers' : 'scythes'];
+    const inventory = gameState.toolsInventory[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : slotType === 'hammer' ? 'hammers' : 'scythes'] || [];
     const currentEquipped = gameState.equipment[slotType];
     
     if (inventory.length === 0) {
@@ -5169,6 +5272,26 @@ function getEquipmentBonus(type) {
         }
     } else if (type === 'mining' && gameState.equipment.pickaxe) {
         const tool = CONFIG.tools.pickaxes.find(t => t.id === gameState.equipment.pickaxe);
+        if (tool) {
+            bonus = tool.speedBonus || 0;
+        }
+    } else if (type === 'crafting' && gameState.equipment.chisel) {
+        const tool = CONFIG.tools.chisels.find(t => t.id === gameState.equipment.chisel);
+        if (tool) {
+            bonus = tool.speedBonus || 0;
+        }
+    } else if (type === 'tailoring' && gameState.equipment.needle) {
+        const tool = CONFIG.tools.needles.find(t => t.id === gameState.equipment.needle);
+        if (tool) {
+            bonus = tool.speedBonus || 0;
+        }
+    } else if (type === 'gathering' && gameState.equipment.scythe) {
+        const tool = CONFIG.tools.scythes.find(t => t.id === gameState.equipment.scythe);
+        if (tool) {
+            bonus = tool.speedBonus || 0;
+        }
+    } else if (type === 'forging' && gameState.equipment.hammer) {
+        const tool = CONFIG.tools.hammers.find(t => t.id === gameState.equipment.hammer);
         if (tool) {
             bonus = tool.speedBonus || 0;
         }
