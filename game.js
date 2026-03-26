@@ -394,14 +394,14 @@ const CONFIG = {
             { ore: 142, plank: 94, prevTool: 'brilliant_scythe' }
         ],
         hammers: [
-            { ore: 10, plank: 6, prevTool: null },
-            { ore: 16, plank: 10, prevTool: 'cyan_hammer' },
-            { ore: 22, plank: 14, prevTool: 'red_hammer' },
-            { ore: 34, plank: 22, prevTool: 'feather_hammer' },
-            { ore: 52, plank: 34, prevTool: 'white_hammer' },
-            { ore: 77, plank: 50, prevTool: 'hell_hammer' },
-            { ore: 107, plank: 70, prevTool: 'thunder_hammer' },
-            { ore: 143, plank: 94, prevTool: 'brilliant_hammer' }
+            { ingot: 10, prevTool: null },
+            { ingot: 16, prevTool: 'cyan_hammer' },
+            { ingot: 22, prevTool: 'red_hammer' },
+            { ingot: 34, prevTool: 'feather_hammer' },
+            { ingot: 52, prevTool: 'white_hammer' },
+            { ingot: 77, prevTool: 'hell_hammer' },
+            { ingot: 107, prevTool: 'thunder_hammer' },
+            { ingot: 143, prevTool: 'brilliant_hammer' }
         ]
     },
     // 矿石与矿锭的映射（用于工具锻造）
@@ -3168,15 +3168,22 @@ function renderToolsList() {
         const hammerInventory = gameState.toolsInventory.hammers || [];
         const isOwned = hammerInventory.includes(hammer.id);
         
-        const oreId = oreIds[index];
-        const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        // 锤子使用矿锭作为材料
+        const ingotIds = ['cyan_ingot', 'red_copper_ingot', 'feather_ingot', 'white_silver_ingot', 'hell_steel_ingot', 'thunder_steel_ingot', 'brilliant_crystal', 'star_crystal'];
+        const ingotNames = {
+            'cyan_ingot': '青闪铁锭', 'red_copper_ingot': '赤铜锭', 'feather_ingot': '轻羽锭',
+            'white_silver_ingot': '白银锭', 'hell_steel_ingot': '狱炎钢', 'thunder_steel_ingot': '雷鸣钢',
+            'brilliant_crystal': '璀璨水晶', 'star_crystal': '星辉水晶'
+        };
+        const ingotId = ingotIds[index];
+        const ownedIngot = gameState.ingotsInventory[ingotId] || 0;
         
-        let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
+        let materialDesc = `${ingotNames[ingotId]}×${materials.ingot}(${ownedIngot})`;
         if (materials.prevTool) {
             const hasPrev = hammerInventory.includes(materials.prevTool);
-            materialDesc += `, 上一级(${hasPrev ? '✓' : '✗'})`;
+            const prevTool = CONFIG.tools.hammers.find(t => t.id === materials.prevTool);
+            const prevToolName = prevTool ? prevTool.name : '上一级锤';
+            materialDesc += `, ${prevToolName}(${hasPrev ? '✓' : '✗'})`;
         }
         
         let actionStatus = '';
@@ -3248,15 +3255,23 @@ function canForgeTool(toolType, index) {
     const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : 'scythes';
     const materials = CONFIG.toolCraftingMaterials[materialsKey][index];
     
-    // 所有工具都使用矿石
-    const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
-    const oreId = oreIds[index];
-    const ownedOre = gameState.miningInventory[oreId] || 0;
-    if (ownedOre < materials.ore) return false;
-    
-    const plankId = CONFIG.plankIdMapping[index];
-    const ownedPlank = gameState.planksInventory[plankId] || 0;
-    if (ownedPlank < materials.plank) return false;
+    // 锤子使用矿锭作为材料
+    if (toolType === 'hammer') {
+        const ingotIds = ['cyan_ingot', 'red_copper_ingot', 'feather_ingot', 'white_silver_ingot', 'hell_steel_ingot', 'thunder_steel_ingot', 'brilliant_crystal', 'star_crystal'];
+        const ingotId = ingotIds[index];
+        const ownedIngot = gameState.ingotsInventory[ingotId] || 0;
+        if (ownedIngot < materials.ingot) return false;
+    } else {
+        // 其他工具使用矿石和木板
+        const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
+        const oreId = oreIds[index];
+        const ownedOre = gameState.miningInventory[oreId] || 0;
+        if (ownedOre < materials.ore) return false;
+        
+        const plankId = CONFIG.plankIdMapping[index];
+        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        if (ownedPlank < materials.plank) return false;
+    }
     
     if (materials.prevTool) {
         const inventory = toolType === 'axe' ? gameState.toolsInventory.axes : 
@@ -3366,13 +3381,20 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
     
     const materials = CONFIG.toolCraftingMaterials[materialsKey][toolIndex];
     
-    // 所有工具都使用矿石
-    const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
-    const oreId = oreIds[toolIndex];
-    gameState.miningInventory[oreId] -= materials.ore;
-    
-    const plankId = CONFIG.plankIdMapping[toolIndex];
-    gameState.planksInventory[plankId] -= materials.plank;
+    // 锤子使用矿锭作为材料
+    if (toolType === 'hammer') {
+        const ingotIds = ['cyan_ingot', 'red_copper_ingot', 'feather_ingot', 'white_silver_ingot', 'hell_steel_ingot', 'thunder_steel_ingot', 'brilliant_crystal', 'star_crystal'];
+        const ingotId = ingotIds[toolIndex];
+        gameState.ingotsInventory[ingotId] -= materials.ingot;
+    } else {
+        // 其他工具使用矿石和木板
+        const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
+        const oreId = oreIds[toolIndex];
+        gameState.miningInventory[oreId] -= materials.ore;
+        
+        const plankId = CONFIG.plankIdMapping[toolIndex];
+        gameState.planksInventory[plankId] -= materials.plank;
+    }
     
     if (materials.prevTool) {
         const inventory = toolType === 'axe' ? gameState.toolsInventory.axes : 
