@@ -790,6 +790,7 @@ function init() {
     renderPotionsInventory();
     renderFabricsInventory();
     renderToolsInventory();
+    renderTokensInventory();
     
     // 初始化仓库二级菜单
     setupStorageTabs();
@@ -1786,7 +1787,7 @@ function completeWoodcuttingOnce(treeId) {
     gameState.woodcuttingInventory[treeId]++;
     
     // 检查是否获得伐木代币
-    tryGetToken('wood_token', treeIndex, 'standard');
+    const token = tryGetToken('wood_token', treeIndex, 'standard');
     
     addExp(tree.exp);
     addSkillExp('woodcutting', tree.exp);
@@ -1794,7 +1795,11 @@ function completeWoodcuttingOnce(treeId) {
     saveGame();
     // 显示奖励
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${tree.dropIcon} ${tree.drop}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${tree.dropIcon} ${tree.drop}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -1878,7 +1883,7 @@ function completeMiningOnce(oreId) {
     gameState.miningInventory[oreId]++;
     
     // 检查是否获得挖矿代币
-    tryGetToken('mining_token', oreIndex, 'standard');
+    const token = tryGetToken('mining_token', oreIndex, 'standard');
     
     addExp(ore.exp);
     addSkillExp('mining', ore.exp);
@@ -1886,7 +1891,11 @@ function completeMiningOnce(oreId) {
     saveGame();
     // 显示奖励
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${ore.dropIcon} ${ore.drop}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${ore.dropIcon} ${ore.drop}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -2027,7 +2036,7 @@ function completeGatheringOnce(type, locationId, itemId) {
     }
     
     // 检查是否获得采集代币（根据采集地点索引）
-    tryGetToken('gathering_token', locationIndex, 'standard');
+    const token = tryGetToken('gathering_token', locationIndex, 'standard');
     
     // 增加经验
     addExp(location.exp);
@@ -2038,9 +2047,13 @@ function completeGatheringOnce(type, locationId, itemId) {
     
     // 显示奖励
     if (elements.actionRewards && rewards.length > 0) {
-        elements.actionRewards.innerHTML = rewards.map(r => 
+        let rewardHtml = rewards.map(r => 
             `<span class="action-reward-item">+${r.amount} ${r.icon} ${r.name}</span>`
         ).join('');
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -2274,6 +2287,7 @@ function updateUI() {
     renderFabricsInventory();
     renderPotionsInventory();
     renderToolsInventory();
+    renderTokensInventory();
 }
 
 function formatNumber(num) {
@@ -2351,7 +2365,7 @@ function addExp(amount) {
     // 此函数保留但不做任何操作
 }
 
-// 检查是否获得代币
+// 检查是否获得代币，返回代币信息或null
 function tryGetToken(tokenType, levelIndex, rateType = 'standard') {
     const rates = CONFIG.tokenDropRates[rateType];
     const rate = rates[Math.min(levelIndex, rates.length - 1)];
@@ -2362,10 +2376,9 @@ function tryGetToken(tokenType, levelIndex, rateType = 'standard') {
             gameState.tokensInventory[tokenType] = 0;
         }
         gameState.tokensInventory[tokenType]++;
-        showToast(`✨ 获得代币！${token.icon} ${token.name}`);
-        return true;
+        return token; // 返回代币信息
     }
-    return false;
+    return null;
 }
 
 function updateTotalLevel() {
@@ -3008,7 +3021,7 @@ function completeCraftingOnce(plankId) {
     gameState.planksInventory[plankId]++;
     
     // 检查是否获得制作代币
-    tryGetToken('crafting_token', plankIndex, 'standard');
+    const token = tryGetToken('crafting_token', plankIndex, 'standard');
     
     addExp(plank.exp);
     addSkillExp('crafting', plank.exp);
@@ -3017,7 +3030,11 @@ function completeCraftingOnce(plankId) {
     
     // 显示奖励
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${plank.icon} ${plank.name}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${plank.icon} ${plank.name}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -3718,7 +3735,7 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
     if (!targetInventory.includes(toolId)) targetInventory.push(toolId);
     
     // 检查是否获得锻造代币（使用工具概率表）
-    tryGetToken('forging_token', toolIndex, 'tool');
+    const token = tryGetToken('forging_token', toolIndex, 'tool');
     
     addExp(tool.exp);
     addSkillExp('forging', tool.exp);
@@ -3726,7 +3743,11 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
     saveGame();
     
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${tool.icon} ${tool.name}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${tool.icon} ${tool.name}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -3834,7 +3855,7 @@ function completeForgingOnce(ingotId) {
     gameState.ingotsInventory[ingotId]++;
     
     // 检查是否获得锻造代币
-    tryGetToken('forging_token', ingotIndex, 'standard');
+    const token = tryGetToken('forging_token', ingotIndex, 'standard');
     
     addExp(ingot.exp);
     addSkillExp('forging', ingot.exp);
@@ -3843,7 +3864,11 @@ function completeForgingOnce(ingotId) {
     
     // 显示奖励
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${ingot.icon} ${ingot.name}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${ingot.icon} ${ingot.name}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -4089,7 +4114,7 @@ function completeTailoringOnce(fabricId) {
     gameState.fabricsInventory[fabricId]++;
     
     // 检查是否获得缝制代币
-    tryGetToken('tailoring_token', fabricIndex, 'tailoring');
+    const token = tryGetToken('tailoring_token', fabricIndex, 'tailoring');
     
     addExp(fabric.exp);
     addSkillExp('tailoring', fabric.exp);
@@ -4098,7 +4123,11 @@ function completeTailoringOnce(fabricId) {
     
     // 显示奖励
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${fabric.icon} ${fabric.name}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${fabric.icon} ${fabric.name}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -4381,7 +4410,7 @@ function completeAlchemyOnce(potionId) {
     gameState.potionsInventory[potionId]++;
     
     // 检查是否获得制药代币
-    tryGetToken('alchemy_token', potionIndex, 'standard');
+    const token = tryGetToken('alchemy_token', potionIndex, 'standard');
     
     addExp(potion.exp);
     addSkillExp('alchemy', potion.exp);
@@ -4389,7 +4418,11 @@ function completeAlchemyOnce(potionId) {
     saveGame();
     
     if (elements.actionRewards) {
-        elements.actionRewards.innerHTML = `<span class="action-reward-item">+1 ${potion.icon} ${potion.name}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+1 ${potion.icon} ${potion.name}</span>`;
+        if (token) {
+            rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
+        }
+        elements.actionRewards.innerHTML = rewardHtml;
         setTimeout(() => { if (elements.actionRewards) elements.actionRewards.innerHTML = ''; }, 3000);
     }
 }
@@ -4420,6 +4453,37 @@ function renderPotionsInventory() {
         .join('');
     
     container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无药水</div>';
+}
+
+function renderTokensInventory() {
+    const container = document.getElementById('storage-tokens-items');
+    if (!container) return;
+    
+    const tokens = gameState.tokensInventory || {};
+    const hasTokens = Object.values(tokens).some(count => count > 0);
+    
+    if (!hasTokens) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无代币</div>';
+        return;
+    }
+    
+    const html = Object.entries(tokens)
+        .filter(([id, count]) => count > 0)
+        .map(([id, count]) => {
+            const token = CONFIG.tokens[id];
+            const name = token ? token.name : id;
+            const icon = token ? token.icon : '🪙';
+            return `
+                <div class="storage-item-small">
+                    <div class="storage-item-small-icon">${icon}</div>
+                    <div class="storage-item-small-name">${name}</div>
+                    <div class="storage-item-small-count">×${count}</div>
+                </div>
+            `;
+        })
+        .join('');
+    
+    container.innerHTML = html;
 }
 
 function setupAlchemyTabs() {
