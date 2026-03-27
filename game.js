@@ -1292,7 +1292,7 @@ function renderMerchantWarehouse() {
     });
     
     if (allItems.length === 0) {
-        elements.merchantWarehouseGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">仓库空空如也</div>';
+        elements.merchantWarehouseGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无物品</div>';
         elements.merchantSellBar.style.display = 'none';
         return;
     }
