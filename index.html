@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-27 18:20</span>
+            <span class="update-time-badge">代码更新: 2026-03-27 18:45</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -615,6 +615,43 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-btn secondary" id="tool-select-cancel">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 出售数量选择弹窗 -->
+    <div class="modal" id="sell-amount-modal">
+        <div class="modal-content" style="max-width: 320px;">
+            <div class="modal-header">
+                <h2>选择出售数量</h2>
+                <span class="modal-close" id="sell-amount-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <span id="sell-item-icon" style="font-size: 32px;"></span>
+                    <span id="sell-item-name" style="font-size: 16px; margin-left: 8px;"></span>
+                </div>
+                <div style="text-align: center; color: #888; margin-bottom: 15px;">
+                    拥有: <span id="sell-item-owned">0</span> 个 | 单价: <span id="sell-item-price">0</span> 金币
+                </div>
+                <div class="action-count-options" style="grid-template-columns: repeat(3, 1fr);">
+                    <button class="count-option" data-count="1">1</button>
+                    <button class="count-option" data-count="10">10</button>
+                    <button class="count-option" data-count="50">50</button>
+                    <button class="count-option" data-count="100">100</button>
+                    <button class="count-option" id="sell-all-btn">全部</button>
+                </div>
+                <div class="action-count-custom">
+                    <label>自定义数量：</label>
+                    <input type="number" id="sell-amount-input" min="1" placeholder="输入数量">
+                </div>
+                <div style="text-align: center; margin-top: 10px; color: #4CAF50; font-weight: bold;">
+                    总计: <span id="sell-total-price">0</span> 金币
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="sell-amount-cancel">取消</button>
+                <button class="modal-btn primary" id="sell-amount-confirm">确认出售</button>
             </div>
         </div>
     </div>

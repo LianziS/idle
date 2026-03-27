@@ -751,6 +751,17 @@ const elements = {
     merchantSellBar: document.getElementById('merchant-sell-bar'),
     merchantSellTotal: document.getElementById('merchant-sell-total'),
     merchantSellBtn: document.getElementById('merchant-sell-btn'),
+    sellAmountModal: document.getElementById('sell-amount-modal'),
+    sellItemIcon: document.getElementById('sell-item-icon'),
+    sellItemName: document.getElementById('sell-item-name'),
+    sellItemOwned: document.getElementById('sell-item-owned'),
+    sellItemPrice: document.getElementById('sell-item-price'),
+    sellAmountInput: document.getElementById('sell-amount-input'),
+    sellTotalPrice: document.getElementById('sell-total-price'),
+    sellAmountConfirm: document.getElementById('sell-amount-confirm'),
+    sellAmountCancel: document.getElementById('sell-amount-cancel'),
+    sellAmountClose: document.getElementById('sell-amount-close'),
+    sellAllBtn: document.getElementById('sell-all-btn'),
     // 行动次数选择弹窗
     actionModal: document.getElementById('action-modal'),
     actionModalTitle: document.getElementById('action-modal-title'),
@@ -779,6 +790,8 @@ const elements = {
 
 // 临时存储待执行的行动
 let pendingAction = null;
+// 临时存储待出售的物品
+let pendingSellItem = null;
 
 function init() {
     loadGame();
@@ -1328,16 +1341,17 @@ function renderMerchantWarehouse() {
     }
     
     const html = allItems.map(item => {
-        const isSelected = gameState.warehouseSelection.some(s => s.id === item.id && s.type === item.type);
+        const selectedInfo = gameState.warehouseSelection.find(s => s.id === item.id && s.type === item.type);
+        const isSelected = !!selectedInfo;
         const itemKey = `${item.type}:${item.id}`;
         
         return `
             <div class="merchant-warehouse-item ${isSelected ? 'selected' : ''}" 
                 data-item-type="${item.type}" data-item-id="${item.id}"
-                title="${item.name}"
+                title="${item.name}${isSelected ? ` (已选${selectedInfo.count}个)` : ''}"
                 ${!gameState.isSelectMode ? 'style="pointer-events: none;"' : ''}>
                 <div class="merchant-warehouse-item-icon">${item.icon}</div>
-                <div class="merchant-warehouse-item-count">×${item.count}</div>
+                <div class="merchant-warehouse-item-count">×${item.count}${isSelected ? `<span style="color:#4CAF50"> (${selectedInfo.count})</span>` : ''}</div>
             </div>
         `;
     }).join('');
@@ -1345,12 +1359,27 @@ function renderMerchantWarehouse() {
     elements.merchantWarehouseGrid.innerHTML = html;
     
     // 绑定选择事件
-    elements.merchantWarehouseGrid.querySelectorAll('.merchant-warehouse-item').forEach(item => {
-        item.addEventListener('click', function(e) {
+    elements.merchantWarehouseGrid.querySelectorAll('.merchant-warehouse-item').forEach(itemEl => {
+        itemEl.addEventListener('click', function(e) {
             e.stopPropagation();
             const type = this.dataset.itemType;
             const id = this.dataset.itemId;
-            toggleWarehouseSelection({ type, id });
+            const count = getItemCount({ type, id });
+            
+            // 找到物品信息
+            const itemInfo = allItems.find(i => i.type === type && i.id === id);
+            if (!itemInfo) return;
+            
+            // 检查是否已选中
+            const selectedIndex = gameState.warehouseSelection.findIndex(s => s.type === type && s.id === id);
+            
+            if (selectedIndex > -1) {
+                // 已选中，弹出修改数量弹窗
+                openSellAmountModal({ type, id, name: itemInfo.name, icon: itemInfo.icon, owned: count }, selectedIndex);
+            } else {
+                // 未选中，弹出选择数量弹窗
+                openSellAmountModal({ type, id, name: itemInfo.name, icon: itemInfo.icon, owned: count }, -1);
+            }
         });
     });
     
@@ -1358,7 +1387,109 @@ function renderMerchantWarehouse() {
     updateSellBar();
 }
 
+function openSellAmountModal(item, editIndex) {
+    if (!elements.sellAmountModal) return;
+    
+    pendingSellItem = { ...item, editIndex };
+    
+    const price = getItemSellPrice(item);
+    elements.sellItemIcon.textContent = item.icon;
+    elements.sellItemName.textContent = item.name;
+    elements.sellItemOwned.textContent = item.owned;
+    elements.sellItemPrice.textContent = price;
+    elements.sellAmountInput.value = item.owned;
+    elements.sellAmountInput.max = item.owned;
+    elements.sellTotalPrice.textContent = item.owned * price;
+    
+    // 重置选中状态
+    document.querySelectorAll('#sell-amount-modal .count-option').forEach(o => o.classList.remove('selected'));
+    
+    elements.sellAmountModal.classList.add('show');
+}
+
+function setupSellAmountListeners() {
+    // 关闭弹窗
+    if (elements.sellAmountClose) {
+        elements.sellAmountClose.addEventListener('click', () => {
+            elements.sellAmountModal.classList.remove('show');
+            pendingSellItem = null;
+        });
+    }
+    if (elements.sellAmountCancel) {
+        elements.sellAmountCancel.addEventListener('click', () => {
+            elements.sellAmountModal.classList.remove('show');
+            pendingSellItem = null;
+        });
+    }
+    
+    // 数量选项点击
+    document.querySelectorAll('#sell-amount-modal .count-option').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#sell-amount-modal .count-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            if (this.id === 'sell-all-btn') {
+                elements.sellAmountInput.value = pendingSellItem.owned;
+            } else {
+                elements.sellAmountInput.value = this.dataset.count;
+            }
+            updateSellTotalPrice();
+        });
+    });
+    
+    // 输入框变化
+    if (elements.sellAmountInput) {
+        elements.sellAmountInput.addEventListener('input', updateSellTotalPrice);
+    }
+    
+    // 确认出售
+    if (elements.sellAmountConfirm) {
+        elements.sellAmountConfirm.addEventListener('click', confirmSellAmount);
+    }
+}
+
+function updateSellTotalPrice() {
+    if (!pendingSellItem) return;
+    const count = parseInt(elements.sellAmountInput.value) || 0;
+    const price = getItemSellPrice(pendingSellItem);
+    elements.sellTotalPrice.textContent = count * price;
+}
+
+function confirmSellAmount() {
+    if (!pendingSellItem) return;
+    
+    const count = parseInt(elements.sellAmountInput.value) || 0;
+    if (count <= 0) {
+        showToast('❌ 请输入有效数量');
+        return;
+    }
+    if (count > pendingSellItem.owned) {
+        showToast('❌ 数量超过拥有数量');
+        return;
+    }
+    
+    const { type, id, name, icon, editIndex } = pendingSellItem;
+    
+    if (editIndex > -1) {
+        // 修改已有选择
+        if (count === 0) {
+            // 移除
+            gameState.warehouseSelection.splice(editIndex, 1);
+        } else {
+            gameState.warehouseSelection[editIndex].count = count;
+        }
+    } else {
+        // 添加新选择
+        gameState.warehouseSelection.push({ type, id, name, icon, count });
+    }
+    
+    elements.sellAmountModal.classList.remove('show');
+    pendingSellItem = null;
+    renderMerchantWarehouse();
+}
+
 function toggleWarehouseSelection(item) {
+    // 保留此函数用于兼容，但实际逻辑已移到点击事件中
     const index = gameState.warehouseSelection.findIndex(s => s.type === item.type && s.id === item.id);
     if (index > -1) {
         gameState.warehouseSelection.splice(index, 1);
@@ -1379,7 +1510,7 @@ function updateSellBar() {
     let total = 0;
     gameState.warehouseSelection.forEach(item => {
         const price = getItemSellPrice(item);
-        const count = getItemCount(item);
+        const count = item.count || 0;
         total += count * price;
     });
     
@@ -1493,19 +1624,21 @@ function setupMerchantListeners() {
                 // 确认出售
                 let total = 0;
                 gameState.warehouseSelection.forEach(item => {
-                    const count = getItemCount(item);
+                    const count = item.count || 0;
                     const price = getItemSellPrice(item);
                     total += count * price;
                     
-                    // 从对应库存中扣除
-                    if (item.type === 'wood') gameState.woodcuttingInventory[item.id] = 0;
-                    else if (item.type === 'ore') gameState.miningInventory[item.id] = 0;
-                    else if (item.type === 'ingot') gameState.ingotsInventory[item.id] = 0;
-                    else if (item.type === 'plank') gameState.planksInventory[item.id] = 0;
-                    else if (item.type === 'fabric') gameState.fabricsInventory[item.id] = 0;
-                    else if (item.type === 'gathering') gameState.gatheringInventory[item.id] = 0;
-                    else if (item.type === 'potion') gameState.potionsInventory[item.id] = 0;
+                    // 从对应库存中扣除指定数量
+                    if (item.type === 'wood') gameState.woodcuttingInventory[item.id] -= count;
+                    else if (item.type === 'ore') gameState.miningInventory[item.id] -= count;
+                    else if (item.type === 'ingot') gameState.ingotsInventory[item.id] -= count;
+                    else if (item.type === 'plank') gameState.planksInventory[item.id] -= count;
+                    else if (item.type === 'fabric') gameState.fabricsInventory[item.id] -= count;
+                    else if (item.type === 'gathering') gameState.gatheringInventory[item.id] -= count;
+                    else if (item.type === 'potion') gameState.potionsInventory[item.id] -= count;
+                    else if (item.type === 'essence') gameState.essencesInventory[item.id] -= count;
                     else if (item.type === 'tool') {
+                        // 工具每次只能卖1个
                         const inventory = gameState.toolsInventory[item.subtype] || [];
                         const idx = inventory.indexOf(item.id);
                         if (idx > -1) inventory.splice(idx, 1);
@@ -1530,6 +1663,9 @@ function setupMerchantListeners() {
                 updateUI();
                 saveGame();
                 renderMerchantWarehouse();
+                renderGatheringInventory();
+                renderWoodcuttingInventory();
+                renderMiningInventory();
             } else {
                 // 第一次点击，进入确认状态
                 gameState.sellConfirming = true;
@@ -1537,6 +1673,9 @@ function setupMerchantListeners() {
             }
         });
     }
+    
+    // 初始化出售数量选择监听器
+    setupSellAmountListeners();
 }
 
 function switchPage(pageId) {
