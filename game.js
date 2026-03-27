@@ -1534,6 +1534,7 @@ function getItemCount(item) {
     if (item.type === 'fabric') return gameState.fabricsInventory[item.id] || 0;
     if (item.type === 'gathering') return gameState.gatheringInventory[item.id] || 0;
     if (item.type === 'potion') return gameState.potionsInventory[item.id] || 0;
+    if (item.type === 'essence') return gameState.essencesInventory[item.id] || 0;
     if (item.type === 'tool') {
         const inventory = gameState.toolsInventory[item.subtype] || [];
         return inventory.includes(item.id) ? 1 : 0;
@@ -1550,6 +1551,7 @@ function getItemSellPrice(item) {
     if (item.type === 'fabric') return 4;
     if (item.type === 'gathering') return 2;
     if (item.type === 'potion') return 8;
+    if (item.type === 'essence') return 6; // 精华售价
     if (item.type === 'token') return 10; // 代币售价
     if (item.type === 'tool') {
         // 工具根据等级定价
