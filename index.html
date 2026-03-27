@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-27 21:15</span>
+            <span class="update-time-badge">代码更新: 2026-03-27 21:55</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -177,6 +177,22 @@
                     <div class="nav-exp-bar">
                         <div class="nav-exp-bg">
                             <div class="nav-exp-fill" id="nav-alchemy-exp"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 酿造 -->
+            <div class="nav-item nav-item-skill" data-page="brewing">
+                <span class="nav-icon">🍺</span>
+                <div class="nav-skill-wrapper">
+                    <div class="nav-text-row">
+                        <span class="nav-text">酿造</span>
+                        <span class="nav-exp-level" id="nav-brewing-lvl">1</span>
+                    </div>
+                    <div class="nav-exp-bar">
+                        <div class="nav-exp-bg">
+                            <div class="nav-exp-fill" id="nav-brewing-exp"></div>
                         </div>
                     </div>
                 </div>
@@ -444,15 +460,35 @@
                 <div class="gathering-tabs" id="alchemy-tabs">
                     <button class="gathering-tab active" data-tab="potions">炼药</button>
                     <button class="gathering-tab" data-tab="essences">提炼</button>
-                    <button class="gathering-tab" data-tab="brews">酿酒</button>
                     <button class="gathering-tab" data-tab="other">其他</button>
                 </div>
                 <!-- 药水列表 -->
                 <div class="gathering-items-list active" id="alchemy-potions-list"></div>
                 <!-- 提炼列表 -->
                 <div class="gathering-items-list" id="alchemy-essences-list"></div>
+            </section>
+        </main>
+
+        <!-- 酿造页 -->
+        <main class="page" id="page-brewing">
+            <section class="panel">
+                <h2 class="panel-title">🍺 酿造</h2>
+                <div class="skill-exp-bar">
+                    <div class="skill-exp-bg">
+                        <div class="skill-exp-fill" id="brewing-exp-fill"></div>
+                    </div>
+                    <span class="skill-exp-level" id="brewing-level">1</span>
+                </div>
+                <!-- 酿造标签页 -->
+                <div class="gathering-tabs" id="brewing-tabs">
+                    <button class="gathering-tab active" data-tab="brews">酿酒</button>
+                    <button class="gathering-tab" data-tab="aging">地窖陈酿</button>
+                    <button class="gathering-tab" data-tab="other">其他</button>
+                </div>
                 <!-- 酿酒列表 -->
-                <div class="gathering-items-list" id="alchemy-brews-list"></div>
+                <div class="gathering-items-list active" id="brewing-brews-list"></div>
+                <!-- 陈酿列表 -->
+                <div class="gathering-items-list" id="brewing-aging-list"></div>
             </section>
         </main>
 

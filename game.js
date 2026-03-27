@@ -619,7 +619,9 @@ let gameState = {
     activeEssence: null,
     essenceCount: 0,
     essenceRemaining: 0,
-    // 酿酒状态
+    // 酿造状态
+    brewingLevel: 1,
+    brewingExp: 0,
     activeBrew: null,
     brewCount: 0,
     brewRemaining: 0,
@@ -719,7 +721,11 @@ const elements = {
     alchemyLevel: document.getElementById('alchemy-level'),
     alchemyPotionsList: document.getElementById('alchemy-potions-list'),
     alchemyEssencesList: document.getElementById('alchemy-essences-list'),
-    alchemyBrewsList: document.getElementById('alchemy-brews-list'),
+    // 酿造
+    brewingExpFill: document.getElementById('brewing-exp-fill'),
+    brewingLevel: document.getElementById('brewing-level'),
+    brewingBrewsList: document.getElementById('brewing-brews-list'),
+    brewingAgingList: document.getElementById('brewing-aging-list'),
     navGatheringExp: document.getElementById('nav-gathering-exp'),
     navGatheringLvl: document.getElementById('nav-gathering-lvl'),
     navCraftingExp: document.getElementById('nav-crafting-exp'),
@@ -730,6 +736,8 @@ const elements = {
     navTailoringLvl: document.getElementById('nav-tailoring-lvl'),
     navAlchemyExp: document.getElementById('nav-alchemy-exp'),
     navAlchemyLvl: document.getElementById('nav-alchemy-lvl'),
+    navBrewingExp: document.getElementById('nav-brewing-exp'),
+    navBrewingLvl: document.getElementById('nav-brewing-lvl'),
     playTime: document.getElementById('play-time'),
     modal: document.getElementById('modal'),
     modalBody: document.getElementById('modal-body'),
@@ -837,11 +845,11 @@ function init() {
     renderTailoring();
     renderCombatZones();
     renderAlchemy();
-    renderEssencesList();
-    renderBrewsList();
+    renderBrewing();
     renderMerchants();
     setupEventListeners();
     setupMerchantListeners();
+    setupBrewingTabs();
     startGameLoop();
     updateUI();
     renderWoodcuttingInventory();
@@ -4617,6 +4625,74 @@ function renderAlchemy() {
     renderPotionsList();
 }
 
+function checkAlchemyLevelUp() {
+    while (gameState.alchemyLevel < 200 && gameState.alchemyExp >= getSkillExpForLevel(gameState.alchemyLevel + 1)) {
+        gameState.alchemyLevel++;
+        showToast(`🎉 炼金升级到 ${gameState.alchemyLevel} 级！`);
+    }
+    renderAlchemy();
+}
+
+// ============ 酿造系统 ============
+
+function renderBrewing() {
+    // 更新酿造经验条
+    if (elements.brewingExpFill && elements.brewingLevel) {
+        const currentExp = getSkillExpForLevel(gameState.brewingLevel);
+        const nextExp = getSkillExpForLevel(gameState.brewingLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.brewingExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.brewingExpFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.brewingLevel.textContent = gameState.brewingLevel;
+    }
+    
+    // 更新侧边栏酿造经验条
+    if (elements.navBrewingExp && elements.navBrewingLvl) {
+        const currentExp = getSkillExpForLevel(gameState.brewingLevel);
+        const nextExp = getSkillExpForLevel(gameState.brewingLevel + 1);
+        const expNeeded = nextExp - currentExp;
+        const expProgress = gameState.brewingExp - currentExp;
+        const percentage = expNeeded > 0 ? (expProgress / expNeeded) * 100 : 0;
+        elements.navBrewingExp.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+        elements.navBrewingLvl.textContent = gameState.brewingLevel;
+    }
+    
+    // 渲染酒类列表
+    renderBrewsList();
+}
+
+function checkBrewingLevelUp() {
+    while (gameState.brewingLevel < 200 && gameState.brewingExp >= getSkillExpForLevel(gameState.brewingLevel + 1)) {
+        gameState.brewingLevel++;
+        showToast(`🎉 酿造升级到 ${gameState.brewingLevel} 级！`);
+    }
+    renderBrewing();
+}
+
+function setupBrewingTabs() {
+    const tabs = document.querySelectorAll('#brewing-tabs .gathering-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const tabName = this.dataset.tab;
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            const brewsList = document.getElementById('brewing-brews-list');
+            const agingList = document.getElementById('brewing-aging-list');
+            
+            if (brewsList) {
+                brewsList.style.display = tabName === 'brews' ? 'block' : 'none';
+            }
+            if (agingList) {
+                agingList.style.display = tabName === 'aging' ? 'block' : 'none';
+            }
+        });
+    });
+}
+
 function renderPotionsList() {
     if (!elements.alchemyPotionsList) return;
     
@@ -4794,13 +4870,13 @@ function canExtractEssence(essence) {
     return true;
 }
 
-// ============ 酿酒系统 ============
+// ============ 酿造系统 ============
 
 function renderBrewsList() {
-    if (!elements.alchemyBrewsList) return;
+    if (!elements.brewingBrewsList) return;
     
     const html = CONFIG.brews.map((brew, index) => {
-        const isUnlocked = gameState.alchemyLevel >= brew.reqLevel;
+        const isUnlocked = gameState.brewingLevel >= brew.reqLevel;
         const isActive = gameState.activeBrew === brew.id;
         const canBrew = canBrewDrink(brew);
         
@@ -4860,18 +4936,18 @@ function renderBrewsList() {
         `;
     }).join('');
     
-    elements.alchemyBrewsList.innerHTML = html;
+    elements.brewingBrewsList.innerHTML = html;
     
     // 绑定点击事件
-    elements.alchemyBrewsList.querySelectorAll('.gathering-item-card').forEach(card => {
+    elements.brewingBrewsList.querySelectorAll('.gathering-item-card').forEach(card => {
         card.addEventListener('click', function(e) {
             e.stopPropagation();
             
             const brewId = this.dataset.brewId;
             const brew = CONFIG.brews.find(b => b.id === brewId);
             
-            if (gameState.alchemyLevel < brew.reqLevel) {
-                showToast(`❌ 需要炼金等级 ${brew.reqLevel}`);
+            if (gameState.brewingLevel < brew.reqLevel) {
+                showToast(`❌ 需要酿造等级 ${brew.reqLevel}`);
                 return;
             }
             
@@ -4956,8 +5032,8 @@ function completeBrewingOnce(brewId) {
     const token = tryGetToken('brewing_token', brewIndex, 'brewing');
     
     // 增加经验
-    gameState.alchemyExp += brew.exp;
-    checkAlchemyLevelUp();
+    gameState.brewingExp += brew.exp;
+    checkBrewingLevelUp();
     
     showToast(`🍻 获得 ${brew.name}`);
     renderBrewsList();
@@ -5439,16 +5515,12 @@ function setupAlchemyTabs() {
             
             const potionsList = document.getElementById('alchemy-potions-list');
             const essencesList = document.getElementById('alchemy-essences-list');
-            const brewsList = document.getElementById('alchemy-brews-list');
             
             if (potionsList) {
                 potionsList.style.display = tabName === 'potions' ? 'block' : 'none';
             }
             if (essencesList) {
                 essencesList.style.display = tabName === 'essences' ? 'block' : 'none';
-            }
-            if (brewsList) {
-                brewsList.style.display = tabName === 'brews' ? 'block' : 'none';
             }
         });
     });
