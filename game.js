@@ -6387,9 +6387,44 @@ function startNextQueueAction() {
     saveGame();
     updateQueueButton();
     
+    // 检查材料是否足够（针对需要材料的行动）
+    if (!canExecuteAction(action)) {
+        showToast(`❌ 队列行动【${action.name}】材料不足，跳过`);
+        // 继续尝试下一个队列行动
+        setTimeout(() => startNextQueueAction(), 100);
+        return;
+    }
+    
     // 执行行动
     pendingAction = action;
     executePendingAction();
+}
+
+// 检查行动是否可以执行（材料是否足够）
+function canExecuteAction(action) {
+    const { type, id, itemId } = action;
+    
+    if (type === 'crafting') {
+        const plank = CONFIG.woodPlanks.find(p => p.id === id);
+        return plank ? canCraftPlank(plank) : false;
+    } else if (type === 'forging') {
+        const ingot = CONFIG.ingots.find(i => i.id === id);
+        return ingot ? canForgeIngot(ingot) : false;
+    } else if (type === 'forging_tool') {
+        return canForgeTool(itemId.toolType, itemId.toolIndex);
+    } else if (type === 'tailoring') {
+        const fabric = CONFIG.fabrics.find(f => f.id === id);
+        return fabric ? canTailorFabric(fabric) : false;
+    } else if (type === 'alchemy') {
+        const potion = CONFIG.potions.find(p => p.id === id);
+        return potion ? canBrewPotion(potion) : false;
+    } else if (type === 'essence') {
+        const essence = CONFIG.essences.find(e => e.id === id);
+        return essence ? canExtractEssence(essence) : false;
+    }
+    
+    // 伐木、挖矿、采集不需要材料检查
+    return true;
 }
 
 // 当行动完成时调用
