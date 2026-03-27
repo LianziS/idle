@@ -728,6 +728,7 @@ const elements = {
     actionStatusBar: document.getElementById('action-status-bar'),
     actionStatusIcon: document.getElementById('action-status-icon'),
     actionStatusName: document.getElementById('action-status-name'),
+    actionStatusCount: document.getElementById('action-status-count'),
     actionProgressFill: document.getElementById('action-progress-fill'),
     actionProgressTime: document.getElementById('action-progress-time'),
     actionCancelBtn: document.getElementById('action-cancel-btn'),
@@ -1759,7 +1760,7 @@ function startWoodcuttingWithCount(treeId, count) {
     // 应用装备加成
     const bonus = getEquipmentBonus('woodcutting');
     const actualDuration = Math.floor(tree.duration / (1 + bonus));
-    setActionState({ name: `采集${tree.name}`, icon: tree.icon }, actualDuration);
+    setActionState({ name: `采集${tree.name}`, icon: tree.icon }, actualDuration, count, count);
     renderWoodcutting();
     // 启动进度条动画
     if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -1792,7 +1793,7 @@ function scheduleWoodcutting(treeId) {
         const bonus = getEquipmentBonus('woodcutting');
         const actualDuration = Math.floor(tree.duration / (1 + bonus));
         // 重置行动开始时间为当前时间
-        setActionState({ name: `采集${tree.name}`, icon: tree.icon }, actualDuration);
+        setActionState({ name: `采集${tree.name}`, icon: tree.icon }, actualDuration, gameState.woodcuttingCount, gameState.woodcuttingRemaining);
         // 重置进度条为 0
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
@@ -1856,7 +1857,7 @@ function startMiningWithCount(oreId, count) {
     // 应用装备加成
     const bonus = getEquipmentBonus('mining');
     const actualDuration = Math.floor(ore.duration / (1 + bonus));
-    setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, actualDuration);
+    setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, actualDuration, count, count);
     renderMining();
     // 启动进度条动画
     if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -1888,7 +1889,7 @@ function scheduleMining(oreId) {
         const bonus = getEquipmentBonus('mining');
         const actualDuration = Math.floor(ore.duration / (1 + bonus));
         // 重置行动开始时间为当前时间
-        setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, actualDuration);
+        setActionState({ name: `挖掘${ore.name}`, icon: ore.icon }, actualDuration, gameState.miningCount, gameState.miningRemaining);
         // 重置进度条为 0
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
@@ -1966,7 +1967,7 @@ function startGatheringWithCount(type, locationId, itemId, count) {
         actionName = `${location.name}·全采集`;
     }
     
-    setActionState({ name: actionName, icon: actionIcon }, location.duration);
+    setActionState({ name: actionName, icon: actionIcon }, location.duration, count, count);
     renderGathering();
     
     // 启动进度条动画
@@ -2010,7 +2011,7 @@ function scheduleGathering(type, locationId, itemId) {
         }
         
         // 重置行动开始时间为当前时间
-        setActionState({ name: actionName, icon: actionIcon }, location.duration);
+        setActionState({ name: actionName, icon: actionIcon }, location.duration, gameState.gatheringCount, gameState.gatheringRemaining);
         // 重置进度条为 0
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
@@ -2556,15 +2557,34 @@ function hasActiveAction() {
     return gameState.currentAction !== null;
 }
 
-function setActionState(action, duration) {
+function setActionState(action, duration, totalCount = 0, remainingCount = 0) {
     if (action) {
         gameState.currentAction = action;
         gameState.actionStartTime = Date.now();
         gameState.actionDuration = duration;
+        
+        // 更新次数显示
+        if (elements.actionStatusCount) {
+            if (totalCount >= 99999) {
+                // 无限次
+                elements.actionStatusCount.textContent = ' ∞';
+            } else if (totalCount > 0) {
+                // 有次数限制
+                const current = totalCount - remainingCount + 1;
+                elements.actionStatusCount.textContent = ` [${current}/${totalCount}]`;
+            } else {
+                elements.actionStatusCount.textContent = '';
+            }
+        }
     } else {
         gameState.currentAction = null;
         gameState.actionStartTime = 0;
         gameState.actionDuration = 0;
+        
+        // 清空次数显示
+        if (elements.actionStatusCount) {
+            elements.actionStatusCount.textContent = '';
+        }
     }
 }
 
@@ -2945,12 +2965,7 @@ function renderPlanksList() {
                 return;
             }
             
-            // 检查材料
-            if (!canCraftPlank(plank)) {
-                showToast('❌ 材料不足');
-                return;
-            }
-            
+            // 材料不足时也可以加入队列
             openActionModal('crafting', plankId, plank.name);
         });
     });
@@ -2968,21 +2983,27 @@ function startCraftingWithCount(plankId, count) {
     const plank = CONFIG.woodPlanks.find(p => p.id === plankId);
     if (!plank) return;
     
-    // 检查材料是否足够
-    if (!canCraftPlank(plank)) {
+    // 计算实际可执行次数
+    const actualCount = calculateMaxActionCount('crafting', plankId, null, count);
+    if (actualCount <= 0) {
         showToast('❌ 材料不足');
         return;
     }
     
+    // 如果实际次数小于请求次数，显示提示
+    if (actualCount < count && count < 99999) {
+        showToast(`⚠️ 材料仅够制作 ${actualCount} 次`);
+    }
+    
     gameState.activeCrafting = plankId;
-    gameState.craftingCount = count;
-    gameState.craftingRemaining = count;
+    gameState.craftingCount = actualCount;
+    gameState.craftingRemaining = actualCount;
     
     // 重置进度条
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `制作${plank.name}`, icon: plank.icon }, plank.duration);
+    setActionState({ name: `制作${plank.name}`, icon: plank.icon }, plank.duration, actualCount, actualCount);
     renderCrafting();
     
     // 启动进度条动画
@@ -3025,7 +3046,7 @@ function scheduleCrafting(plankId) {
     }
     
     if (gameState.activeCrafting === plankId) {
-        setActionState({ name: `制作${plank.name}`, icon: plank.icon }, plank.duration);
+        setActionState({ name: `制作${plank.name}`, icon: plank.icon }, plank.duration, gameState.craftingCount, gameState.craftingRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -3193,18 +3214,13 @@ function renderIngotsList() {
                 return;
             }
             
-            // 检查材料
-            if (!canForgeIngot(ingot)) {
-                showToast('❌ 材料不足');
-                return;
-            }
-            
             // 检查是否正在进行中
             if (this.classList.contains('active')) {
                 showToast('⏳ 正在锻造中');
                 return;
             }
             
+            // 材料不足时也可以加入队列
             openActionModal('forging', ingotId, ingot.name);
         });
     });
@@ -3580,12 +3596,6 @@ function renderToolsList() {
                 return;
             }
             
-            // 检查材料
-            if (!canForgeTool(toolType, toolIndex)) {
-                showToast('❌ 材料不足');
-                return;
-            }
-            
             // 检查是否正在进行中
             if (this.classList.contains('active')) {
                 showToast('⏳ 正在锻造中');
@@ -3642,9 +3652,12 @@ function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
         return;
     }
     
+    // 工具锻造每次只能锻造1个
+    const actualCount = 1;
+    
     gameState.activeForgingTool = toolId;
-    gameState.forgingToolCount = count;
-    gameState.forgingToolRemaining = count;
+    gameState.forgingToolCount = actualCount;
+    gameState.forgingToolRemaining = actualCount;
     gameState.forgingToolType = toolType;
     gameState.forgingToolIndex = toolIndex;
     
@@ -3655,7 +3668,7 @@ function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
     // 应用装备加成（锤子加速锻造）
     const bonus = getEquipmentBonus('forging');
     const actualDuration = Math.floor(tool.duration / (1 + bonus));
-    setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, actualDuration);
+    setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, actualDuration, actualCount, actualCount);
     renderToolsList();
     
     if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -3700,7 +3713,7 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
         // 应用装备加成（锤子加速锻造）
         const bonus = getEquipmentBonus('forging');
         const actualDuration = Math.floor(tool.duration / (1 + bonus));
-        setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, actualDuration);
+        setActionState({ name: `锻造${tool.name}`, icon: tool.icon }, actualDuration, gameState.forgingToolCount, gameState.forgingToolRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -3798,15 +3811,21 @@ function startForgingWithCount(ingotId, count) {
     const ingot = CONFIG.ingots.find(i => i.id === ingotId);
     if (!ingot) return;
     
-    // 检查材料是否足够
-    if (!canForgeIngot(ingot)) {
+    // 计算实际可执行次数
+    const actualCount = calculateMaxActionCount('forging', ingotId, null, count);
+    if (actualCount <= 0) {
         showToast('❌ 材料不足');
         return;
     }
     
+    // 如果实际次数小于请求次数，显示提示
+    if (actualCount < count && count < 99999) {
+        showToast(`⚠️ 材料仅够锻造 ${actualCount} 次`);
+    }
+    
     gameState.activeForging = ingotId;
-    gameState.forgingCount = count;
-    gameState.forgingRemaining = count;
+    gameState.forgingCount = actualCount;
+    gameState.forgingRemaining = actualCount;
     
     // 重置进度条
     if (elements.actionProgressFill) {
@@ -3815,7 +3834,7 @@ function startForgingWithCount(ingotId, count) {
     // 应用装备加成（锤子加速锻造）
     const bonus = getEquipmentBonus('forging');
     const actualDuration = Math.floor(ingot.duration / (1 + bonus));
-    setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actualDuration);
+    setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actualDuration, actualCount, actualCount);
     renderForging();
     
     // 启动进度条动画
@@ -3861,7 +3880,7 @@ function scheduleForging(ingotId) {
         // 应用装备加成（锤子加速锻造）
         const bonus = getEquipmentBonus('forging');
         const actualDuration = Math.floor(ingot.duration / (1 + bonus));
-        setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actualDuration);
+        setActionState({ name: `锻造${ingot.name}`, icon: ingot.icon }, actualDuration, gameState.forgingCount, gameState.forgingRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -4064,21 +4083,27 @@ function startTailoringWithCount(fabricId, count) {
     const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
     if (!fabric) return;
     
-    // 检查材料是否足够
-    if (!canTailorFabric(fabric)) {
+    // 计算实际可执行次数
+    const actualCount = calculateMaxActionCount('tailoring', fabricId, null, count);
+    if (actualCount <= 0) {
         showToast('❌ 材料不足');
         return;
     }
     
+    // 如果实际次数小于请求次数，显示提示
+    if (actualCount < count && count < 99999) {
+        showToast(`⚠️ 材料仅够缝制 ${actualCount} 次`);
+    }
+    
     gameState.activeTailoring = fabricId;
-    gameState.tailoringCount = count;
-    gameState.tailoringRemaining = count;
+    gameState.tailoringCount = actualCount;
+    gameState.tailoringRemaining = actualCount;
     
     // 重置进度条
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration);
+    setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration, actualCount, actualCount);
     renderTailoring();
     
     // 启动进度条动画
@@ -4121,7 +4146,7 @@ function scheduleTailoring(fabricId) {
     }
     
     if (gameState.activeTailoring === fabricId) {
-        setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration);
+        setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration, gameState.tailoringCount, gameState.tailoringRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -4427,16 +4452,12 @@ function renderEssencesList() {
                 return;
             }
             
-            if (!canExtractEssence(essence)) {
-                showToast('❌ 材料不足');
-                return;
-            }
-            
             if (this.classList.contains('active')) {
                 showToast('⏳ 正在提炼中');
                 return;
             }
             
+            // 材料不足时也可以加入队列
             openActionModal('essence', essenceId, essence.name);
         });
     });
@@ -4454,19 +4475,26 @@ function startEssenceExtraction(essenceId, count) {
     const essence = CONFIG.essences.find(e => e.id === essenceId);
     if (!essence) return;
     
-    if (!canExtractEssence(essence)) {
+    // 计算实际可执行次数
+    const actualCount = calculateMaxActionCount('essence', essenceId, null, count);
+    if (actualCount <= 0) {
         showToast('❌ 材料不足');
         return;
     }
     
+    // 如果实际次数小于请求次数，显示提示
+    if (actualCount < count && count < 99999) {
+        showToast(`⚠️ 材料仅够提炼 ${actualCount} 次`);
+    }
+    
     gameState.activeEssence = essenceId;
-    gameState.essenceCount = count;
-    gameState.essenceRemaining = count;
+    gameState.essenceCount = actualCount;
+    gameState.essenceRemaining = actualCount;
     
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `提炼${essence.name}`, icon: essence.icon }, essence.duration);
+    setActionState({ name: `提炼${essence.name}`, icon: essence.icon }, essence.duration, actualCount, actualCount);
     renderEssencesList();
     
     if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -4502,6 +4530,9 @@ function scheduleEssenceExtraction(essenceId) {
         onActionComplete();
         return;
     }
+    
+    // 更新次数显示（在行动开始时）
+    setActionState({ name: `提炼${essence.name}`, icon: essence.icon }, essence.duration, gameState.essenceCount, gameState.essenceRemaining);
     
     // 消耗材料
     for (const [itemId, count] of Object.entries(essence.materials)) {
@@ -4540,19 +4571,26 @@ function startAlchemyWithCount(potionId, count) {
     const potion = CONFIG.potions.find(p => p.id === potionId);
     if (!potion) return;
     
-    if (!canBrewPotion(potion)) {
+    // 计算实际可执行次数
+    const actualCount = calculateMaxActionCount('alchemy', potionId, null, count);
+    if (actualCount <= 0) {
         showToast('❌ 材料不足');
         return;
     }
     
+    // 如果实际次数小于请求次数，显示提示
+    if (actualCount < count && count < 99999) {
+        showToast(`⚠️ 材料仅够炼制 ${actualCount} 次`);
+    }
+    
     gameState.activeAlchemy = potionId;
-    gameState.alchemyCount = count;
-    gameState.alchemyRemaining = count;
+    gameState.alchemyCount = actualCount;
+    gameState.alchemyRemaining = actualCount;
     
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `炼制${potion.name}`, icon: potion.icon }, potion.duration);
+    setActionState({ name: `炼制${potion.name}`, icon: potion.icon }, potion.duration, actualCount, actualCount);
     renderAlchemy();
     
     if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -4593,7 +4631,7 @@ function scheduleAlchemy(potionId) {
     }
     
     if (gameState.activeAlchemy === potionId) {
-        setActionState({ name: `炼制${potion.name}`, icon: potion.icon }, potion.duration);
+        setActionState({ name: `炼制${potion.name}`, icon: potion.icon }, potion.duration, gameState.alchemyCount, gameState.alchemyRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -6425,6 +6463,72 @@ function canExecuteAction(action) {
     
     // 伐木、挖矿、采集不需要材料检查
     return true;
+}
+
+// 计算实际可执行次数（根据材料数量）
+function calculateMaxActionCount(type, id, itemId, requestedCount) {
+    let maxCount = requestedCount;
+    
+    if (type === 'crafting') {
+        const plank = CONFIG.woodPlanks.find(p => p.id === id);
+        if (plank) {
+            for (const [matId, need] of Object.entries(plank.materials)) {
+                const owned = gameState.woodcuttingInventory[matId] || 0;
+                const possible = Math.floor(owned / need);
+                maxCount = Math.min(maxCount, possible);
+            }
+        }
+    } else if (type === 'forging') {
+        const ingot = CONFIG.ingots.find(i => i.id === id);
+        if (ingot) {
+            for (const [matId, need] of Object.entries(ingot.materials)) {
+                const owned = gameState.miningInventory[matId] || 0;
+                const possible = Math.floor(owned / need);
+                maxCount = Math.min(maxCount, possible);
+            }
+        }
+    } else if (type === 'forging_tool') {
+        // 工具锻造比较复杂，每次只能锻造1个
+        if (canForgeTool(itemId.toolType, itemId.toolIndex)) {
+            maxCount = 1;
+        } else {
+            maxCount = 0;
+        }
+    } else if (type === 'tailoring') {
+        const fabric = CONFIG.fabrics.find(f => f.id === id);
+        if (fabric) {
+            for (const [matId, need] of Object.entries(fabric.materials)) {
+                const owned = gameState.gatheringInventory[matId] || 0;
+                const possible = Math.floor(owned / need);
+                maxCount = Math.min(maxCount, possible);
+            }
+        }
+    } else if (type === 'alchemy') {
+        const potion = CONFIG.potions.find(p => p.id === id);
+        if (potion) {
+            for (const [matId, need] of Object.entries(potion.materials)) {
+                const owned = gameState.gatheringInventory[matId] || 0;
+                const possible = Math.floor(owned / need);
+                maxCount = Math.min(maxCount, possible);
+            }
+        }
+    } else if (type === 'essence') {
+        const essence = CONFIG.essences.find(e => e.id === id);
+        if (essence) {
+            for (const [matId, need] of Object.entries(essence.materials)) {
+                const owned = gameState.gatheringInventory[matId] || 0;
+                const possible = Math.floor(owned / need);
+                maxCount = Math.min(maxCount, possible);
+            }
+        }
+    }
+    
+    // 无限次请求返回实际可执行次数
+    if (requestedCount >= 99999) {
+        return maxCount;
+    }
+    
+    return Math.min(requestedCount, maxCount);
 }
 
 // 当行动完成时调用
