@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-27 15:55</span>
+            <span class="update-time-badge">代码更新: 2026-03-27 16:20</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -252,6 +252,10 @@
                     <h3 class="storage-section-title">药水</h3>
                     <div class="storage-items-grid" id="storage-potions-items"></div>
                     
+                    <!-- 精华 -->
+                    <h3 class="storage-section-title">精华</h3>
+                    <div class="storage-items-grid" id="storage-essences-items"></div>
+                    
                     <!-- 代币 -->
                     <h3 class="storage-section-title">代币</h3>
                     <div class="storage-items-grid" id="storage-tokens-items"></div>
@@ -434,10 +438,13 @@
                 <!-- 炼金标签页 -->
                 <div class="gathering-tabs" id="alchemy-tabs">
                     <button class="gathering-tab active" data-tab="potions">炼药</button>
+                    <button class="gathering-tab" data-tab="essences">提炼</button>
                     <button class="gathering-tab" data-tab="other">其他</button>
                 </div>
                 <!-- 药水列表 -->
-                <div class="gathering-items-list" id="alchemy-potions-list"></div>
+                <div class="gathering-items-list active" id="alchemy-potions-list"></div>
+                <!-- 提炼列表 -->
+                <div class="gathering-items-list" id="alchemy-essences-list"></div>
             </section>
         </main>
 

@@ -512,6 +512,16 @@ const CONFIG = {
         // 至级
         { id: 'hp_potion_8', name: '至级生命药水', icon: '🧪', type: 'hp', reqLevel: 95, duration: 13500, exp: 50, materials: { dragon_blood_fruit: 1, bewitch_berry: 1, rock_rose_honey: 4 } },
         { id: 'mp_potion_8', name: '至级魔法药水', icon: '💧', type: 'mp', reqLevel: 95, duration: 13500, exp: 50, materials: { dragon_blood_fruit: 1, bewitch_berry: 1, rock_rose_honey: 4 } }
+    ],
+    // 提炼精华配置
+    essences: [
+        { id: 'mint_essence', name: '薄荷精华', icon: '💚', reqLevel: 6, duration: 6000, exp: 4, materials: { wild_mint: 2 } },
+        { id: 'pine_essence', name: '松针精华', icon: '🌲', reqLevel: 10, duration: 8000, exp: 8, materials: { pine_needle: 2 } },
+        { id: 'vanilla_essence', name: '香草精华', icon: '🌱', reqLevel: 16, duration: 11000, exp: 12, materials: { vanilla: 2 } },
+        { id: 'sage_essence', name: '鼠尾草精华', icon: '🌿', reqLevel: 22, duration: 14000, exp: 18, materials: { sage: 2 } },
+        { id: 'chili_essence', name: '辣椒精华', icon: '🌶️', reqLevel: 30, duration: 17000, exp: 24, materials: { chili: 2 } },
+        { id: 'mist_essence', name: '雾菱精华', icon: '💠', reqLevel: 40, duration: 20000, exp: 32, materials: { mist_flower: 2 } },
+        { id: 'clover_essence', name: '四叶草精华', icon: '🍀', reqLevel: 55, duration: 30000, exp: 40, materials: { four_leaf_clover: 2 } }
     ]
 };
 
@@ -590,8 +600,14 @@ let gameState = {
     activeAlchemy: null,
     alchemyCount: 0,
     alchemyRemaining: 0,
+    // 提炼精华状态
+    activeEssence: null,
+    essenceCount: 0,
+    essenceRemaining: 0,
     // 药水存储
     potionsInventory: {},
+    // 精华存储
+    essencesInventory: {},
     // 代币存储
     tokensInventory: {
         wood_token: 0,        // 伐木代币
@@ -681,6 +697,7 @@ const elements = {
     alchemyExpFill: document.getElementById('alchemy-exp-fill'),
     alchemyLevel: document.getElementById('alchemy-level'),
     alchemyPotionsList: document.getElementById('alchemy-potions-list'),
+    alchemyEssencesList: document.getElementById('alchemy-essences-list'),
     navGatheringExp: document.getElementById('nav-gathering-exp'),
     navGatheringLvl: document.getElementById('nav-gathering-lvl'),
     navCraftingExp: document.getElementById('nav-crafting-exp'),
@@ -784,6 +801,7 @@ function init() {
     renderTailoring();
     renderCombatZones();
     renderAlchemy();
+    renderEssencesList();
     renderMerchants();
     setupEventListeners();
     setupMerchantListeners();
@@ -795,6 +813,7 @@ function init() {
     renderPlanksInventory();
     renderIngotsInventory();
     renderPotionsInventory();
+    renderEssencesInventory();
     renderFabricsInventory();
     renderToolsInventory();
     renderTokensInventory();
@@ -1262,6 +1281,16 @@ function renderMerchantWarehouse() {
         }
     });
     
+    // 精华
+    const essenceInfo = {};
+    CONFIG.essences.forEach(e => { essenceInfo[e.id] = { icon: e.icon, name: e.name }; });
+    Object.entries(gameState.essencesInventory || {}).forEach(([id, count]) => {
+        if (count > 0) {
+            const info = essenceInfo[id] || {};
+            allItems.push({ id, type: 'essence', icon: info.icon || '✨', name: info.name || id, count });
+        }
+    });
+    
     // 工具（斧、镐、凿、针、镰、锤）
     const toolTypes = [
         { key: 'axes', tools: CONFIG.tools.axes },
@@ -1633,7 +1662,9 @@ function openActionModal(type, id, name, itemId = null) {
         crafting: '制作',
         forging: '锻造',
         forging_tool: '锻造工具',
-        tailoring: '缝制'
+        tailoring: '缝制',
+        alchemy: '炼药',
+        essence: '提炼'
     };
     elements.actionModalTitle.textContent = `选择${typeNames[type] || '行动'}次数 - ${name}`;
     elements.actionCountInput.value = '';
@@ -1709,6 +1740,8 @@ function executePendingAction() {
         startTailoringWithCount(id, count);
     } else if (type === 'alchemy') {
         startAlchemyWithCount(id, count);
+    } else if (type === 'essence') {
+        startEssenceExtraction(id, count);
     }
     
     pendingAction = null;
@@ -4326,6 +4359,179 @@ function canBrewPotion(potion) {
     return true;
 }
 
+// ============ 提炼精华系统 ============
+
+function renderEssencesList() {
+    if (!elements.alchemyEssencesList) return;
+    
+    const html = CONFIG.essences.map(essence => {
+        const isUnlocked = gameState.alchemyLevel >= essence.reqLevel;
+        const isActive = gameState.activeEssence === essence.id;
+        const canExtract = canExtractEssence(essence);
+        
+        // 获取材料名称
+        const materialNames = Object.entries(essence.materials).map(([itemId, count]) => {
+            const owned = gameState.gatheringInventory[itemId] || 0;
+            let materialName = itemId;
+            let materialIcon = '🌿';
+            for (const loc of CONFIG.gatheringLocations) {
+                const item = loc.items.find(i => i.id === itemId);
+                if (item) {
+                    materialName = item.name;
+                    materialIcon = item.icon;
+                    break;
+                }
+            }
+            return `${materialIcon}${materialName}×${count}(${owned})`;
+        }).join(', ');
+        
+        let actionStatus = '';
+        if (isActive) {
+            const remaining = gameState.essenceRemaining || 0;
+            const total = gameState.essenceCount || 1;
+            const countText = total >= 99999 ? '∞' : `${remaining}/${total}`;
+            actionStatus = `<div class="action-timer">提炼中... ${countText}</div>`;
+        }
+        
+        return `
+            <div class="gathering-item-card ${!isUnlocked ? 'locked' : ''} ${isActive ? 'active' : ''}" data-essence-id="${essence.id}">
+                <div class="gathering-item-icon">${essence.icon}</div>
+                <div class="gathering-item-info">
+                    <div class="gathering-item-name">${essence.name}</div>
+                    <div class="gathering-item-desc">${materialNames}</div>
+                    <div class="gathering-item-meta">${essence.duration/1000}秒 | +${essence.exp} EXP | Lv.${essence.reqLevel}</div>
+                </div>
+                ${actionStatus}
+                ${!isUnlocked ? '<div class="gathering-item-locked">🔒 等级不足</div>' : ''}
+                ${isUnlocked && !canExtract ? '<div class="gathering-item-locked">📦 材料不足</div>' : ''}
+            </div>
+        `;
+    }).join('');
+    
+    elements.alchemyEssencesList.innerHTML = html;
+    
+    // 绑定点击事件
+    elements.alchemyEssencesList.querySelectorAll('.gathering-item-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            const essenceId = this.dataset.essenceId;
+            const essence = CONFIG.essences.find(e => e.id === essenceId);
+            
+            if (gameState.alchemyLevel < essence.reqLevel) {
+                showToast(`❌ 需要炼金等级 ${essence.reqLevel}`);
+                return;
+            }
+            
+            if (!canExtractEssence(essence)) {
+                showToast('❌ 材料不足');
+                return;
+            }
+            
+            if (this.classList.contains('active')) {
+                showToast('⏳ 正在提炼中');
+                return;
+            }
+            
+            openActionModal('essence', essenceId, essence.name);
+        });
+    });
+}
+
+function canExtractEssence(essence) {
+    for (const [itemId, count] of Object.entries(essence.materials)) {
+        const owned = gameState.gatheringInventory[itemId] || 0;
+        if (owned < count) return false;
+    }
+    return true;
+}
+
+function startEssenceExtraction(essenceId, count) {
+    const essence = CONFIG.essences.find(e => e.id === essenceId);
+    if (!essence) return;
+    
+    if (!canExtractEssence(essence)) {
+        showToast('❌ 材料不足');
+        return;
+    }
+    
+    gameState.activeEssence = essenceId;
+    gameState.essenceCount = count;
+    gameState.essenceRemaining = count;
+    
+    if (elements.actionProgressFill) {
+        elements.actionProgressFill.style.width = '0%';
+    }
+    setActionState({ name: `提炼${essence.name}`, icon: essence.icon }, essence.duration);
+    renderEssencesList();
+    
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    lastActionStartTime = gameState.actionStartTime;
+    animationFrame = requestAnimationFrame(updateActionStatusBarSmooth);
+    
+    scheduleEssenceExtraction(essenceId);
+}
+
+function scheduleEssenceExtraction(essenceId) {
+    const isInfinite = gameState.essenceCount >= 99999;
+    if (!gameState.activeEssence || (!isInfinite && gameState.essenceRemaining <= 0)) {
+        gameState.activeEssence = null;
+        gameState.essenceCount = 0;
+        gameState.essenceRemaining = 0;
+        setActionState(null, 0);
+        renderEssencesList();
+        onActionComplete();
+        return;
+    }
+    
+    const essence = CONFIG.essences.find(e => e.id === essenceId);
+    if (!essence) return;
+    
+    // 检查材料是否足够
+    if (!canExtractEssence(essence)) {
+        showToast('❌ 材料不足，停止提炼');
+        gameState.activeEssence = null;
+        gameState.essenceCount = 0;
+        gameState.essenceRemaining = 0;
+        setActionState(null, 0);
+        renderEssencesList();
+        onActionComplete();
+        return;
+    }
+    
+    // 消耗材料
+    for (const [itemId, count] of Object.entries(essence.materials)) {
+        gameState.gatheringInventory[itemId] -= count;
+    }
+    
+    gameState.actionTimerId = setTimeout(() => {
+        // 添加精华
+        if (!gameState.essencesInventory[essenceId]) {
+            gameState.essencesInventory[essenceId] = 0;
+        }
+        gameState.essencesInventory[essenceId]++;
+        
+        // 增加经验
+        gameState.alchemyExp += essence.exp;
+        checkAlchemyLevelUp();
+        
+        // 更新剩余次数
+        if (!isInfinite) {
+            gameState.essenceRemaining--;
+        }
+        
+        showToast(`✨ 获得 ${essence.name}`);
+        renderEssencesList();
+        renderGatheringInventory();
+        renderEssencesInventory();
+        renderMerchantWarehouse();
+        saveGame();
+        
+        // 继续下一次提炼
+        scheduleEssenceExtraction(essenceId);
+    }, essence.duration);
+}
+
 function startAlchemyWithCount(potionId, count) {
     const potion = CONFIG.potions.find(p => p.id === potionId);
     if (!potion) return;
@@ -4462,6 +4668,34 @@ function renderPotionsInventory() {
     container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无药水</div>';
 }
 
+function renderEssencesInventory() {
+    const container = document.getElementById('storage-essences-items');
+    if (!container) return;
+    
+    if (!gameState.essencesInventory || Object.keys(gameState.essencesInventory).length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无精华</div>';
+        return;
+    }
+    
+    const html = Object.entries(gameState.essencesInventory)
+        .filter(([id, count]) => count > 0)
+        .map(([id, count]) => {
+            const essence = CONFIG.essences.find(e => e.id === id);
+            const name = essence ? essence.name : id;
+            const icon = essence ? essence.icon : '✨';
+            return `
+                <div class="storage-item-small">
+                    <div class="storage-item-small-icon">${icon}</div>
+                    <div class="storage-item-small-name">${name}</div>
+                    <div class="storage-item-small-count">×${count}</div>
+                </div>
+            `;
+        })
+        .join('');
+    
+    container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无精华</div>';
+}
+
 function renderTokensInventory() {
     const container = document.getElementById('storage-tokens-items');
     if (!container) return;
@@ -4504,8 +4738,13 @@ function setupAlchemyTabs() {
             this.classList.add('active');
             
             const potionsList = document.getElementById('alchemy-potions-list');
+            const essencesList = document.getElementById('alchemy-essences-list');
+            
             if (potionsList) {
                 potionsList.style.display = tabName === 'potions' ? 'block' : 'none';
+            }
+            if (essencesList) {
+                essencesList.style.display = tabName === 'essences' ? 'block' : 'none';
             }
         });
     });
