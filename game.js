@@ -4797,6 +4797,9 @@ function renderAlchemy() {
     
     // 渲染药水列表
     renderPotionsList();
+    
+    // 渲染提炼列表
+    renderEssencesList();
 }
 
 function checkAlchemyLevelUp() {
