@@ -1500,16 +1500,16 @@ function openSellAmountModal(item, editIndex, clickedElement) {
     // 重置选中状态
     document.querySelectorAll('#sell-amount-modal .sell-opt-btn').forEach(o => o.classList.remove('selected'));
     
-    // 计算弹出卡片位置
+    // 计算弹出卡片位置 - 默认显示在物品上方
     if (clickedElement) {
         const rect = clickedElement.getBoundingClientRect();
         const modal = elements.sellAmountModal;
         const modalWidth = 200;
-        const modalHeight = 220;
+        const modalHeight = 200;
+        const gap = 10; // 与物品的间距
         
-        // 默认显示在元素下方
+        // 水平居中
         let left = rect.left + rect.width / 2 - modalWidth / 2;
-        let top = rect.bottom + 8;
         
         // 检查是否超出右边界
         if (left + modalWidth > window.innerWidth - 10) {
@@ -1520,12 +1520,15 @@ function openSellAmountModal(item, editIndex, clickedElement) {
             left = 10;
         }
         
-        // 检查下方是否有足够空间，如果没有则显示在上方
-        if (top + modalHeight > window.innerHeight - 10) {
-            top = rect.top - modalHeight - 8;
-            modal.classList.add('show-above');
-        } else {
+        // 默认显示在元素上方
+        let top = rect.top - modalHeight - gap;
+        
+        // 如果上方空间不够，则显示在下方
+        if (top < 10) {
+            top = rect.bottom + gap;
             modal.classList.remove('show-above');
+        } else {
+            modal.classList.add('show-above');
         }
         
         modal.style.left = `${left}px`;
