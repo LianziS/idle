@@ -1075,6 +1075,12 @@ function openMerchantModal(merchantId) {
     gameState.isSelectMode = false;
     gameState.sellConfirming = false;
     
+    // 重置选择按钮状态
+    if (elements.merchantSelectBtn) {
+        elements.merchantSelectBtn.classList.remove('active');
+        elements.merchantSelectBtn.textContent = '选择';
+    }
+    
     // 渲染商品
     renderMerchantGoods(merchant);
     
