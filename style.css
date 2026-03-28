@@ -1105,6 +1105,24 @@ body::after {
     background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
 }
 
+.sell-popup-btn.sell {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: #fff;
+}
+
+.sell-popup-btn.sell:hover {
+    background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+}
+
+.sell-popup-btn.confirm-danger {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    color: #fff;
+}
+
+.sell-popup-btn.confirm-danger:hover {
+    background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+}
+
 .modal-btn {
     padding: 10px 20px;
     border-radius: 6px;

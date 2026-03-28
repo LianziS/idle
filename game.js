@@ -1444,8 +1444,7 @@ function renderMerchantWarehouse() {
         return `
             <div class="merchant-warehouse-item ${isSelected ? 'selected' : ''}" 
                 data-item-type="${item.type}" data-item-id="${item.id}"
-                title="${item.name}${isSelected ? ` (已选${selectedInfo.count}个)` : ''}"
-                ${!gameState.isSelectMode ? 'style="pointer-events: none; opacity: 0.6;"' : ''}>
+                title="${item.name}${isSelected ? ` (已选${selectedInfo.count}个)` : ''}">
                 <div class="merchant-warehouse-item-icon">${item.icon}</div>
                 <div class="merchant-warehouse-item-count">×${item.count}${isSelected ? `<span style="color:#4CAF50"> (${selectedInfo.count})</span>` : ''}</div>
             </div>
@@ -1486,7 +1485,7 @@ function renderMerchantWarehouse() {
 function openSellAmountModal(item, editIndex, clickedElement) {
     if (!elements.sellAmountModal) return;
     
-    pendingSellItem = { ...item, editIndex };
+    pendingSellItem = { ...item, editIndex, isBatchMode: gameState.isSelectMode };
     
     const price = getItemSellPrice(item);
     elements.sellItemIcon.textContent = item.icon;
@@ -1499,6 +1498,19 @@ function openSellAmountModal(item, editIndex, clickedElement) {
     
     // 重置选中状态
     document.querySelectorAll('#sell-amount-modal .sell-opt-btn').forEach(o => o.classList.remove('selected'));
+    
+    // 根据模式设置按钮文本和样式
+    if (elements.sellAmountConfirm) {
+        if (gameState.isSelectMode) {
+            // 批量模式：显示"确认"
+            elements.sellAmountConfirm.textContent = '确认';
+            elements.sellAmountConfirm.className = 'sell-popup-btn confirm';
+        } else {
+            // 单卖模式：显示"出售"
+            elements.sellAmountConfirm.textContent = '出售';
+            elements.sellAmountConfirm.className = 'sell-popup-btn sell';
+        }
+    }
     
     // 计算弹出卡片位置 - 默认显示在物品上方
     if (clickedElement) {
@@ -1542,15 +1554,28 @@ function openSellAmountModal(item, editIndex, clickedElement) {
 }
 
 function setupSellAmountListeners() {
+    // 点击其他地方关闭弹出卡片
+    document.addEventListener('click', (e) => {
+        if (elements.sellAmountModal && elements.sellAmountModal.classList.contains('show')) {
+            // 检查点击是否在弹出卡片内
+            if (!elements.sellAmountModal.contains(e.target)) {
+                elements.sellAmountModal.classList.remove('show');
+                pendingSellItem = null;
+            }
+        }
+    });
+    
     // 关闭弹窗
     if (elements.sellAmountClose) {
-        elements.sellAmountClose.addEventListener('click', () => {
+        elements.sellAmountClose.addEventListener('click', (e) => {
+            e.stopPropagation();
             elements.sellAmountModal.classList.remove('show');
             pendingSellItem = null;
         });
     }
     if (elements.sellAmountCancel) {
-        elements.sellAmountCancel.addEventListener('click', () => {
+        elements.sellAmountCancel.addEventListener('click', (e) => {
+            e.stopPropagation();
             elements.sellAmountModal.classList.remove('show');
             pendingSellItem = null;
         });
@@ -1602,8 +1627,27 @@ function confirmSellAmount() {
         return;
     }
     
-    const { type, id, name, icon, editIndex } = pendingSellItem;
+    const { type, id, name, icon, editIndex, isBatchMode } = pendingSellItem;
     
+    // 单卖模式：第一次点击变成"确认出售"
+    if (!isBatchMode) {
+        const btn = elements.sellAmountConfirm;
+        if (btn && btn.textContent === '出售') {
+            btn.textContent = '确认出售';
+            btn.className = 'sell-popup-btn confirm-danger';
+            return;
+        }
+        // 第二次点击执行出售
+        if (btn && btn.textContent === '确认出售') {
+            // 执行单次出售
+            executeSingleSell(type, id, count, icon, name);
+            elements.sellAmountModal.classList.remove('show');
+            pendingSellItem = null;
+            return;
+        }
+    }
+    
+    // 批量模式逻辑
     if (editIndex > -1) {
         // 修改已有选择
         if (count === 0) {
@@ -1620,6 +1664,44 @@ function confirmSellAmount() {
     elements.sellAmountModal.classList.remove('show');
     pendingSellItem = null;
     renderMerchantWarehouse();
+}
+
+function executeSingleSell(type, id, count, icon, name) {
+    const price = getItemSellPrice({ type, id });
+    const totalPrice = price * count;
+    
+    // 扣除物品
+    if (type === 'wood') {
+        gameState.resources.wood = Math.max(0, (gameState.resources.wood || 0) - count);
+    } else if (type === 'stone') {
+        gameState.resources.stone = Math.max(0, (gameState.resources.stone || 0) - count);
+    } else if (type === 'herb') {
+        gameState.resources.herb = Math.max(0, (gameState.resources.herb || 0) - count);
+    } else if (type === 'ore') {
+        gameState.oreInventory[id] = Math.max(0, (gameState.oreInventory[id] || 0) - count);
+    } else if (type === 'log') {
+        gameState.logInventory[id] = Math.max(0, (gameState.logInventory[id] || 0) - count);
+    } else if (type === 'essence') {
+        gameState.essenceInventory[id] = Math.max(0, (gameState.essenceInventory[id] || 0) - count);
+    } else if (type === 'brew') {
+        gameState.brewInventory[id] = Math.max(0, (gameState.brewInventory[id] || 0) - count);
+    } else if (type === 'gathering') {
+        gameState.gatheringInventory[id] = Math.max(0, (gameState.gatheringInventory[id] || 0) - count);
+    } else if (type === 'fabric') {
+        gameState.fabricInventory[id] = Math.max(0, (gameState.fabricInventory[id] || 0) - count);
+    } else if (type === 'token') {
+        gameState.tokenInventory[id] = Math.max(0, (gameState.tokenInventory[id] || 0) - count);
+    }
+    
+    // 增加金币
+    gameState.resources.gold = (gameState.resources.gold || 0) + totalPrice;
+    
+    showToast(`✅ 出售 ${icon}${name} ×${count}，获得 ${totalPrice} 金币`);
+    
+    // 更新显示
+    renderMerchantWarehouse();
+    updateResourceDisplay();
+    saveGame();
 }
 
 function toggleWarehouseSelection(item) {
