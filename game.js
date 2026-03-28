@@ -1444,8 +1444,7 @@ function renderMerchantWarehouse() {
         return `
             <div class="merchant-warehouse-item ${isSelected ? 'selected' : ''}" 
                 data-item-type="${item.type}" data-item-id="${item.id}"
-                title="${item.name}${isSelected ? ` (已选${selectedInfo.count}个)` : ''}"
-                ${!gameState.isSelectMode ? 'style="pointer-events: none;"' : ''}>
+                title="${item.name}${isSelected ? ` (已选${selectedInfo.count}个)` : ''}">
                 <div class="merchant-warehouse-item-icon">${item.icon}</div>
                 <div class="merchant-warehouse-item-count">×${item.count}${isSelected ? `<span style="color:#4CAF50"> (${selectedInfo.count})</span>` : ''}</div>
             </div>
