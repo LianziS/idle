@@ -1557,10 +1557,15 @@ function setupSellAmountListeners() {
     // 点击其他地方关闭弹出卡片
     document.addEventListener('click', (e) => {
         if (elements.sellAmountModal && elements.sellAmountModal.classList.contains('show')) {
-            // 检查点击是否在弹出卡片内
+            // 检查点击是否在弹出卡片内或商人面板内
+            const merchantPanel = document.querySelector('.merchant-modal-panel');
             if (!elements.sellAmountModal.contains(e.target)) {
                 elements.sellAmountModal.classList.remove('show');
                 pendingSellItem = null;
+                // 如果点击的是遮罩层，阻止事件传播，避免关闭商人弹窗
+                if (merchantPanel && !merchantPanel.contains(e.target)) {
+                    e.stopPropagation();
+                }
             }
         }
     });
@@ -1809,6 +1814,12 @@ function setupMerchantListeners() {
     if (elements.merchantModalOverlay) {
         elements.merchantModalOverlay.addEventListener('click', function(e) {
             e.stopPropagation();
+            // 如果卖出卡片打开，只关闭卡片，不关闭商人弹窗
+            if (elements.sellAmountModal && elements.sellAmountModal.classList.contains('show')) {
+                elements.sellAmountModal.classList.remove('show');
+                pendingSellItem = null;
+                return;
+            }
             closeMerchantModal();
         });
     }
