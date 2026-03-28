@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <title>中世纪雇佣兵 - 放置游戏</title>
-    <link rel="stylesheet" href="style.css?v=202603282048">
+    <link rel="stylesheet" href="style.css?v=202603282100">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1B2A3A;color:#A0B2C0;min-height:100vh;padding:0;font-size:14px;overflow-x:hidden}
@@ -19,7 +19,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-03-28 20:48</span>
+            <span class="update-time-badge">代码更新: 2026-03-28 21:00</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -662,43 +662,35 @@
         </div>
     </div>
     
-    <!-- 出售数量选择弹窗 -->
-    <div class="modal" id="sell-amount-modal">
-        <div class="modal-content" style="max-width: 320px;">
-            <div class="modal-header">
-                <h2>选择出售数量</h2>
-                <span class="modal-close" id="sell-amount-close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div style="text-align: center; margin-bottom: 15px;">
-                    <span id="sell-item-icon" style="font-size: 32px;"></span>
-                    <span id="sell-item-name" style="font-size: 16px; margin-left: 8px;"></span>
-                </div>
-                <div style="text-align: center; color: #888; margin-bottom: 15px;">
-                    拥有: <span id="sell-item-owned">0</span> 个 | 单价: <span id="sell-item-price">0</span> 金币
-                </div>
-                <div class="action-count-options" style="grid-template-columns: repeat(3, 1fr);">
-                    <button class="count-option" data-count="1">1</button>
-                    <button class="count-option" data-count="10">10</button>
-                    <button class="count-option" data-count="50">50</button>
-                    <button class="count-option" data-count="100">100</button>
-                    <button class="count-option" id="sell-all-btn">全部</button>
-                </div>
-                <div class="action-count-custom">
-                    <label>自定义数量：</label>
-                    <input type="number" id="sell-amount-input" min="1" placeholder="输入数量">
-                </div>
-                <div style="text-align: center; margin-top: 10px; color: #4CAF50; font-weight: bold;">
-                    总计: <span id="sell-total-price">0</span> 金币
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn secondary" id="sell-amount-cancel">取消</button>
-                <button class="modal-btn primary" id="sell-amount-confirm">确认出售</button>
-            </div>
+    <!-- 出售数量选择弹出卡片 -->
+    <div class="sell-popup-card" id="sell-amount-modal">
+        <div class="sell-popup-header">
+            <span id="sell-item-icon"></span>
+            <span id="sell-item-name"></span>
+            <span class="sell-popup-close" id="sell-amount-close">×</span>
+        </div>
+        <div class="sell-popup-info">
+            拥有: <span id="sell-item-owned">0</span> | 单价: <span id="sell-item-price">0</span>💰
+        </div>
+        <div class="sell-popup-options">
+            <button class="sell-opt-btn" data-count="1">1</button>
+            <button class="sell-opt-btn" data-count="10">10</button>
+            <button class="sell-opt-btn" data-count="50">50</button>
+            <button class="sell-opt-btn" data-count="100">100</button>
+            <button class="sell-opt-btn sell-opt-all" id="sell-all-btn">全部</button>
+        </div>
+        <div class="sell-popup-custom">
+            <input type="number" id="sell-amount-input" min="1" placeholder="自定义数量">
+        </div>
+        <div class="sell-popup-total">
+            总计: <span id="sell-total-price">0</span>💰
+        </div>
+        <div class="sell-popup-actions">
+            <button class="sell-popup-btn cancel" id="sell-amount-cancel">取消</button>
+            <button class="sell-popup-btn confirm" id="sell-amount-confirm">确认</button>
         </div>
     </div>
 
-    <script src="game.js?v=202603282048"></script>
+    <script src="game.js?v=202603282100"></script>
 </body>
 </html>

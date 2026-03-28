@@ -961,6 +961,151 @@ body::after {
     border-top: 1px solid rgba(107, 79, 60, 0.3);
 }
 
+/* 出售数量弹出卡片 */
+.sell-popup-card {
+    position: fixed;
+    display: none;
+    width: 200px;
+    background: linear-gradient(180deg, rgba(40, 50, 60, 0.95) 0%, rgba(27, 42, 58, 0.98) 100%);
+    border: 2px solid rgba(107, 79, 60, 0.6);
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    font-size: 13px;
+}
+
+.sell-popup-card.show {
+    display: block;
+}
+
+.sell-popup-card.show-above {
+    transform: translateY(-100%);
+    margin-top: -8px;
+}
+
+.sell-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.sell-popup-header #sell-item-icon {
+    font-size: 20px;
+}
+
+.sell-popup-header #sell-item-name {
+    flex: 1;
+    color: #E8C57F;
+}
+
+.sell-popup-close {
+    color: #888;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px 6px;
+}
+
+.sell-popup-close:hover {
+    color: #fff;
+}
+
+.sell-popup-info {
+    color: #888;
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+
+.sell-popup-options {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.sell-opt-btn {
+    background: rgba(107, 79, 60, 0.3);
+    border: 1px solid rgba(107, 79, 60, 0.4);
+    border-radius: 4px;
+    padding: 6px 4px;
+    color: #A0B2C0;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+}
+
+.sell-opt-btn:hover {
+    background: rgba(107, 79, 60, 0.5);
+    color: #fff;
+}
+
+.sell-opt-btn.selected {
+    background: rgba(139, 44, 45, 0.6);
+    border-color: #8B2C2D;
+    color: #fff;
+}
+
+.sell-opt-all {
+    grid-column: span 1;
+}
+
+.sell-popup-custom {
+    margin-bottom: 8px;
+}
+
+.sell-popup-custom input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid rgba(107, 79, 60, 0.4);
+    border-radius: 4px;
+    background: rgba(27, 42, 58, 0.6);
+    color: #A0B2C0;
+    font-size: 12px;
+}
+
+.sell-popup-total {
+    text-align: center;
+    color: #4CAF50;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.sell-popup-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sell-popup-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.sell-popup-btn.cancel {
+    background: rgba(160, 178, 192, 0.2);
+    color: #A0B2C0;
+}
+
+.sell-popup-btn.cancel:hover {
+    background: rgba(160, 178, 192, 0.3);
+}
+
+.sell-popup-btn.confirm {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: #fff;
+}
+
+.sell-popup-btn.confirm:hover {
+    background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+}
+
 .modal-btn {
     padding: 10px 20px;
     border-radius: 6px;

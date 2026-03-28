@@ -1471,10 +1471,10 @@ function renderMerchantWarehouse() {
             
             if (selectedIndex > -1) {
                 // 已选中，弹出修改数量弹窗
-                openSellAmountModal({ type, id, name: itemInfo.name, icon: itemInfo.icon, owned: count }, selectedIndex);
+                openSellAmountModal({ type, id, name: itemInfo.name, icon: itemInfo.icon, owned: count }, selectedIndex, this);
             } else {
                 // 未选中，弹出选择数量弹窗
-                openSellAmountModal({ type, id, name: itemInfo.name, icon: itemInfo.icon, owned: count }, -1);
+                openSellAmountModal({ type, id, name: itemInfo.name, icon: itemInfo.icon, owned: count }, -1, this);
             }
         });
     });
@@ -1483,7 +1483,7 @@ function renderMerchantWarehouse() {
     updateSellBar();
 }
 
-function openSellAmountModal(item, editIndex) {
+function openSellAmountModal(item, editIndex, clickedElement) {
     if (!elements.sellAmountModal) return;
     
     pendingSellItem = { ...item, editIndex };
@@ -1498,7 +1498,39 @@ function openSellAmountModal(item, editIndex) {
     elements.sellTotalPrice.textContent = item.owned * price;
     
     // 重置选中状态
-    document.querySelectorAll('#sell-amount-modal .count-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('#sell-amount-modal .sell-opt-btn').forEach(o => o.classList.remove('selected'));
+    
+    // 计算弹出卡片位置
+    if (clickedElement) {
+        const rect = clickedElement.getBoundingClientRect();
+        const modal = elements.sellAmountModal;
+        const modalWidth = 200;
+        const modalHeight = 220;
+        
+        // 默认显示在元素下方
+        let left = rect.left + rect.width / 2 - modalWidth / 2;
+        let top = rect.bottom + 8;
+        
+        // 检查是否超出右边界
+        if (left + modalWidth > window.innerWidth - 10) {
+            left = window.innerWidth - modalWidth - 10;
+        }
+        // 检查是否超出左边界
+        if (left < 10) {
+            left = 10;
+        }
+        
+        // 检查下方是否有足够空间，如果没有则显示在上方
+        if (top + modalHeight > window.innerHeight - 10) {
+            top = rect.top - modalHeight - 8;
+            modal.classList.add('show-above');
+        } else {
+            modal.classList.remove('show-above');
+        }
+        
+        modal.style.left = `${left}px`;
+        modal.style.top = `${top}px`;
+    }
     
     elements.sellAmountModal.classList.add('show');
 }
@@ -1519,9 +1551,9 @@ function setupSellAmountListeners() {
     }
     
     // 数量选项点击
-    document.querySelectorAll('#sell-amount-modal .count-option').forEach(btn => {
+    document.querySelectorAll('#sell-amount-modal .sell-opt-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('#sell-amount-modal .count-option').forEach(o => o.classList.remove('selected'));
+            document.querySelectorAll('#sell-amount-modal .sell-opt-btn').forEach(o => o.classList.remove('selected'));
             this.classList.add('selected');
             
             if (this.id === 'sell-all-btn') {
