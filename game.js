@@ -6316,6 +6316,8 @@ function loadGame() {
                         gameState.activeWoodcutting = null;
                         gameState.woodcuttingCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
@@ -6368,6 +6370,8 @@ function loadGame() {
                         gameState.activeMining = null;
                         gameState.miningCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
@@ -6437,6 +6441,8 @@ function loadGame() {
                         gameState.activeGathering = null;
                         gameState.gatheringCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
@@ -6494,6 +6500,8 @@ function loadGame() {
                         gameState.activeCrafting = null;
                         gameState.craftingCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
@@ -6551,6 +6559,8 @@ function loadGame() {
                         gameState.activeForging = null;
                         gameState.forgingCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
@@ -6608,6 +6618,8 @@ function loadGame() {
                         gameState.activeTailoring = null;
                         gameState.tailoringCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
@@ -6678,6 +6690,8 @@ function loadGame() {
                         gameState.activeForgingTool = null;
                         gameState.forgingToolCount = 0;
                         setActionState(null, 0);
+                        // 自动开始队列下一个行动
+                        setTimeout(() => startNextQueueAction(), 100);
                     }
                 }
             }
