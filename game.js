@@ -2234,11 +2234,14 @@ function completeWoodcuttingOnce(treeId) {
     const tree = CONFIG.trees.find(t => t.id === treeId);
     const treeIndex = CONFIG.trees.findIndex(t => t.id === treeId);
     
+    // 随机掉落1-3个（各33.3%概率）
+    const dropCount = Math.floor(Math.random() * 3) + 1;
+    
     // 添加对应的木材到物品存储
     if (!gameState.woodcuttingInventory[treeId]) {
         gameState.woodcuttingInventory[treeId] = 0;
     }
-    gameState.woodcuttingInventory[treeId]++;
+    gameState.woodcuttingInventory[treeId] += dropCount;
     
     // 检查是否获得伐木代币
     const token = tryGetToken('wood_token', treeIndex, 'standard');
@@ -2249,7 +2252,7 @@ function completeWoodcuttingOnce(treeId) {
     saveGame();
     // 显示奖励
     if (elements.actionRewards) {
-        let rewardHtml = `<span class="action-reward-item">+1 ${tree.dropIcon} ${tree.drop}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+${dropCount} ${tree.dropIcon} ${tree.drop}</span>`;
         if (token) {
             rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
         }
@@ -2349,11 +2352,14 @@ function completeMiningOnce(oreId) {
     const ore = CONFIG.ores.find(o => o.id === oreId);
     const oreIndex = CONFIG.ores.findIndex(o => o.id === oreId);
     
+    // 随机掉落1-3个（各33.3%概率）
+    const dropCount = Math.floor(Math.random() * 3) + 1;
+    
     // 添加对应的矿石到物品存储
     if (!gameState.miningInventory[oreId]) {
         gameState.miningInventory[oreId] = 0;
     }
-    gameState.miningInventory[oreId]++;
+    gameState.miningInventory[oreId] += dropCount;
     
     // 检查是否获得挖矿代币
     const token = tryGetToken('mining_token', oreIndex, 'standard');
@@ -2364,7 +2370,7 @@ function completeMiningOnce(oreId) {
     saveGame();
     // 显示奖励
     if (elements.actionRewards) {
-        let rewardHtml = `<span class="action-reward-item">+1 ${ore.dropIcon} ${ore.drop}</span>`;
+        let rewardHtml = `<span class="action-reward-item">+${dropCount} ${ore.dropIcon} ${ore.drop}</span>`;
         if (token) {
             rewardHtml += `<span class="action-reward-item token-reward">+1 ${token.icon} ${token.name}</span>`;
         }
@@ -6296,12 +6302,16 @@ function loadGame() {
                     
                     // 给予离线完成的奖励
                     const actualCompleted = Math.min(completedCount, gameState.woodcuttingRemaining);
+                    let totalDrops = 0;
                     for (let i = 0; i < actualCompleted; i++) {
+                        // 随机掉落1-3个
+                        const dropCount = Math.floor(Math.random() * 3) + 1;
+                        totalDrops += dropCount;
                         // 添加木材
                         if (!gameState.woodcuttingInventory[tree.id]) {
                             gameState.woodcuttingInventory[tree.id] = 0;
                         }
-                        gameState.woodcuttingInventory[tree.id]++;
+                        gameState.woodcuttingInventory[tree.id] += dropCount;
                         addExp(tree.exp);
                         addSkillExp('woodcutting', tree.exp);
                     }
@@ -6312,7 +6322,7 @@ function loadGame() {
                     
                     // 显示离线奖励
                     if (actualCompleted > 0) {
-                        showToast(`⏰ 离线完成 ${actualCompleted} 次伐木！`);
+                        showToast(`⏰ 离线完成 ${actualCompleted} 次伐木，获得 ${totalDrops} 个${tree.drop}！`);
                     }
                     
                     // 如果还有剩余次数，继续执行
@@ -6355,11 +6365,15 @@ function loadGame() {
                     const remainingTime = offlineTime % actionDuration;
                     
                     const actualCompleted = Math.min(completedCount, gameState.miningRemaining);
+                    let totalDrops = 0;
                     for (let i = 0; i < actualCompleted; i++) {
+                        // 随机掉落1-3个
+                        const dropCount = Math.floor(Math.random() * 3) + 1;
+                        totalDrops += dropCount;
                         if (!gameState.miningInventory[ore.id]) {
                             gameState.miningInventory[ore.id] = 0;
                         }
-                        gameState.miningInventory[ore.id]++;
+                        gameState.miningInventory[ore.id] += dropCount;
                         addExp(ore.exp);
                         addSkillExp('mining', ore.exp);
                     }
@@ -6368,7 +6382,7 @@ function loadGame() {
                     gameState.actionStartTime = now - remainingTime;
                     
                     if (actualCompleted > 0) {
-                        showToast(`⏰ 离线完成 ${actualCompleted} 次挖矿！`);
+                        showToast(`⏰ 离线完成 ${actualCompleted} 次挖矿，获得 ${totalDrops} 个${ore.drop}！`);
                     }
                     
                     if (gameState.miningRemaining > 0 || gameState.miningCount >= 99999) {
