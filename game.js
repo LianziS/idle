@@ -2500,6 +2500,43 @@ function scheduleGathering(type, locationId, itemId) {
     }
 }
 
+// 根据物品ID获取采集掉落数量
+function getGatheringDropCount(itemId) {
+    // 四种蜜：1-7个，概率5%,10%,20%,30%,20%,10%,5%
+    const honeyItems = ['honey', 'blossom_honey', 'moonlight_honey', 'rock_rose_honey'];
+    // 甜浆果、小麦、啤酒花、苹果、葡萄、黑麦、雾果、龙血果：1-5个，概率10%,20%,40%,20%,10%
+    const fruitItems = ['sweet_berry', 'wheat', 'hops', 'apple', 'grape', 'rye', 'mist_fruit', 'dragon_blood_fruit'];
+    // 血蔷薇、黄麻、星露草、亚麻、赤炼蛇果、月光菇、羊毛、蚕丝、灵魂草、风语绒、原野之心、迷心浆果、生命纤维、星辰花：1-3个，概率33.3%
+    const commonItems = ['blood_rose', 'jute', 'star_dew_herb', 'flax', 'red_serpent_fruit', 'moonlight_mushroom', 
+                         'wool', 'silk', 'soul_herb', 'wind_velvet', 'wild_heart', 'bewitch_berry', 'life_fiber', 'star_blossom'];
+    
+    const rand = Math.random() * 100;
+    
+    if (honeyItems.includes(itemId)) {
+        // 1-7个：5%,10%,20%,30%,20%,10%,5%
+        if (rand < 5) return 1;
+        if (rand < 15) return 2;
+        if (rand < 35) return 3;
+        if (rand < 65) return 4;
+        if (rand < 85) return 5;
+        if (rand < 95) return 6;
+        return 7;
+    } else if (fruitItems.includes(itemId)) {
+        // 1-5个：10%,20%,40%,20%,10%
+        if (rand < 10) return 1;
+        if (rand < 30) return 2;
+        if (rand < 70) return 3;
+        if (rand < 90) return 4;
+        return 5;
+    } else if (commonItems.includes(itemId)) {
+        // 1-3个：33.3%,33.3%,33.3%
+        return Math.floor(Math.random() * 3) + 1;
+    } else {
+        // 其他：每次1个
+        return 1;
+    }
+}
+
 function completeGatheringOnce(type, locationId, itemId) {
     const location = CONFIG.gatheringLocations.find(l => l.id === locationId);
     const locationIndex = CONFIG.gatheringLocations.findIndex(l => l.id === locationId);
@@ -2514,30 +2551,34 @@ function completeGatheringOnce(type, locationId, itemId) {
     if (type === 'gathering_item' && itemId) {
         // 单个物品采集 - 100% 获得
         const item = location.items.find(i => i.id === itemId);
+        const dropCount = getGatheringDropCount(itemId);
         if (!gameState.gatheringInventory[item.id]) {
             gameState.gatheringInventory[item.id] = 0;
         }
-        gameState.gatheringInventory[item.id]++;
-        rewards.push({ icon: item.icon, name: item.name, amount: 1 });
+        gameState.gatheringInventory[item.id] += dropCount;
+        rewards.push({ icon: item.icon, name: item.name, amount: dropCount });
     } else {
         // 全采集 - 每次行动 100% 成功，但每种物品独立 30% 概率
         location.items.forEach(item => {
             if (Math.random() < 0.3) {
+                // 先确定获得这个物品，再计算数量
+                const dropCount = getGatheringDropCount(item.id);
                 if (!gameState.gatheringInventory[item.id]) {
                     gameState.gatheringInventory[item.id] = 0;
                 }
-                gameState.gatheringInventory[item.id]++;
-                rewards.push({ icon: item.icon, name: item.name, amount: 1 });
+                gameState.gatheringInventory[item.id] += dropCount;
+                rewards.push({ icon: item.icon, name: item.name, amount: dropCount });
             }
         });
         // 如果全采集什么都没获得，至少给一个随机物品保底
         if (rewards.length === 0 && location.items.length > 0) {
             const randomItem = location.items[Math.floor(Math.random() * location.items.length)];
+            const dropCount = getGatheringDropCount(randomItem.id);
             if (!gameState.gatheringInventory[randomItem.id]) {
                 gameState.gatheringInventory[randomItem.id] = 0;
             }
-            gameState.gatheringInventory[randomItem.id]++;
-            rewards.push({ icon: randomItem.icon, name: randomItem.name, amount: 1 });
+            gameState.gatheringInventory[randomItem.id] += dropCount;
+            rewards.push({ icon: randomItem.icon, name: randomItem.name, amount: dropCount });
         }
     }
     
@@ -6430,18 +6471,21 @@ function loadGame() {
                         // 模拟采集奖励
                         if (!gameState.gatheringInventory) gameState.gatheringInventory = {};
                         if (gameState.gatheringItemId) {
+                            // 单个物品采集
+                            const dropCount = getGatheringDropCount(gameState.gatheringItemId);
                             if (!gameState.gatheringInventory[gameState.gatheringItemId]) {
                                 gameState.gatheringInventory[gameState.gatheringItemId] = 0;
                             }
-                            gameState.gatheringInventory[gameState.gatheringItemId]++;
+                            gameState.gatheringInventory[gameState.gatheringItemId] += dropCount;
                         } else {
-                            // 全采集逻辑
+                            // 全采集逻辑：先确定获得哪些物品，再计算数量
                             location.items.forEach(item => {
                                 if (Math.random() < 0.3) {
+                                    const dropCount = getGatheringDropCount(item.id);
                                     if (!gameState.gatheringInventory[item.id]) {
                                         gameState.gatheringInventory[item.id] = 0;
                                     }
-                                    gameState.gatheringInventory[item.id]++;
+                                    gameState.gatheringInventory[item.id] += dropCount;
                                 }
                             });
                         }
