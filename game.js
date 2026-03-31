@@ -7327,7 +7327,7 @@ function updateQueueButtonInModal() {
     const queueLength = gameState.actionQueue.length;
     const hasCurrentAction = gameState.currentAction !== null;
     
-    // 如果队列已满（5个），按钮不可用
+    // 如果队列已满，按钮不可用
     if (queueLength >= gameState.maxQueueSize) {
         elements.actionModalQueue.disabled = true;
         elements.actionModalQueue.textContent = '添加到队列';
@@ -7403,7 +7403,7 @@ function addToQueue() {
     
     // 检查队列是否已满
     if (queueLength >= gameState.maxQueueSize) {
-        showToast('❌ 队列已满（最多4个）');
+        showToast('❌ 队列已满（最多2个排队）');
         return;
     }
     
