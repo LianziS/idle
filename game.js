@@ -6262,7 +6262,10 @@ document.head.appendChild(style);
 
 function saveGame() {
     gameState.lastSave = Date.now();
-    localStorage.setItem('medievalMercenarySave', JSON.stringify(gameState));
+    // 排除配置项（不应该被存档覆盖）
+    const stateToSave = { ...gameState };
+    delete stateToSave.maxQueueSize;
+    localStorage.setItem('medievalMercenarySave', JSON.stringify(stateToSave));
 }
 
 function loadGame() {
@@ -6271,6 +6274,8 @@ function loadGame() {
         try {
             const loaded = JSON.parse(saved);
             gameState = { ...gameState, ...loaded };
+            // 强制重置队列大小限制（防止旧存档覆盖）
+            gameState.maxQueueSize = 2;
             const now = Date.now();
             for (const [actionId, endTime] of Object.entries(gameState.activeActions)) {
                 if (endTime > now) setTimeout(() => completeAction(actionId), endTime - now);
