@@ -80,7 +80,7 @@ const CONFIG = {
             name: '夏尔边境',
             reqLevel: 1,
             duration: 6000,
-            exp: 2,
+            exp: 5,
             items: [
                 { id: 'sweet_berry', name: '甜浆果', icon: '🫐', futureUse: ['酿酒'] },
                 { id: 'wild_mint', name: '野薄荷', icon: '🌿', futureUse: ['炼金', '酿酒'] },
@@ -94,7 +94,7 @@ const CONFIG = {
             name: '狼林边缘',
             reqLevel: 10,
             duration: 8000,
-            exp: 3,
+            exp: 7.5,
             items: [
                 { id: 'wheat', name: '小麦', icon: '🌾', futureUse: ['酿酒'] },
                 { id: 'pine_needle', name: '松针', icon: '🌲', futureUse: ['炼金', '酿酒'] },
@@ -108,7 +108,7 @@ const CONFIG = {
             name: '河间地带',
             reqLevel: 20,
             duration: 10000,
-            exp: 4,
+            exp: 12.5,
             items: [
                 { id: 'hops', name: '啤酒花', icon: '🌿', futureUse: ['酿酒'] },
                 { id: 'vanilla', name: '香草', icon: '🌱', futureUse: ['炼金', '酿酒'] },
@@ -122,7 +122,7 @@ const CONFIG = {
             name: '艾林谷地',
             reqLevel: 35,
             duration: 12000,
-            exp: 5,
+            exp: 20,
             items: [
                 { id: 'apple', name: '苹果', icon: '🍎', futureUse: ['酿酒'] },
                 { id: 'sage', name: '鼠尾草', icon: '🌿', futureUse: ['炼金', '酿酒'] },
@@ -136,7 +136,7 @@ const CONFIG = {
             name: '洛汗平原',
             reqLevel: 50,
             duration: 15000,
-            exp: 6,
+            exp: 30,
             items: [
                 { id: 'grape', name: '葡萄', icon: '🍇', futureUse: ['酿酒'] },
                 { id: 'chili', name: '辣椒', icon: '🌶️', futureUse: ['炼金', '酿酒'] },
@@ -150,7 +150,7 @@ const CONFIG = {
             name: '多恩边疆',
             reqLevel: 65,
             duration: 18000,
-            exp: 7,
+            exp: 40,
             items: [
                 { id: 'rye', name: '黑麦', icon: '🌾', futureUse: ['酿酒'] },
                 { id: 'mist_flower', name: '雾菱花', icon: '💠', futureUse: ['炼金', '酿酒'] },
@@ -164,7 +164,7 @@ const CONFIG = {
             name: '叹息峡谷',
             reqLevel: 80,
             duration: 22000,
-            exp: 8,
+            exp: 55,
             items: [
                 { id: 'mist_fruit', name: '雾果', icon: '🍑', futureUse: ['酿酒'] },
                 { id: 'rock_rose_honey', name: '岩玫瑰蜜', icon: '🍯', futureUse: ['制药', '酿酒'] },
@@ -177,7 +177,7 @@ const CONFIG = {
             name: '龙脊山脉',
             reqLevel: 95,
             duration: 30000,
-            exp: 10,
+            exp: 73,
             items: [
                 { id: 'dragon_blood_fruit', name: '龙血果', icon: '🐉', futureUse: ['酿酒'] },
                 { id: 'four_leaf_clover', name: '四叶草', icon: '🍀', futureUse: ['炼金', '酿酒'] },
@@ -707,8 +707,8 @@ let gameState = {
         rods: []
     },
     // 行动队列系统
-    actionQueue: [],     // 行动队列（最多5个）
-    maxQueueSize: 4,
+    actionQueue: [],     // 行动队列（最多3个：当前+2排队）
+    maxQueueSize: 2,
     // 当前行动的定时器ID（用于取消时清除）
     actionTimerId: null
 };
@@ -2464,7 +2464,10 @@ function scheduleGathering(type, locationId, itemId) {
             actionName = `${location.name}·全采集`;
         }
         
-        setActionState({ name: actionName, icon: actionIcon }, location.duration, gameState.gatheringCount, gameState.gatheringRemaining);
+        // 应用装备加成（镰刀加速采集）
+        const bonus = getEquipmentBonus('gathering');
+        const actualDuration = Math.floor(location.duration / (1 + bonus));
+        setActionState({ name: actionName, icon: actionIcon }, actualDuration, gameState.gatheringCount, gameState.gatheringRemaining);
         // 重置进度条为 0
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
@@ -2484,7 +2487,7 @@ function scheduleGathering(type, locationId, itemId) {
                 // 递归调用继续下一次行动
                 scheduleGathering(type, locationId, itemId);
             }
-        }, location.duration);
+        }, actualDuration);
     }
 }
 
@@ -3509,7 +3512,10 @@ function scheduleCrafting(plankId) {
     
     // 开始下一次行动
     if (gameState.activeCrafting === plankId) {
-        setActionState({ name: `制作${plank.name}`, icon: plank.icon }, plank.duration, gameState.craftingCount, gameState.craftingRemaining);
+        // 应用装备加成（凿子加速制作）
+        const bonus = getEquipmentBonus('crafting');
+        const actualDuration = Math.floor(plank.duration / (1 + bonus));
+        setActionState({ name: `制作${plank.name}`, icon: plank.icon }, actualDuration, gameState.craftingCount, gameState.craftingRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -3525,7 +3531,7 @@ function scheduleCrafting(plankId) {
                 completeCraftingOnce(plankId);
                 scheduleCrafting(plankId);
             }
-        }, plank.duration);
+        }, actualDuration);
     }
 }
 
@@ -4792,7 +4798,10 @@ function scheduleTailoring(fabricId) {
     
     // 开始下一次行动
     if (gameState.activeTailoring === fabricId) {
-        setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration, gameState.tailoringCount, gameState.tailoringRemaining);
+        // 应用装备加成（针加速缝制）
+        const bonus = getEquipmentBonus('tailoring');
+        const actualDuration = Math.floor(fabric.duration / (1 + bonus));
+        setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, actualDuration, gameState.tailoringCount, gameState.tailoringRemaining);
         if (elements.actionProgressFill) {
             elements.actionProgressFill.style.width = '0%';
         }
@@ -4808,7 +4817,7 @@ function scheduleTailoring(fabricId) {
                 completeTailoringOnce(fabricId);
                 scheduleTailoring(fabricId);
             }
-        }, fabric.duration);
+        }, actualDuration);
     }
 }
 
