@@ -2399,7 +2399,10 @@ function startGatheringWithCount(type, locationId, itemId, count) {
         actionName = `${location.name}·全采集`;
     }
     
-    setActionState({ name: actionName, icon: actionIcon }, location.duration, count, count);
+    // 应用装备加成（镰刀加速采集）
+    const bonus = getEquipmentBonus('gathering');
+    const actualDuration = Math.floor(location.duration / (1 + bonus));
+    setActionState({ name: actionName, icon: actionIcon }, actualDuration, count, count);
     renderGathering();
     
     // 启动进度条动画
@@ -2413,7 +2416,7 @@ function startGatheringWithCount(type, locationId, itemId, count) {
             completeGatheringOnce(type, locationId, itemId);
             scheduleGathering(type, locationId, itemId);
         }
-    }, location.duration);
+    }, actualDuration);
 }
 
 function scheduleGathering(type, locationId, itemId) {
@@ -3450,7 +3453,10 @@ function startCraftingWithCount(plankId, count) {
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `制作${plank.name}`, icon: plank.icon }, plank.duration, actualCount, actualCount);
+    // 应用装备加成（凿子加速制作）
+    const bonus = getEquipmentBonus('crafting');
+    const actualDuration = Math.floor(plank.duration / (1 + bonus));
+    setActionState({ name: `制作${plank.name}`, icon: plank.icon }, actualDuration, actualCount, actualCount);
     renderCrafting();
     
     // 启动进度条动画
@@ -3464,7 +3470,7 @@ function startCraftingWithCount(plankId, count) {
             completeCraftingOnce(plankId);
             scheduleCrafting(plankId);
         }
-    }, plank.duration);
+    }, actualDuration);
 }
 
 function scheduleCrafting(plankId) {
@@ -4736,7 +4742,10 @@ function startTailoringWithCount(fabricId, count) {
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
-    setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, fabric.duration, actualCount, actualCount);
+    // 应用装备加成（针加速缝制）
+    const bonus = getEquipmentBonus('tailoring');
+    const actualDuration = Math.floor(fabric.duration / (1 + bonus));
+    setActionState({ name: `缝制${fabric.name}`, icon: fabric.icon }, actualDuration, actualCount, actualCount);
     renderTailoring();
     
     // 启动进度条动画
@@ -4750,7 +4759,7 @@ function startTailoringWithCount(fabricId, count) {
             completeTailoringOnce(fabricId);
             scheduleTailoring(fabricId);
         }
-    }, fabric.duration);
+    }, actualDuration);
 }
 
 function scheduleTailoring(fabricId) {
