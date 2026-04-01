@@ -4683,6 +4683,9 @@ function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
     gameState.forgingToolType = toolType;
     gameState.forgingToolIndex = toolIndex;
     
+    // 通知后端行动开始
+    notifyActionStart('forging_tool', toolId, actualCount);
+    
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
@@ -4779,6 +4782,9 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
     const materialsKey = toolsKey;
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
+    
+    // 后端验证
+    notifyActionComplete('forging_tool', toolId);
     
     const materials = CONFIG.toolCraftingMaterials[materialsKey][toolIndex];
     
@@ -5139,6 +5145,9 @@ function startTailoringWithCount(fabricId, count) {
     gameState.tailoringCount = actualCount;
     gameState.tailoringRemaining = actualCount;
     
+    // 通知后端行动开始
+    notifyActionStart('tailoring', fabricId, actualCount);
+    
     // 重置进度条
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
@@ -5235,6 +5244,9 @@ function completeTailoringOnce(fabricId) {
     const fabric = CONFIG.fabrics.find(f => f.id === fabricId);
     const fabricIndex = CONFIG.fabrics.findIndex(f => f.id === fabricId);
     if (!fabric) return;
+    
+    // 后端验证
+    notifyActionComplete('tailoring', fabricId);
     
     // 消耗材料（使用辅助函数）
     for (const [itemId, count] of Object.entries(fabric.materials)) {
@@ -5757,6 +5769,9 @@ function startBrewingWithCount(brewId, count) {
     gameState.brewCount = actualCount;
     gameState.brewRemaining = actualCount;
     
+    // 通知后端行动开始
+    notifyActionStart('brewing', brewId, actualCount);
+    
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
@@ -5782,6 +5797,9 @@ function startBrewingWithCount(brewId, count) {
 function completeBrewingOnce(brewId) {
     const brew = CONFIG.brews.find(b => b.id === brewId);
     if (!brew) return;
+    
+    // 后端验证
+    notifyActionComplete('brewing', brewId);
     
     // 添加酒类（使用辅助函数）
     addItem('BREW', brewId, 1);
@@ -5958,6 +5976,9 @@ function completeEssenceOnce(essenceId) {
     const essence = CONFIG.essences.find(e => e.id === essenceId);
     if (!essence) return;
     
+    // 后端验证
+    notifyActionComplete('essence', essenceId);
+    
     // 添加精华
     addItem('ESSENCE', essenceId, 1);
     
@@ -6065,6 +6086,9 @@ function startAlchemyWithCount(potionId, count) {
     gameState.alchemyCount = actualCount;
     gameState.alchemyRemaining = actualCount;
     
+    // 通知后端行动开始
+    notifyActionStart('alchemy', potionId, actualCount);
+    
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = '0%';
     }
@@ -6158,6 +6182,9 @@ function completeAlchemyOnce(potionId) {
     const potion = CONFIG.potions.find(p => p.id === potionId);
     const potionIndex = CONFIG.potions.findIndex(p => p.id === potionId);
     if (!potion) return;
+    
+    // 后端验证
+    notifyActionComplete('alchemy', potionId);
     
     // 消耗材料（使用辅助函数）
     for (const [itemId, count] of Object.entries(potion.materials)) {
