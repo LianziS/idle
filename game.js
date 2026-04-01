@@ -1907,23 +1907,6 @@ function confirmSellAmount() {
     renderMerchantWarehouse();
 }
 
-// 物品类型映射（用于商人出售等场景）
-const TYPE_TO_ITEM_TYPE = {
-    'wood': 'WOOD',
-    'stone': null,  // 资源类型，不是物品
-    'herb': null,
-    'ore': 'ORE',
-    'log': 'WOOD',
-    'essence': 'ESSENCE',
-    'brew': 'BREW',
-    'gathering': 'GATHERING',
-    'fabric': 'FABRIC',
-    'token': 'TOKEN',
-    'plank': 'PLANK',
-    'ingot': 'INGOT',
-    'potion': 'POTION'
-};
-
 function executeSingleSell(type, id, count, icon, name) {
     const price = getItemSellPrice({ type, id });
     const totalPrice = price * count;
