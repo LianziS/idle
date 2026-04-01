@@ -3172,8 +3172,7 @@ function canAfford(cost) {
         }
         // 检查伐木物品
         else if (CONFIG.trees.find(t => t.id === res)) {
-            const owned = gameState.woodcuttingInventory[res] || 0;
-            if (owned < amount) return false;
+            if (getItemCount('WOOD', res) < amount) return false;
         }
         // 检查其他物品（矿石、采集物等）
         else {
@@ -3733,7 +3732,7 @@ function renderPlanksList() {
         // 获取材料名称
         const materialNames = Object.entries(plank.materials).map(([woodId, count]) => {
             const tree = CONFIG.trees.find(t => t.id === woodId);
-            const owned = gameState.woodcuttingInventory[woodId] || 0;
+            const owned = getItemCount('WOOD', woodId);
             return `${tree ? tree.drop : woodId}×${count} (${owned}/${count})`;
         }).join(', ');
         
@@ -3784,8 +3783,7 @@ function renderPlanksList() {
 
 function canCraftPlank(plank) {
     for (const [woodId, count] of Object.entries(plank.materials)) {
-        const owned = gameState.woodcuttingInventory[woodId] || 0;
-        if (owned < count) return false;
+        if (getItemCount('WOOD', woodId) < count) return false;
     }
     return true;
 }
@@ -4004,7 +4002,7 @@ function renderIngotsList() {
         // 获取材料名称
         const materialNames = Object.entries(ingot.materials).map(([oreId, count]) => {
             const ore = CONFIG.ores.find(o => o.id === oreId);
-            const owned = gameState.miningInventory[oreId] || 0;
+            const owned = getItemCount('ORE', oreId);
             return `${ore ? ore.drop : oreId}×${count} (${owned}/${count})`;
         }).join(', ');
         
@@ -4061,8 +4059,7 @@ function renderIngotsList() {
 
 function canForgeIngot(ingot) {
     for (const [oreId, count] of Object.entries(ingot.materials)) {
-        const owned = gameState.miningInventory[oreId] || 0;
-        if (owned < count) return false;
+        if (getItemCount('ORE', oreId) < count) return false;
     }
     return true;
 }
@@ -4131,8 +4128,8 @@ function renderToolsList() {
         // 构建材料描述（斧头使用对应矿石）
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         const oreName = oreNames[oreId] || '矿石';
         const plankName = plankNames[plankId] || '木板';
         
@@ -4182,8 +4179,8 @@ function renderToolsList() {
         // 构建材料描述（镐子使用对应矿石）
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         const oreName = oreNames[oreId] || '矿石';
         const plankName = plankNames[plankId] || '木板';
         
@@ -4233,8 +4230,8 @@ function renderToolsList() {
         
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
@@ -4277,8 +4274,8 @@ function renderToolsList() {
         
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
@@ -4321,8 +4318,8 @@ function renderToolsList() {
         
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
@@ -4428,8 +4425,8 @@ function renderToolsList() {
         };
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
@@ -4486,8 +4483,8 @@ function renderToolsList() {
         };
         const oreId = oreIds[index];
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
+        const ownedPlank = getItemCount('PLANK', plankId);
         
         let materialDesc = `${oreNames[oreId]}×${materials.ore}(${ownedOre}), ${plankNames[plankId]}×${materials.plank}(${ownedPlank})`;
         if (materials.prevTool) {
@@ -4575,7 +4572,7 @@ function getMaxForgeToolCount(toolType, toolIndex) {
         // 其他工具使用矿石和木板
         const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
         const oreId = oreIds[toolIndex];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
         const ownedPlank = gameState.planksInventory[CONFIG.plankIdMapping[toolIndex]] || 0;
         maxCount = Math.min(maxCount, Math.floor(ownedOre / materials.ore));
         maxCount = Math.min(maxCount, Math.floor(ownedPlank / materials.plank));
@@ -4609,11 +4606,11 @@ function canForgeTool(toolType, index) {
         // 其他工具使用矿石和木板
         const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
         const oreId = oreIds[index];
-        const ownedOre = gameState.miningInventory[oreId] || 0;
+        const ownedOre = getItemCount('ORE', oreId);
         if (ownedOre < materials.ore) return false;
         
         const plankId = CONFIG.plankIdMapping[index];
-        const ownedPlank = gameState.planksInventory[plankId] || 0;
+        const ownedPlank = getItemCount('PLANK', plankId);
         if (ownedPlank < materials.plank) return false;
     }
     
@@ -5587,14 +5584,14 @@ function renderEssencesList() {
 function canExtractEssence(essence) {
     for (const [itemId, count] of Object.entries(essence.materials)) {
         // 检查采集物品
-        let owned = gameState.gatheringInventory[itemId] || 0;
+        let owned = getItemCount('GATHERING', itemId);
         // 检查精华
         if (owned === 0) {
-            owned = gameState.essencesInventory[itemId] || 0;
+            owned = getItemCount('ESSENCE', itemId);
         }
         // 检查代币
         if (owned === 0) {
-            owned = gameState.tokensInventory[itemId] || 0;
+            owned = getItemCount('TOKEN', itemId);
         }
         if (owned < count) return false;
     }
@@ -5613,7 +5610,7 @@ function renderBrewsList() {
         
         // 获取材料名称
         const materialNames = Object.entries(brew.materials).map(([itemId, count]) => {
-            let owned = gameState.gatheringInventory[itemId] || 0;
+            let owned = getItemCount('GATHERING', itemId);
             let materialName = itemId;
             let materialIcon = '🍺';
             
@@ -5631,14 +5628,14 @@ function renderBrewsList() {
             if (essence) {
                 materialName = essence.name;
                 materialIcon = essence.icon;
-                owned = gameState.essencesInventory[itemId] || 0;
+                owned = getItemCount('ESSENCE', itemId);
             }
             // 检查代币
             const token = CONFIG.tokens[itemId];
             if (token) {
                 materialName = token.name;
                 materialIcon = token.icon;
-                owned = gameState.tokensInventory[itemId] || 0;
+                owned = getItemCount('TOKEN', itemId);
             }
             
             return `${materialIcon}${materialName}×${count}(${owned})`;
@@ -5695,14 +5692,14 @@ function renderBrewsList() {
 
 function canBrewDrink(brew) {
     for (const [itemId, count] of Object.entries(brew.materials)) {
-        let owned = gameState.gatheringInventory[itemId] || 0;
+        let owned = getItemCount('GATHERING', itemId);
         // 检查精华
         if (owned === 0) {
-            owned = gameState.essencesInventory[itemId] || 0;
+            owned = getItemCount('ESSENCE', itemId);
         }
         // 检查代币
         if (owned === 0) {
-            owned = gameState.tokensInventory[itemId] || 0;
+            owned = getItemCount('TOKEN', itemId);
         }
         if (owned < count) return false;
     }
@@ -5820,16 +5817,16 @@ function scheduleBrewing(brewId) {
     // 消耗材料
     for (const [itemId, count] of Object.entries(brew.materials)) {
         // 从采集库存扣除
-        if (gameState.gatheringInventory[itemId]) {
-            gameState.gatheringInventory[itemId] -= count;
+        if (getItemCount('GATHERING', itemId) > 0) {
+            removeItem('GATHERING', itemId, count);
         }
         // 从精华库存扣除
-        else if (gameState.essencesInventory[itemId]) {
-            gameState.essencesInventory[itemId] -= count;
+        else if (getItemCount('ESSENCE', itemId) > 0) {
+            removeItem('ESSENCE', itemId, count);
         }
         // 从代币库存扣除
-        else if (gameState.tokensInventory[itemId]) {
-            gameState.tokensInventory[itemId] -= count;
+        else if (getItemCount('TOKEN', itemId) > 0) {
+            removeItem('TOKEN', itemId, count);
         }
     }
     
@@ -6407,19 +6404,13 @@ function completeGathering(type, locationId, itemId = null) {
     if (type === 'item' && itemId) {
         // 单个物品采集
         const item = location.items.find(i => i.id === itemId);
-        if (!gameState.gatheringInventory[item.id]) {
-            gameState.gatheringInventory[item.id] = 0;
-        }
-        gameState.gatheringInventory[item.id]++;
+        addItem('GATHERING', item.id, 1);
         rewards.push({ icon: item.icon, name: item.name, amount: 1 });
     } else {
         // 全采集 - 30% 概率获得每种物品
         location.items.forEach(item => {
             if (Math.random() < 0.3) {
-                if (!gameState.gatheringInventory[item.id]) {
-                    gameState.gatheringInventory[item.id] = 0;
-                }
-                gameState.gatheringInventory[item.id]++;
+                addItem('GATHERING', item.id, 1);
                 rewards.push({ icon: item.icon, name: item.name, amount: 1 });
             }
         });
@@ -6808,19 +6799,13 @@ function loadGame() {
                         if (gameState.gatheringItemId) {
                             // 单个物品采集
                             const dropCount = getGatheringDropCount(gameState.gatheringItemId);
-                            if (!gameState.gatheringInventory[gameState.gatheringItemId]) {
-                                gameState.gatheringInventory[gameState.gatheringItemId] = 0;
-                            }
-                            gameState.gatheringInventory[gameState.gatheringItemId] += dropCount;
+                            addItem('GATHERING', gameState.gatheringItemId, dropCount);
                         } else {
                             // 全采集逻辑：先确定获得哪些物品，再计算数量
                             location.items.forEach(item => {
                                 if (Math.random() < 0.3) {
                                     const dropCount = getGatheringDropCount(item.id);
-                                    if (!gameState.gatheringInventory[item.id]) {
-                                        gameState.gatheringInventory[item.id] = 0;
-                                    }
-                                    gameState.gatheringInventory[item.id] += dropCount;
+                                    addItem('GATHERING', item.id, dropCount);
                                 }
                             });
                         }
