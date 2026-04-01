@@ -1424,7 +1424,7 @@ function canSubmitQuest(quest) {
             if (total < amount) return false;
         } else if (res === 'honey' || res === 'sweet_berry') {
             // 采集物品
-            if ((gameState.gatheringInventory[res] || 0) < amount) return false;
+            if (getItemCount('GATHERING', res) < amount) return false;
         } else if ((gameState.resources[res] || 0) < amount) {
             return false;
         }
@@ -1477,7 +1477,7 @@ function handleQuest(merchant, quest, data) {
                         remaining -= deduct;
                     }
                 } else if (res === 'honey' || res === 'sweet_berry') {
-                    gameState.gatheringInventory[res] -= amount;
+                    removeItem('GATHERING', res, amount);
                 } else {
                     gameState.resources[res] -= amount;
                 }
@@ -2889,10 +2889,7 @@ function completeGatheringOnce(type, locationId, itemId) {
         if (rewards.length === 0 && location.items.length > 0) {
             const randomItem = location.items[Math.floor(Math.random() * location.items.length)];
             const dropCount = getGatheringDropCount(randomItem.id);
-            if (!gameState.gatheringInventory[randomItem.id]) {
-                gameState.gatheringInventory[randomItem.id] = 0;
-            }
-            gameState.gatheringInventory[randomItem.id] += dropCount;
+            addItem('GATHERING', randomItem.id, dropCount);
             rewards.push({ icon: randomItem.icon, name: randomItem.name, amount: dropCount });
         }
     }
@@ -5018,7 +5015,7 @@ function renderFabricsList() {
         
         // 获取材料名称
         const materialNames = Object.entries(fabric.materials).map(([itemId, count]) => {
-            const owned = gameState.gatheringInventory[itemId] || 0;
+            const owned = getItemCount('GATHERING', itemId);
             // 查找材料名称
             let materialName = itemId;
             for (const loc of CONFIG.gatheringLocations) {
@@ -5089,8 +5086,7 @@ function renderFabricsList() {
 
 function canTailorFabric(fabric) {
     for (const [itemId, count] of Object.entries(fabric.materials)) {
-        const owned = gameState.gatheringInventory[itemId] || 0;
-        if (owned < count) return false;
+        if (getItemCount('GATHERING', itemId) < count) return false;
     }
     return true;
 }
@@ -5439,7 +5435,7 @@ function renderPotionsList() {
         
         // 获取材料名称
         const materialNames = Object.entries(potion.materials).map(([itemId, count]) => {
-            const owned = gameState.gatheringInventory[itemId] || 0;
+            const owned = getItemCount('GATHERING', itemId);
             let materialName = itemId;
             let materialIcon = '🌿';
             for (const loc of CONFIG.gatheringLocations) {
@@ -5508,8 +5504,7 @@ function renderPotionsList() {
 
 function canBrewPotion(potion) {
     for (const [itemId, count] of Object.entries(potion.materials)) {
-        const owned = gameState.gatheringInventory[itemId] || 0;
-        if (owned < count) return false;
+        if (getItemCount('GATHERING', itemId) < count) return false;
     }
     return true;
 }
@@ -5526,7 +5521,7 @@ function renderEssencesList() {
         
         // 获取材料名称
         const materialNames = Object.entries(essence.materials).map(([itemId, count]) => {
-            const owned = gameState.gatheringInventory[itemId] || 0;
+            const owned = getItemCount('GATHERING', itemId);
             let materialName = itemId;
             let materialIcon = '🌿';
             for (const loc of CONFIG.gatheringLocations) {
