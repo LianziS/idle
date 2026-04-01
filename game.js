@@ -6669,10 +6669,7 @@ function loadGame() {
                         const dropCount = Math.floor(Math.random() * 3) + 1;
                         totalDrops += dropCount;
                         // 添加木材
-                        if (!gameState.woodcuttingInventory[tree.id]) {
-                            gameState.woodcuttingInventory[tree.id] = 0;
-                        }
-                        gameState.woodcuttingInventory[tree.id] += dropCount;
+                        addItem('WOOD', tree.id, dropCount);
                         addExp(tree.exp);
                         addSkillExp('woodcutting', tree.exp);
                     }
@@ -6731,10 +6728,7 @@ function loadGame() {
                         // 随机掉落1-3个
                         const dropCount = Math.floor(Math.random() * 3) + 1;
                         totalDrops += dropCount;
-                        if (!gameState.miningInventory[ore.id]) {
-                            gameState.miningInventory[ore.id] = 0;
-                        }
-                        gameState.miningInventory[ore.id] += dropCount;
+                        addItem('ORE', ore.id, dropCount);
                         addExp(ore.exp);
                         addSkillExp('mining', ore.exp);
                     }
@@ -6855,12 +6849,9 @@ function loadGame() {
                     for (let i = 0; i < actualCompleted; i++) {
                         if (canCraftPlank(plank)) {
                             for (const [woodId, count] of Object.entries(plank.materials)) {
-                                gameState.woodcuttingInventory[woodId] -= count;
+                                removeItem('WOOD', woodId, count);
                             }
-                            if (!gameState.planksInventory[plank.id]) {
-                                gameState.planksInventory[plank.id] = 0;
-                            }
-                            gameState.planksInventory[plank.id]++;
+                            addItem('PLANK', plank.id, 1);
                             addExp(plank.exp);
                             addSkillExp('crafting', plank.exp);
                         }
@@ -6914,12 +6905,9 @@ function loadGame() {
                     for (let i = 0; i < actualCompleted; i++) {
                         if (canForgeIngot(ingot)) {
                             for (const [oreId, count] of Object.entries(ingot.materials)) {
-                                gameState.miningInventory[oreId] -= count;
+                                removeItem('ORE', oreId, count);
                             }
-                            if (!gameState.ingotsInventory[ingot.id]) {
-                                gameState.ingotsInventory[ingot.id] = 0;
-                            }
-                            gameState.ingotsInventory[ingot.id]++;
+                            addItem('INGOT', ingot.id, 1);
                             addExp(ingot.exp);
                             addSkillExp('forging', ingot.exp);
                         }
