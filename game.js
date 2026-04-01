@@ -728,6 +728,35 @@ function hasEnoughItems(itemType, id, count) {
     return getInventoryCount(itemType, id) >= count;
 }
 
+// 工具相关辅助函数
+function getToolConfigKey(toolType) {
+    const toolTypeMap = {
+        'axe': 'axes', 'pickaxe': 'pickaxes', 'chisel': 'chisels',
+        'needle': 'needles', 'scythe': 'scythes', 'hammer': 'hammers',
+        'tongs': 'tongs', 'rod': 'rods'
+    };
+    return toolTypeMap[toolType] || 'scythes';
+}
+
+function getToolEquipKey(subtype) {
+    const equipKeyMap = {
+        'axes': 'axe', 'pickaxes': 'pickaxe', 'chisels': 'chisel',
+        'needles': 'needle', 'scythes': 'scythe', 'hammers': 'hammer',
+        'tongs': 'tongs', 'rods': 'rod'
+    };
+    return equipKeyMap[subtype];
+}
+
+function getToolByTypeAndIndex(toolType, toolIndex) {
+    const configKey = getToolConfigKey(toolType);
+    return CONFIG.tools[configKey]?.[toolIndex];
+}
+
+function getToolInventory(toolType) {
+    const configKey = getToolConfigKey(toolType);
+    return gameState.toolsInventory[configKey] || [];
+}
+
 // ============ 游戏状态 ============
 
 let gameState = {
@@ -1547,18 +1576,11 @@ function renderMerchantWarehouse() {
         }
     });
     
-    // 工具（斧、镐、凿、针、镰、锤）
-    const toolTypes = [
-        { key: 'axes', tools: CONFIG.tools.axes, equipKey: 'axe' },
-        { key: 'pickaxes', tools: CONFIG.tools.pickaxes, equipKey: 'pickaxe' },
-        { key: 'chisels', tools: CONFIG.tools.chisels, equipKey: 'chisel' },
-        { key: 'needles', tools: CONFIG.tools.needles, equipKey: 'needle' },
-        { key: 'scythes', tools: CONFIG.tools.scythes, equipKey: 'scythe' },
-        { key: 'hammers', tools: CONFIG.tools.hammers, equipKey: 'hammer' },
-        { key: 'tongs', tools: CONFIG.tools.tongs, equipKey: 'tongs' },
-        { key: 'rods', tools: CONFIG.tools.rods, equipKey: 'rod' }
-    ];
-    toolTypes.forEach(({ key, tools, equipKey }) => {
+    // 工具（使用 TOOL_TYPE_LIST 遍历）
+    TOOL_TYPE_LIST.forEach(toolType => {
+        const key = toolType.configKey;
+        const tools = CONFIG.tools[key];
+        const equipKey = toolType.equipKey;
         const inventory = gameState.toolsInventory[key] || [];
         // 过滤掉已装备的工具
         const unequippedTools = inventory.filter(toolId => gameState.equipment[equipKey] !== toolId);
@@ -1916,13 +1938,7 @@ function getItemCount(item) {
     if (item.type === 'brew') return gameState.brewsInventory[item.id] || 0;
     if (item.type === 'tool') {
         const inventory = gameState.toolsInventory[item.subtype] || [];
-        // 获取装备槽键名
-        const equipKeyMap = {
-            'axes': 'axe', 'pickaxes': 'pickaxe', 'chisels': 'chisel',
-            'needles': 'needle', 'scythes': 'scythe', 'hammers': 'hammer',
-            'tongs': 'tongs', 'rods': 'rod'
-        };
-        const equipKey = equipKeyMap[item.subtype];
+        const equipKey = getToolEquipKey(item.subtype);
         // 过滤掉已装备的工具，返回未装备数量
         const equippedId = gameState.equipment[equipKey];
         return inventory.filter(id => id !== equippedId).length;
@@ -2163,12 +2179,7 @@ function setupMerchantListeners() {
                     else if (item.type === 'tool') {
                         // 批量出售未装备的工具
                         const inventory = gameState.toolsInventory[item.subtype] || [];
-                        const equipKeyMap = {
-                            'axes': 'axe', 'pickaxes': 'pickaxe', 'chisels': 'chisel',
-                            'needles': 'needle', 'scythes': 'scythe', 'hammers': 'hammer',
-                            'tongs': 'tongs', 'rods': 'rod'
-                        };
-                        const equipKey = equipKeyMap[item.subtype];
+                        const equipKey = getToolEquipKey(item.subtype);
                         const equippedId = gameState.equipment[equipKey];
                         
                         // 移除指定数量的未装备工具
@@ -4529,7 +4540,7 @@ function renderToolsList() {
             const toolType = this.dataset.toolType;
             const toolIndex = parseInt(this.dataset.toolIndex);
             const toolId = this.dataset.toolId;
-            const toolConfigKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'scythe' ? 'scythes' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : 'rods';
+            const toolConfigKey = getToolConfigKey(toolType);
             const tool = CONFIG.tools[toolConfigKey][toolIndex];
             
             // 检查等级
@@ -4551,7 +4562,7 @@ function renderToolsList() {
 
 // 计算工具可锻造的最大次数
 function getMaxForgeToolCount(toolType, toolIndex) {
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : toolType === 'rod' ? 'rods' : 'scythes';
+    const materialsKey = getToolConfigKey(toolType);
     const materials = CONFIG.toolCraftingMaterials[materialsKey][toolIndex];
     
     let maxCount = Infinity;
@@ -4577,12 +4588,7 @@ function getMaxForgeToolCount(toolType, toolIndex) {
         const inventory = gameState.toolsInventory[materialsKey] || [];
         const prevToolCount = inventory.filter(id => id === materials.prevTool).length;
         // 检查是否有未装备的前置工具
-        const equipKeyMap = {
-            'axes': 'axe', 'pickaxes': 'pickaxe', 'chisels': 'chisel',
-            'needles': 'needle', 'scythes': 'scythe', 'hammers': 'hammer',
-            'tongs': 'tongs', 'rods': 'rod'
-        };
-        const equipKey = equipKeyMap[materialsKey];
+        const equipKey = getToolEquipKey(materialsKey);
         const equippedId = gameState.equipment[equipKey];
         const unequippedPrevToolCount = equippedId === materials.prevTool ? prevToolCount - 1 : prevToolCount;
         maxCount = Math.min(maxCount, Math.max(0, unequippedPrevToolCount));
@@ -4592,7 +4598,7 @@ function getMaxForgeToolCount(toolType, toolIndex) {
 }
 
 function canForgeTool(toolType, index) {
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : toolType === 'rod' ? 'rods' : 'scythes';
+    const materialsKey = getToolConfigKey(toolType);
     const materials = CONFIG.toolCraftingMaterials[materialsKey][index];
     
     // 锤子使用矿锭作为材料
@@ -4629,7 +4635,7 @@ function canForgeTool(toolType, index) {
 }
 
 function startForgingToolWithCount(toolId, count, toolType, toolIndex) {
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : toolType === 'rod' ? 'rods' : 'scythes';
+    const toolsKey = getToolConfigKey(toolType);
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -4692,7 +4698,7 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
         return;
     }
     
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'scythe' ? 'scythes' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : 'rods';
+    const toolsKey = getToolConfigKey(toolType);
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -4749,8 +4755,8 @@ function scheduleForgingTool(toolId, toolType, toolIndex) {
 }
 
 function completeForgingToolOnce(toolId, toolType, toolIndex) {
-    const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : toolType === 'rod' ? 'rods' : 'scythes';
-    const materialsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : toolType === 'rod' ? 'rods' : 'scythes';
+    const toolsKey = getToolConfigKey(toolType);
+    const materialsKey = toolsKey;
     const tool = CONFIG.tools[toolsKey][toolIndex];
     if (!tool) return;
     
@@ -7083,7 +7089,7 @@ function loadGame() {
             if (gameState.activeForgingTool && gameState.forgingToolRemaining > 0) {
                 const toolType = gameState.forgingToolType;
                 const toolIndex = gameState.forgingToolIndex;
-                const toolsKey = toolType === 'axe' ? 'axes' : toolType === 'pickaxe' ? 'pickaxes' : toolType === 'chisel' ? 'chisels' : toolType === 'needle' ? 'needles' : toolType === 'scythe' ? 'scythes' : toolType === 'hammer' ? 'hammers' : toolType === 'tongs' ? 'tongs' : 'rods';
+                const toolsKey = getToolConfigKey(toolType);
                 const tools = CONFIG.tools[toolsKey];
                 const tool = tools[toolIndex];
                 
