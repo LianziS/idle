@@ -2978,6 +2978,8 @@ function updateUI() {
     renderIngotsInventory();
     renderFabricsInventory();
     renderPotionsInventory();
+    renderEssencesInventory();
+    renderBrewsInventory();
     renderToolsInventory();
     renderTokensInventory();
 }
