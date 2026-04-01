@@ -1869,31 +1869,39 @@ function confirmSellAmount() {
     renderMerchantWarehouse();
 }
 
+// 物品类型映射（用于商人出售等场景）
+const TYPE_TO_ITEM_TYPE = {
+    'wood': 'WOOD',
+    'stone': null,  // 资源类型，不是物品
+    'herb': null,
+    'ore': 'ORE',
+    'log': 'WOOD',
+    'essence': 'ESSENCE',
+    'brew': 'BREW',
+    'gathering': 'GATHERING',
+    'fabric': 'FABRIC',
+    'token': 'TOKEN',
+    'plank': 'PLANK',
+    'ingot': 'INGOT',
+    'potion': 'POTION'
+};
+
 function executeSingleSell(type, id, count, icon, name) {
     const price = getItemSellPrice({ type, id });
     const totalPrice = price * count;
     
-    // 扣除物品
+    // 扣除物品（使用辅助函数）
     if (type === 'wood') {
         gameState.resources.wood = Math.max(0, (gameState.resources.wood || 0) - count);
     } else if (type === 'stone') {
         gameState.resources.stone = Math.max(0, (gameState.resources.stone || 0) - count);
     } else if (type === 'herb') {
         gameState.resources.herb = Math.max(0, (gameState.resources.herb || 0) - count);
-    } else if (type === 'ore') {
-        gameState.miningInventory[id] = Math.max(0, (gameState.miningInventory[id] || 0) - count);
-    } else if (type === 'log') {
-        gameState.woodcuttingInventory[id] = Math.max(0, (gameState.woodcuttingInventory[id] || 0) - count);
-    } else if (type === 'essence') {
-        gameState.essencesInventory[id] = Math.max(0, (gameState.essencesInventory[id] || 0) - count);
-    } else if (type === 'brew') {
-        gameState.brewsInventory[id] = Math.max(0, (gameState.brewsInventory[id] || 0) - count);
-    } else if (type === 'gathering') {
-        gameState.gatheringInventory[id] = Math.max(0, (gameState.gatheringInventory[id] || 0) - count);
-    } else if (type === 'fabric') {
-        gameState.fabricsInventory[id] = Math.max(0, (gameState.fabricsInventory[id] || 0) - count);
-    } else if (type === 'token') {
-        gameState.tokensInventory[id] = Math.max(0, (gameState.tokensInventory[id] || 0) - count);
+    } else {
+        const itemTypeKey = TYPE_TO_ITEM_TYPE[type];
+        if (itemTypeKey) {
+            removeItem(itemTypeKey, id, count);
+        }
     }
     
     // 增加金币
@@ -1946,15 +1954,10 @@ function updateSellBar() {
 }
 
 function getItemCount(item) {
-    if (item.type === 'wood') return gameState.woodcuttingInventory[item.id] || 0;
-    if (item.type === 'ore') return gameState.miningInventory[item.id] || 0;
-    if (item.type === 'ingot') return gameState.ingotsInventory[item.id] || 0;
-    if (item.type === 'plank') return gameState.planksInventory[item.id] || 0;
-    if (item.type === 'fabric') return gameState.fabricsInventory[item.id] || 0;
-    if (item.type === 'gathering') return gameState.gatheringInventory[item.id] || 0;
-    if (item.type === 'potion') return gameState.potionsInventory[item.id] || 0;
-    if (item.type === 'essence') return gameState.essencesInventory[item.id] || 0;
-    if (item.type === 'brew') return gameState.brewsInventory[item.id] || 0;
+    const itemTypeKey = TYPE_TO_ITEM_TYPE[item.type];
+    if (itemTypeKey) {
+        return getItemCount(itemTypeKey, item.id);
+    }
     if (item.type === 'tool') {
         const inventory = gameState.toolsInventory[item.subtype] || [];
         const equipKey = getToolEquipKey(item.subtype);
@@ -1962,7 +1965,6 @@ function getItemCount(item) {
         const equippedId = gameState.equipment[equipKey];
         return inventory.filter(id => id !== equippedId).length;
     }
-    if (item.type === 'token') return gameState.tokensInventory[item.id] || 0;
     return 0;
 }
 
@@ -4765,57 +4767,26 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
     if (toolType === 'hammer') {
         const ingotIds = ['cyan_ingot', 'red_copper_ingot', 'feather_ingot', 'white_silver_ingot', 'hell_steel_ingot', 'thunder_steel_ingot', 'brilliant_crystal', 'star_crystal'];
         const ingotId = ingotIds[toolIndex];
-        gameState.ingotsInventory[ingotId] -= materials.ingot;
+        removeItem('INGOT', ingotId, materials.ingot);
     } else {
         // 其他工具使用矿石和木板
         const oreIds = ['cyan_ore', 'red_iron', 'feather_ore', 'hell_ore', 'white_ore', 'thunder_ore', 'brilliant', 'star_ore'];
         const oreId = oreIds[toolIndex];
-        gameState.miningInventory[oreId] -= materials.ore;
+        removeItem('ORE', oreId, materials.ore);
         
         const plankId = CONFIG.plankIdMapping[toolIndex];
-        gameState.planksInventory[plankId] -= materials.plank;
+        removeItem('PLANK', plankId, materials.plank);
     }
     
+    // 移除前置工具
     if (materials.prevTool) {
-        const inventory = toolType === 'axe' ? gameState.toolsInventory.axes : 
-                          toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
-                          toolType === 'chisel' ? gameState.toolsInventory.chisels : 
-                          toolType === 'needle' ? gameState.toolsInventory.needles : 
-                          toolType === 'hammer' ? gameState.toolsInventory.hammers :
-                          toolType === 'tongs' ? gameState.toolsInventory.tongs :
-                          toolType === 'rod' ? gameState.toolsInventory.rods :
-                          gameState.toolsInventory.scythes;
-        if (inventory) {
-            const idx = inventory.indexOf(materials.prevTool);
-            if (idx > -1) inventory.splice(idx, 1);
-        }
+        const inventory = gameState.toolsInventory[toolsKey] || [];
+        const idx = inventory.indexOf(materials.prevTool);
+        if (idx > -1) inventory.splice(idx, 1);
     }
     
-    const inventory = toolType === 'axe' ? gameState.toolsInventory.axes : 
-                      toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
-                      toolType === 'chisel' ? gameState.toolsInventory.chisels : 
-                      toolType === 'needle' ? gameState.toolsInventory.needles : 
-                      toolType === 'hammer' ? gameState.toolsInventory.hammers :
-                      toolType === 'tongs' ? gameState.toolsInventory.tongs :
-                      toolType === 'rod' ? gameState.toolsInventory.rods :
-                      gameState.toolsInventory.scythes;
-    if (!inventory) {
-        if (toolType === 'chisel') gameState.toolsInventory.chisels = [];
-        else if (toolType === 'needle') gameState.toolsInventory.needles = [];
-        else if (toolType === 'scythe') gameState.toolsInventory.scythes = [];
-        else if (toolType === 'hammer') gameState.toolsInventory.hammers = [];
-        else if (toolType === 'tongs') gameState.toolsInventory.tongs = [];
-        else if (toolType === 'rod') gameState.toolsInventory.rods = [];
-    }
-    const targetInventory = toolType === 'axe' ? gameState.toolsInventory.axes : 
-                            toolType === 'pickaxe' ? gameState.toolsInventory.pickaxes :
-                            toolType === 'chisel' ? gameState.toolsInventory.chisels : 
-                            toolType === 'needle' ? gameState.toolsInventory.needles : 
-                            toolType === 'hammer' ? gameState.toolsInventory.hammers :
-                            toolType === 'tongs' ? gameState.toolsInventory.tongs :
-                            toolType === 'rod' ? gameState.toolsInventory.rods :
-                            gameState.toolsInventory.scythes;
-    // 直接添加工具到库存（同一ID可有多把）
+    // 添加新工具到库存
+    const targetInventory = gameState.toolsInventory[toolsKey] || [];
     targetInventory.push(toolId);
     
     // 检查是否获得锻造代币（使用工具概率表）
