@@ -4664,7 +4664,6 @@ function completeForgingToolOnce(toolId, toolType, toolIndex) {
                             gameState.toolsInventory.scythes;
     // 直接添加工具到库存（同一ID可有多把）
     targetInventory.push(toolId);
-    console.log(`✅ 锻造完成，添加 ${toolId} 到库存，当前库存:`, targetInventory);
     
     // 检查是否获得锻造代币（使用工具概率表）
     const token = tryGetToken('forging_token', toolIndex, 'tool');
@@ -5166,13 +5165,10 @@ function renderToolsInventory() {
     ];
     
     let html = '';
-    let totalItems = 0;
     
     toolTypes.forEach(type => {
         const inventory = gameState.toolsInventory[type.key] || [];
         if (inventory.length === 0) return;
-        
-        console.log(`📦 ${type.name} 库存:`, inventory, `装备: ${type.equipKey}=${gameState.equipment[type.equipKey]}`);
         
         // 按工具ID分组统计数量
         const toolCounts = {};
@@ -5182,32 +5178,11 @@ function renderToolsInventory() {
         
         // 遍历每种工具
         Object.entries(toolCounts).forEach(([toolId, count]) => {
-            // 先尝试在当前类型的配置中查找
-            let tool = CONFIG.tools[type.config].find(t => t.id === toolId);
-            
-            // 如果找不到，尝试在其他类型中查找（修复放错位置的工具）
-            if (!tool) {
-                const allToolTypes = ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'hammers', 'tongs', 'rods'];
-                for (const otherType of allToolTypes) {
-                    const found = CONFIG.tools[otherType]?.find(t => t.id === toolId);
-                    if (found) {
-                        console.log(`⚠️ 工具 ${toolId} 放错位置了！应该在 ${otherType} 但在 ${type.config}`);
-                        tool = found;
-                        break;
-                    }
-                }
-            }
-            
-            if (!tool) {
-                console.log(`❌ 找不到工具配置: ${toolId}`);
-                return;
-            }
+            const tool = CONFIG.tools[type.config].find(t => t.id === toolId);
+            if (!tool) return;
             
             const isEquipped = gameState.equipment[type.equipKey] === toolId;
             const unequippedCount = isEquipped ? count - 1 : count;
-            
-            console.log(`  🔧 ${tool.name}: 总数=${count}, 已装备=${isEquipped}, 未装备=${unequippedCount}`);
-            totalItems++;
             
             // 已装备的工具单独一格
             if (isEquipped) {
@@ -5222,7 +5197,6 @@ function renderToolsInventory() {
             
             // 未装备的工具单独一格（显示数量）
             if (unequippedCount > 0) {
-                console.log(`    ✅ 生成未装备格子: ${tool.name} ×${unequippedCount}`);
                 html += `
                     <div class="storage-item-small">
                         <div class="storage-item-small-icon">${tool.icon}</div>
@@ -5230,13 +5204,10 @@ function renderToolsInventory() {
                         <div class="storage-item-small-count">×${unequippedCount}</div>
                     </div>
                 `;
-            } else {
-                console.log(`    ⏭️ 跳过: ${tool.name} (unequippedCount=${unequippedCount})`);
             }
         });
     });
     
-    console.log(`📊 总计 ${totalItems} 种工具, HTML长度: ${html.length}`);
     container.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">暂无锻造工具</div>';
 }
 
@@ -7171,7 +7142,6 @@ function loadGame() {
                         favorability: m.favorability || 0,
                         completedQuests: []
                     };
-                    console.log(`✅ 新商人已初始化: ${m.name}`);
                 }
             });
             
@@ -7179,7 +7149,6 @@ function loadGame() {
             CONFIG.buildings.forEach(b => {
                 if (!gameState.buildings[b.id]) {
                     gameState.buildings[b.id] = { level: 0 };
-                    console.log(`✅ 新建筑已初始化: ${b.name}`);
                 }
             });
             
@@ -7359,6 +7328,34 @@ function renderEquipmentSlots() {
     } else {
         hammerSlot.textContent = '🔨';
         hammerName.textContent = '空';
+    }
+    
+    // 渲染小桶槽位
+    const tongsSlot = document.getElementById('equipment-slot-tongs');
+    const tongsName = document.getElementById('equipment-slot-tongs-name');
+    if (gameState.equipment.tongs) {
+        const tool = CONFIG.tools.tongs.find(t => t.id === gameState.equipment.tongs);
+        if (tool) {
+            tongsSlot.textContent = tool.icon + ' ✓';
+            tongsName.textContent = tool.name;
+        }
+    } else {
+        tongsSlot.textContent = '🪣';
+        tongsName.textContent = '空';
+    }
+    
+    // 渲染搅拌棒槽位
+    const rodSlot = document.getElementById('equipment-slot-rod');
+    const rodName = document.getElementById('equipment-slot-rod-name');
+    if (gameState.equipment.rod) {
+        const tool = CONFIG.tools.rods.find(t => t.id === gameState.equipment.rod);
+        if (tool) {
+            rodSlot.textContent = tool.icon + ' ✓';
+            rodName.textContent = tool.name;
+        }
+    } else {
+        rodSlot.textContent = '🥄';
+        rodName.textContent = '空';
     }
     
     // 更新槽位状态
