@@ -7378,7 +7378,7 @@ function setupEquipmentListeners() {
             if (this.classList.contains('locked')) return;
             
             const slotType = this.dataset.slot;
-            const validSlots = ['axe', 'pickaxe', 'chisel', 'needle', 'scythe', 'hammer'];
+            const validSlots = ['axe', 'pickaxe', 'chisel', 'needle', 'scythe', 'hammer', 'tongs', 'rod'];
             if (validSlots.includes(slotType)) {
                 openToolSelectModal(slotType);
             }
@@ -7424,7 +7424,9 @@ function openToolSelectModal(slotType) {
         chisel: '凿子', 
         needle: '针', 
         scythe: '镰刀',
-        hammer: '锤'
+        hammer: '锤',
+        tongs: '小桶',
+        rod: '搅拌棒'
     };
     const slotSkills = {
         axe: 'woodcuttingLevel',
@@ -7432,7 +7434,9 @@ function openToolSelectModal(slotType) {
         chisel: 'craftingLevel',
         needle: 'tailoringLevel',
         scythe: 'gatheringLevel',
-        hammer: 'forgingLevel'
+        hammer: 'forgingLevel',
+        tongs: 'brewingLevel',
+        rod: 'alchemyLevel'
     };
     const slotBonusNames = {
         axe: '伐木',
@@ -7440,13 +7444,16 @@ function openToolSelectModal(slotType) {
         chisel: '制作',
         needle: '缝制',
         scythe: '采集',
-        hammer: '锻造'
+        hammer: '锻造',
+        tongs: '酿造',
+        rod: '炼金'
     };
     
     title.textContent = `选择${slotNames[slotType] || '工具'}`;
     
-    const tools = CONFIG.tools[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : slotType === 'hammer' ? 'hammers' : 'scythes'];
-    const inventory = gameState.toolsInventory[slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : slotType === 'hammer' ? 'hammers' : 'scythes'] || [];
+    const toolsKey = slotType === 'axe' ? 'axes' : slotType === 'pickaxe' ? 'pickaxes' : slotType === 'chisel' ? 'chisels' : slotType === 'needle' ? 'needles' : slotType === 'hammer' ? 'hammers' : slotType === 'tongs' ? 'tongs' : slotType === 'rod' ? 'rods' : 'scythes';
+    const tools = CONFIG.tools[toolsKey];
+    const inventory = gameState.toolsInventory[toolsKey] || [];
     const currentEquipped = gameState.equipment[slotType];
     
     if (inventory.length === 0) {
