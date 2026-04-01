@@ -104,6 +104,23 @@ body::after {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    gap: 10px;
+}
+
+.logout-btn {
+    background: rgba(139, 44, 45, 0.5);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    color: #ff9999;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: rgba(139, 44, 45, 0.8);
+    border-color: rgba(255, 100, 100, 0.5);
 }
 
 .player-badge {
