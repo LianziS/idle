@@ -517,8 +517,8 @@ const CONFIG = {
         0: 'pine_plank',      // 青杉木板
         1: 'iron_birch_plank', // 铁桦木板
         2: 'wind_tree_plank',  // 风啸木板
-        3: 'frost_maple_plank', // 霜叶木板
-        4: 'flame_tree_plank',  // 焰心木板
+        3: 'flame_tree_plank',  // 焰心木板 (对应 trees 索引3: flame_tree, reqLevel 35)
+        4: 'frost_maple_plank', // 霜叶木板 (对应 trees 索引4: frost_maple, reqLevel 50)
         5: 'thunder_tree_plank', // 雷鸣木板
         6: 'ancient_oak_plank',  // 古橡木板
         7: 'world_tree_plank'    // 世界木板
@@ -1695,7 +1695,7 @@ function executeSingleSell(type, id, count, icon, name) {
     } else if (type === 'fabric') {
         gameState.fabricInventory[id] = Math.max(0, (gameState.fabricInventory[id] || 0) - count);
     } else if (type === 'token') {
-        gameState.tokenInventory[id] = Math.max(0, (gameState.tokenInventory[id] || 0) - count);
+        gameState.tokensInventory[id] = Math.max(0, (gameState.tokensInventory[id] || 0) - count);
     }
     
     // 增加金币
