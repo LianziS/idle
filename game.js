@@ -5818,7 +5818,7 @@ function completeTailoringOnce(fabricId) {
     addItem('FABRIC', fabricId, 1);
     
     // 检查是否获得缝制代币
-    const token = tryGetToken('tailoring_token', fabricIndex, 'tailoring');
+    const token = tryGetToken('tailoring_token', fabricIndex, 'standard');
     
     addExp(fabric.exp);
     addSkillExp('tailoring', fabric.exp);
@@ -6367,7 +6367,7 @@ function completeBrewingOnce(brewId) {
     
     // 检查是否获得酿造代币
     const brewIndex = CONFIG.brews.findIndex(b => b.id === brewId);
-    const token = tryGetToken('brewing_token', brewIndex, 'brewing');
+    const token = tryGetToken('brewing_token', brewIndex, 'standard');
     
     // 增加经验
     gameState.brewingExp += brew.exp;
