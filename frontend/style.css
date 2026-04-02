@@ -4741,3 +4741,9 @@ body::after {
 .cost-item.not-enough .cost-amount {
     color: #FF6B6B;
 }
+
+/* 无穷符号按钮字体翻倍 */
+.count-btn.infinity {
+    font-size: 2em;
+    padding: 4px 16px;
+}
