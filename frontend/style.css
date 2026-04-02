@@ -239,19 +239,15 @@ body::after {
     background: linear-gradient(135deg, #8B2C2D 0%, #a33435 100%);
     border: 1px solid rgba(139, 44, 45, 0.6);
     color: #fff;
-    padding: 0 10px;
+    padding: 0 12px;
     border-radius: 4px;
     font-size: 0.75rem;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.3s;
-    display: none;
+    display: block;
     height: 24px;
     line-height: 24px;
-}
-
-.action-cancel-btn.visible {
-    display: block;
 }
 
 .action-cancel-btn:hover {
@@ -260,8 +256,13 @@ body::after {
 }
 
 .action-cancel-btn:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
     cursor: not-allowed;
+}
+
+.action-cancel-btn.idle {
+    background: linear-gradient(135deg, #555 0%, #666 100%);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .action-rewards {

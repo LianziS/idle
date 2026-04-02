@@ -495,7 +495,15 @@ class GameEngine {
         this.state.activeAction = null;
         this.state.actionRemaining = 0;
         
-        return { success: true, cancelledAction: action };
+        // 检查队列，自动开始第一个
+        let nextAction = null;
+        if (this.state.actionQueue.length > 0) {
+            const queueItem = this.state.actionQueue.shift();
+            this.startAction(queueItem.type, queueItem.id, queueItem.count);
+            nextAction = queueItem;
+        }
+        
+        return { success: true, cancelledAction: action, nextAction: nextAction };
     }
     
     /**

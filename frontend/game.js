@@ -289,9 +289,14 @@ function setupEventListeners() {
     // 取消行动按钮
     if (elements.actionCancelBtn) {
         elements.actionCancelBtn.addEventListener('click', () => {
-            if (confirm('确定要取消当前行动吗？')) {
+            const currentAction = gameState?.activeAction;
+            const queue = gameState?.actionQueue || [];
+            
+            if (currentAction) {
+                // 有行动进行中，停止并开始队列第一项
                 socket.emit('action_cancel');
             }
+            // 没有行动时按钮显示"休息中"，点击无效果
         });
     }
     
@@ -592,6 +597,13 @@ function updateActionStatusBar() {
         if (elements.actionProgressFill) elements.actionProgressFill.style.width = '0%';
         if (elements.actionProgressTime) elements.actionProgressTime.textContent = '-';
         
+        // 更新停止按钮
+        if (elements.actionCancelBtn) {
+            elements.actionCancelBtn.textContent = '休息中';
+            elements.actionCancelBtn.classList.add('idle');
+            elements.actionCancelBtn.disabled = true;
+        }
+        
         // 更新队列按钮
         updateQueueButton();
         return;
@@ -620,6 +632,13 @@ function updateActionStatusBar() {
         } else {
             elements.actionStatusCount.textContent = `[${current}/${totalCount}]`;
         }
+    }
+    
+    // 更新停止按钮
+    if (elements.actionCancelBtn) {
+        elements.actionCancelBtn.textContent = '停止';
+        elements.actionCancelBtn.classList.remove('idle');
+        elements.actionCancelBtn.disabled = false;
     }
     
     // 计算进度
