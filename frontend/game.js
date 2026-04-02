@@ -1021,70 +1021,100 @@ function renderMining() {
  * 渲染采集列表
  */
 function renderGathering() {
-    if (!elements.gatheringList || !gameState) return;
+    if (!gameState) return;
     
     const level = gameState.gatheringLevel || 1;
+    const tabsContainer = document.getElementById('gathering-tabs');
+    const contentContainer = document.getElementById('gathering-items-list');
     
-    elements.gatheringList.innerHTML = CONFIG.gatheringLocations.map(loc => {
-        const unlocked = level >= loc.reqLevel;
-        const items = loc.items || [];
-        
-        // 生成采集品子列表
-        const itemsHtml = items.map(item => `
-            <div class="gathering-item-card" data-action="gathering" data-loc-id="${loc.id}" data-item-id="${item.id}">
-                <span class="gathering-item-icon">${item.icon}</span>
-                <span class="gathering-item-name">${item.name}</span>
-            </div>
-        `).join('');
-        
-        return `
-            <div class="gathering-region-card ${unlocked ? '' : 'locked'}" data-region="${loc.id}">
-                <div class="gathering-region-header">
-                    <span class="gathering-region-icon">${loc.icon || '🌿'}</span>
-                    <div class="gathering-region-info">
-                        <div class="gathering-region-name">${loc.name}</div>
-                        <div class="gathering-region-meta">
-                            <span>⏱️ ${formatTime(loc.duration)}</span>
-                            <span>✨ ${loc.exp}</span>
-                            <span>Lv.${loc.reqLevel}</span>
-                        </div>
-                    </div>
-                    <span class="gathering-region-expand">▼</span>
-                </div>
-                <div class="gathering-items-container" style="display: none;">
-                    <div class="gathering-items-grid">
-                        ${itemsHtml}
-                    </div>
-                </div>
-                ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${loc.reqLevel}</div>` : ''}
-            </div>
-        `;
-    }).join('');
+    if (!tabsContainer || !contentContainer) return;
     
-    // 绑定区域展开/收起事件
-    elements.gatheringList.querySelectorAll('.gathering-region-header').forEach(header => {
-        header.addEventListener('click', () => {
-            const card = header.closest('.gathering-region-card');
-            const container = card.querySelector('.gathering-items-container');
-            const expand = card.querySelector('.gathering-region-expand');
-            
-            if (container.style.display === 'none') {
-                container.style.display = 'block';
-                expand.textContent = '▲';
-            } else {
-                container.style.display = 'none';
-                expand.textContent = '▼';
-            }
+    // 生成标签页
+    const tabs = CONFIG.gatheringLocations.map((loc, index) => `
+        <button class="gathering-tab ${index === 0 ? 'active' : ''}" data-loc-id="${loc.id}">
+            ${loc.name}
+        </button>
+    `).join('');
+    
+    tabsContainer.innerHTML = tabs;
+    
+    // 默认显示第一个区域
+    renderGatheringLocation(CONFIG.gatheringLocations[0].id, level);
+    
+    // 绑定标签点击事件
+    tabsContainer.querySelectorAll('.gathering-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabsContainer.querySelectorAll('.gathering-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderGatheringLocation(tab.dataset.locId, level);
         });
     });
+}
+
+/**
+ * 渲染指定采集区域的内容
+ */
+function renderGatheringLocation(locId, level) {
+    const container = document.getElementById('gathering-items-list');
+    if (!container) return;
+    
+    const loc = CONFIG.gatheringLocations.find(l => l.id === locId);
+    if (!loc) return;
+    
+    const unlocked = level >= loc.reqLevel;
+    const items = loc.items || [];
+    
+    // 生成采集品卡片
+    const itemCards = items.map(item => `
+        <div class="gathering-item-card ${unlocked ? '' : 'locked'}" data-loc-id="${loc.id}" data-item-id="${item.id}">
+            <span class="gathering-item-icon">${item.icon}</span>
+            <div class="gathering-item-info">
+                <span class="gathering-item-name">${item.name}</span>
+                <span class="gathering-item-exp">✨${item.exp}</span>
+            </div>
+            ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${loc.reqLevel}</div>` : ''}
+        </div>
+    `).join('');
+    
+    // 区域采集点卡片
+    const regionCard = `
+        <div class="gathering-region-action-card ${unlocked ? '' : 'locked'}" data-loc-id="${loc.id}">
+            <span class="gathering-region-icon">${loc.icon}</span>
+            <div class="gathering-region-info">
+                <span class="gathering-region-name">${loc.name}</span>
+                <div class="gathering-region-meta">
+                    <span>⏱️ ${formatTime(loc.duration)}</span>
+                    <span>✨ ${loc.exp}</span>
+                    <span>随机采集</span>
+                </div>
+            </div>
+            ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${loc.reqLevel}</div>` : ''}
+        </div>
+    `;
+    
+    container.innerHTML = `
+        <div class="gathering-items-grid">
+            ${itemCards}
+        </div>
+        <div class="gathering-region-divider">
+            <span>区域采集</span>
+        </div>
+        ${regionCard}
+    `;
     
     // 绑定采集品点击事件
-    elements.gatheringList.querySelectorAll('.gathering-item-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            e.stopPropagation();
+    container.querySelectorAll('.gathering-item-card:not(.locked)').forEach(card => {
+        card.addEventListener('click', () => {
             const locId = card.dataset.locId;
             const itemId = card.dataset.itemId;
             openGatheringItemModal(locId, itemId);
+        });
+    });
+    
+    // 绑定区域采集点击事件
+    container.querySelectorAll('.gathering-region-action-card:not(.locked)').forEach(card => {
+        card.addEventListener('click', () => {
+            openActionModal('GATHERING', card.dataset.locId);
         });
     });
 }
