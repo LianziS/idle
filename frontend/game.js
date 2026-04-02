@@ -1293,7 +1293,10 @@ function renderGatheringLocation(locId, level) {
             <span class="gathering-item-icon">${item.icon}</span>
             <div class="gathering-item-info">
                 <span class="gathering-item-name">${item.name}</span>
-                <span class="gathering-item-exp">✨${item.exp}</span>
+                <div class="gathering-item-meta">
+                    <span>⏱️ ${formatTime(loc.duration)}</span>
+                    <span>✨ ${item.exp}</span>
+                </div>
             </div>
             ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${loc.reqLevel}</div>` : ''}
         </div>
