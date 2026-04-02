@@ -168,6 +168,51 @@ const CONFIG = {
         { id: 'dream_cloth', name: '梦幻布料', icon: '✨', reqLevel: 95, duration: 25000, exp: 72.5, materials: { life_fiber: 2 } }
     ],
     
+    // 装备槽位配置
+    equipmentSlots: [
+        { id: 'axe', name: '斧头', icon: '🪓', skill: 'woodcutting' },
+        { id: 'pickaxe', name: '镐子', icon: '⛏️', skill: 'mining' },
+        { id: 'chisel', name: '凿子', icon: '🔨', skill: 'crafting' },
+        { id: 'needle', name: '针', icon: '🪡', skill: 'tailoring' },
+        { id: 'scythe', name: '镰刀', icon: '🗡️', skill: 'gathering' },
+        { id: 'hammer', name: '锤子', icon: '🔨', skill: 'forging' },
+        { id: 'tongs', name: '小桶', icon: '🪣', skill: 'brewing' },
+        { id: 'rod', name: '搅拌棒', icon: '🥄', skill: 'alchemy' }
+    ],
+    
+    // 工具配置（简化版）
+    tools: {
+        axes: [
+            { id: 'cyan_axe', name: '青闪斧', icon: '🪓', speedBonus: 0.15, reqEquipLevel: 1 },
+            { id: 'red_axe', name: '赤铁斧', icon: '🪓', speedBonus: 0.225, reqEquipLevel: 10 },
+            { id: 'feather_axe', name: '羽斧', icon: '🪓', speedBonus: 0.30, reqEquipLevel: 20 },
+            { id: 'white_axe', name: '白银斧', icon: '🪓', speedBonus: 0.45, reqEquipLevel: 35 }
+        ],
+        pickaxes: [
+            { id: 'cyan_pickaxe', name: '青闪镐', icon: '⛏️', speedBonus: 0.15, reqEquipLevel: 1 },
+            { id: 'red_pickaxe', name: '赤铁镐', icon: '⛏️', speedBonus: 0.225, reqEquipLevel: 10 },
+            { id: 'feather_pickaxe', name: '羽镐', icon: '⛏️', speedBonus: 0.30, reqEquipLevel: 20 }
+        ],
+        chisels: [
+            { id: 'cyan_chisel', name: '青闪凿子', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1 }
+        ],
+        needles: [
+            { id: 'cyan_needle', name: '青闪针', icon: '🪡', speedBonus: 0.15, reqEquipLevel: 1 }
+        ],
+        scythes: [
+            { id: 'cyan_scythe', name: '青闪镰刀', icon: '🗡️', speedBonus: 0.15, reqEquipLevel: 1 }
+        ],
+        hammers: [
+            { id: 'cyan_hammer', name: '青铁锤', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1 }
+        ],
+        tongs: [
+            { id: 'cyan_tongs', name: '青闪小桶', icon: '🪣', speedBonus: 0.15, reqEquipLevel: 1 }
+        ],
+        rods: [
+            { id: 'cyan_rod', name: '青闪搅拌棒', icon: '🥄', speedBonus: 0.15, reqEquipLevel: 1 }
+        ]
+    },
+    
     // 资源出售价格
     resourcePrices: {
         wood: 2,

@@ -214,7 +214,54 @@ function renderAll() {
     renderForging();
     renderTailoring();
     renderInventories();
+    renderEquipmentSlots();
     updateUI();
+}
+
+/**
+ * 渲染装备槽位
+ */
+function renderEquipmentSlots() {
+    if (!gameState || !gameState.equipment) return;
+    
+    const slots = CONFIG.equipmentSlots || [
+        { id: 'axe', name: '斧头', icon: '🪓' },
+        { id: 'pickaxe', name: '镐子', icon: '⛏️' },
+        { id: 'chisel', name: '凿子', icon: '🔨' },
+        { id: 'needle', name: '针', icon: '🪡' },
+        { id: 'scythe', name: '镰刀', icon: '🗡️' },
+        { id: 'hammer', name: '锤子', icon: '🔨' },
+        { id: 'tongs', name: '小桶', icon: '🪣' },
+        { id: 'rod', name: '搅拌棒', icon: '🥄' }
+    ];
+    
+    slots.forEach(slot => {
+        const slotEl = document.getElementById(`equipment-slot-${slot.id}`);
+        const nameEl = document.getElementById(`equipment-slot-${slot.id}-name`);
+        
+        if (!slotEl || !nameEl) return;
+        
+        const equippedId = gameState.equipment[slot.id];
+        if (equippedId && CONFIG.tools) {
+            const toolType = slot.id === 'tongs' ? 'tongs' : 
+                            slot.id === 'rod' ? 'rods' : `${slot.id}s`;
+            const tools = CONFIG.tools[toolType] || [];
+            const tool = tools.find(t => t.id === equippedId);
+            
+            if (tool) {
+                slotEl.innerHTML = `${tool.icon} ✓`;
+                nameEl.textContent = tool.name;
+                slotEl.closest('.equipment-slot')?.classList.add('equipped');
+            } else {
+                slotEl.innerHTML = slot.icon;
+                nameEl.textContent = '未知';
+            }
+        } else {
+            slotEl.innerHTML = slot.icon;
+            nameEl.textContent = '空';
+            slotEl.closest('.equipment-slot')?.classList.remove('equipped');
+        }
+    });
 }
 
 /**
@@ -780,7 +827,20 @@ function openGMPanel() {
         { label: '加金币 10000', command: 'add_gold', args: { amount: 10000 } },
         { label: '加伐木经验 1000', command: 'add_exp', args: { skill: 'woodcutting', amount: 1000 } },
         { label: '伐木等级 50', command: 'set_level', args: { skill: 'woodcutting', level: 50 } },
-        { label: '加青杉木 100', command: 'add_item', args: { itemType: 'WOOD', itemId: 'pine', count: 100 } }
+        { label: '加青杉木 100', command: 'add_item', args: { itemType: 'WOOD', itemId: 'pine', count: 100 } },
+        { label: '加青闪矿 100', command: 'add_item', args: { itemType: 'ORE', itemId: 'cyan_ore', count: 100 } },
+        { label: '加青闪斧', command: 'add_tool', args: { toolType: 'axes', toolId: 'cyan_axe' } },
+        { label: '加青闪镐', command: 'add_tool', args: { toolType: 'pickaxes', toolId: 'cyan_pickaxe' } },
+        { label: '加全部技能等级', command: 'multi', args: {
+            actions: [
+                { command: 'set_level', args: { skill: 'woodcutting', level: 50 } },
+                { command: 'set_level', args: { skill: 'mining', level: 50 } },
+                { command: 'set_level', args: { skill: 'gathering', level: 50 } },
+                { command: 'set_level', args: { skill: 'crafting', level: 50 } },
+                { command: 'set_level', args: { skill: 'forging', level: 50 } },
+                { command: 'set_level', args: { skill: 'tailoring', level: 50 } }
+            ]
+        }}
     ];
     
     const panel = document.createElement('div');
@@ -800,8 +860,17 @@ function openGMPanel() {
     panel.querySelectorAll('.gm-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const data = JSON.parse(btn.dataset.command);
-            socket.emit('gm_command', data);
-            showToast(`🔧 执行: ${btn.textContent}`);
+            
+            // 处理 multi 命令
+            if (data.command === 'multi' && data.actions) {
+                data.actions.forEach(action => {
+                    socket.emit('gm_command', action);
+                });
+                showToast(`🔧 执行: ${btn.textContent}`);
+            } else {
+                socket.emit('gm_command', data);
+                showToast(`🔧 执行: ${btn.textContent}`);
+            }
         });
     });
     

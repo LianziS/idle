@@ -502,6 +502,15 @@ io.on('connection', (socket) => {
             case 'add_item':
                 gameEngine.addItem(data.itemType, data.itemId, data.count || 1);
                 break;
+            case 'add_tool':
+                // 添加工具到背包
+                const toolType = data.toolType; // 'axes', 'pickaxes', etc.
+                const toolId = data.toolId;
+                if (!gameEngine.state.toolsInventory[toolType]) {
+                    gameEngine.state.toolsInventory[toolType] = [];
+                }
+                gameEngine.state.toolsInventory[toolType].push(toolId);
+                break;
             case 'set_level':
                 const skillKey = data.skill + 'Level';
                 if (gameEngine.state[skillKey] !== undefined) {
