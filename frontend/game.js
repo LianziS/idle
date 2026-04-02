@@ -2578,7 +2578,15 @@ function formatCost(cost, separator = ' ') {
         'frost_maple': '霜叶枫木',
         'thunder_tree': '雷鸣木',
         'ancient_oak': '古橡木',
-        'world_tree': '世界树枝'
+        'world_tree': '世界树枝',
+        'cyan_ore': '青闪石',
+        'red_iron': '赤铁石',
+        'feather_ore': '羽石',
+        'hell_ore': '白鸠石',
+        'white_ore': '狱炎石',
+        'thunder_ore': '雷鸣石',
+        'brilliant': '璀璨原石',
+        'star_ore': '星辉原石'
     };
     
     return Object.entries(cost)
