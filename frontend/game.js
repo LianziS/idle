@@ -1105,19 +1105,19 @@ function renderMerchantPanel(merchantId, merchantData) {
     });
     
     const modal = document.createElement('div');
-    modal.className = 'merchant-modal-overlay';
+    modal.className = 'merchant-modal active'; // 添加 active 类
     modal.innerHTML = `
-        <div class="merchant-modal">
-            <div class="merchant-header">
-                <span class="merchant-avatar">${merchantData.avatar}</span>
-                <div class="merchant-info">
-                    <div class="merchant-name">${merchantData.name}</div>
-                    <div class="merchant-title">${merchantData.title}</div>
-                    <div class="merchant-favor">好感度: ${Math.floor((merchantData.favorability || 0) * 100)}%</div>
+        <div class="merchant-modal-overlay"></div>
+        <div class="merchant-modal-panel">
+            <div class="merchant-modal-header">
+                <span class="merchant-modal-avatar">${merchantData.avatar}</span>
+                <div class="merchant-modal-info">
+                    <h3>${merchantData.name}</h3>
+                    <p class="merchant-modal-title">${merchantData.title}</p>
                 </div>
-                <button class="merchant-close">&times;</button>
+                <button class="merchant-modal-close">&times;</button>
             </div>
-            <div class="merchant-body">
+            <div class="merchant-modal-body">
                 <div class="merchant-section">
                     <h4>商品</h4>
                     <div class="goods-list">
@@ -1160,8 +1160,8 @@ function renderMerchantPanel(merchantId, merchantData) {
     document.body.appendChild(modal);
     
     // 绑定事件
-    modal.querySelector('.merchant-close').addEventListener('click', () => modal.remove());
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    modal.querySelector('.merchant-modal-close').addEventListener('click', () => modal.remove());
+    modal.querySelector('.merchant-modal-overlay').addEventListener('click', () => modal.remove());
     
     // 购买按钮
     modal.querySelectorAll('.buy-btn').forEach(btn => {
