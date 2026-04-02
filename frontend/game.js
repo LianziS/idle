@@ -98,10 +98,22 @@ function cacheElements() {
 function setupSocket() {
     socket = io();
     
+    // 设置超时：5秒后强制隐藏 loading
+    setTimeout(() => {
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl && loadingEl.style.display !== 'none') {
+            loadingEl.style.display = 'none';
+            console.log('Loading 超时隐藏');
+        }
+    }, 5000);
+    
     // 认证
     const token = localStorage.getItem('medieval_token');
     if (token) {
         socket.emit('auth', { token });
+    } else {
+        // 没有 token，直接跳转登录页
+        window.location.href = '/login';
     }
     
     // 认证结果
