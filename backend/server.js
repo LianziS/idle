@@ -484,7 +484,9 @@ io.on('connection', (socket) => {
     socket.on('queue_replace_current', (data) => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });
         
+        console.log('queue_replace_current received:', data);
         const result = gameEngine.replaceCurrentWithQueue(data.index);
+        console.log('replaceCurrentWithQueue result:', result);
         socket.emit('game_state_update', gameEngine.getFullState());
     });
     

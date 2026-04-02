@@ -823,6 +823,7 @@ function showReplaceActionConfirm(index, action, queueItem) {
     });
     
     modal.querySelector('#replace-confirm').addEventListener('click', () => {
+        console.log('确认替换，index:', index);
         socket.emit('queue_replace_current', { index });
         modal.remove();
     });

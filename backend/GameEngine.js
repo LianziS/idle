@@ -551,11 +551,15 @@ class GameEngine {
      */
     replaceCurrentWithQueue(index) {
         const queue = this.state.actionQueue;
+        console.log('replaceCurrentWithQueue called, index:', index, 'queue:', queue.length);
+        
         if (index < 0 || index >= queue.length) {
+            console.log('索引无效');
             return { success: false, reason: '索引无效' };
         }
         
         if (!this.state.activeAction) {
+            console.log('没有进行中的行动');
             return { success: false, reason: '没有进行中的行动' };
         }
         
@@ -564,6 +568,8 @@ class GameEngine {
         const actionType = ACTION_TYPES[currentAction.type];
         const config = CONFIG[actionType.configKey];
         const item = config.find(c => c.id === currentAction.id);
+        
+        console.log('当前行动:', currentAction.type, currentAction.id, '剩余:', currentAction.remaining);
         
         // 保存当前行动
         const savedAction = {
@@ -577,18 +583,15 @@ class GameEngine {
         
         // 获取要执行的队列项
         const queueItem = queue[index];
+        console.log('队列项:', queueItem.type, queueItem.id, 'count:', queueItem.count);
         
-        // 先把当前行动放到队列第一位
+        // 先移除被选中的队列项
+        queue.splice(index, 1);
+        
+        // 把当前行动放到队列第一位
         queue.unshift(savedAction);
         
-        // 移除被选中的项（注意索引变化，因为已经 unshift 了）
-        if (index === 0) {
-            // 如果选择的是第一项，现在它是第二项了
-            queue.splice(1, 1);
-        } else {
-            // 否则移除原位置的项
-            queue.splice(index + 1, 1);
-        }
+        console.log('替换后队列:', queue.map(q => q.name));
         
         // 开始新的行动
         this.startAction(queueItem.type, queueItem.id, queueItem.count);
