@@ -286,6 +286,22 @@ function setupSocket() {
  * 设置事件监听器
  */
 function setupEventListeners() {
+    // 侧边栏展开/收起按钮
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('expanded');
+            // 保存状态到本地存储
+            localStorage.setItem('sidebarExpanded', sidebar.classList.contains('expanded'));
+        });
+        
+        // 恢复上次状态
+        if (localStorage.getItem('sidebarExpanded') === 'true') {
+            sidebar.classList.add('expanded');
+        }
+    }
+    
     // 取消行动按钮
     if (elements.actionCancelBtn) {
         elements.actionCancelBtn.addEventListener('click', () => {
