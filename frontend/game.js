@@ -141,14 +141,14 @@ function setupSocket() {
         if (result.success && result.rewards) {
             showRewards(result.rewards);
             if (result.completed) {
-                showToast('✅ 行动完成');
+                showToast('✅ 行动全部完成');
             }
         }
     });
     
     // 队列下一个
     socket.on('queue_next', (nextAction) => {
-        showToast(`📋 开始: ${nextAction.name}`);
+        showToast(`📋 自动开始: ${nextAction.name}`);
     });
     
     // 错误处理
@@ -229,8 +229,34 @@ function updateUI() {
         elements.storageGold.textContent = formatNumber(gameState.gold || 0);
     }
     
+    // 更新技能等级显示（如果有）
+    updateSkillDisplay();
+    
     // 更新行动状态栏
     updateActionStatusBar();
+}
+
+/**
+ * 更新技能等级显示
+ */
+function updateSkillDisplay() {
+    const skills = [
+        { key: 'woodcuttingLevel', name: '伐木', element: 'woodcutting-level' },
+        { key: 'miningLevel', name: '挖矿', element: 'mining-level' },
+        { key: 'gatheringLevel', name: '采集', element: 'gathering-level' },
+        { key: 'craftingLevel', name: '制作', element: 'crafting-level' },
+        { key: 'forgingLevel', name: '锻造', element: 'forging-level' },
+        { key: 'tailoringLevel', name: '缝制', element: 'tailoring-level' },
+        { key: 'brewingLevel', name: '酿造', element: 'brewing-level' },
+        { key: 'alchemyLevel', name: '炼金', element: 'alchemy-level' }
+    ];
+    
+    skills.forEach(skill => {
+        const el = document.getElementById(skill.element);
+        if (el && gameState[skill.key]) {
+            el.textContent = `Lv.${gameState[skill.key]}`;
+        }
+    });
 }
 
 /**

@@ -17,6 +17,9 @@ const { GameEngine } = require('./GameEngine');
 // 游戏引擎实例管理（按用户ID）
 const gameEngines = new Map();
 
+// Socket 连接与引擎映射
+const socketEngineMap = new Map();
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -396,6 +399,9 @@ io.on('connection', (socket) => {
                 gameEngines.set(decoded.userId, gameEngine);
             }
             
+            // 保存 socket 与引擎的映射
+            socketEngineMap.set(socket.id, { gameEngine, socket });
+            
             socket.emit('auth_result', { success: true, userId: decoded.userId });
             
             // 发送完整游戏状态
@@ -520,6 +526,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log(`用户断开: ${socket.id}`);
         
+        // 清理 socket 映射
+        socketEngineMap.delete(socket.id);
+        
         // 保存游戏状态到数据库
         if (currentUser && gameEngine) {
             db.run(
@@ -537,5 +546,35 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`🎮 游戏服务器运行在 http://localhost:${PORT}`);
     console.log(`📝 登录页面: http://localhost:${PORT}/login`);
 });
+
+// ============ 行动定时器 ============
+
+// 每500ms检查所有用户的活动行动
+setInterval(() => {
+    for (const [socketId, { gameEngine, socket }] of socketEngineMap) {
+        if (gameEngine.state.activeAction) {
+            const elapsed = Date.now() - gameEngine.state.actionStartTime;
+            const duration = gameEngine.state.actionDuration;
+            
+            // 如果行动时间到了
+            if (elapsed >= duration) {
+                const result = gameEngine.completeActionOnce();
+                socket.emit('action_complete_result', result);
+                socket.emit('game_state_update', gameEngine.getFullState());
+                
+                // 如果有下一个行动
+                if (result.nextAction) {
+                    socket.emit('queue_next', result.nextAction);
+                    // 自动开始下一个行动
+                    const startResult = gameEngine.startAction(result.nextAction.type, result.nextAction.id, result.nextAction.count);
+                    if (startResult.success) {
+                        socket.emit('action_result', startResult);
+                        socket.emit('game_state_update', gameEngine.getFullState());
+                    }
+                }
+            }
+        }
+    }
+}, 500);
 
 module.exports = { app, io, db };
