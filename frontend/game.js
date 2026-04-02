@@ -263,13 +263,18 @@ function updateSkillDisplay() {
  * 更新行动状态栏
  */
 function updateActionStatusBar() {
-    if (!gameState || !gameState.activeAction) {
+    if (!gameState) return;
+    
+    if (!gameState.activeAction) {
         // 没有行动进行中
         if (elements.actionStatusIcon) elements.actionStatusIcon.textContent = '∞';
         if (elements.actionStatusName) elements.actionStatusName.textContent = '休息中';
         if (elements.actionStatusCount) elements.actionStatusCount.textContent = '';
         if (elements.actionProgressFill) elements.actionProgressFill.style.width = '0%';
         if (elements.actionProgressTime) elements.actionProgressTime.textContent = '-';
+        
+        // 更新队列按钮
+        updateQueueButton();
         return;
     }
     
@@ -277,6 +282,39 @@ function updateActionStatusBar() {
     const remaining = action.remaining || 0;
     
     // 计算进度
+    const elapsed = Date.now() - (gameState.actionStartTime || Date.now());
+    const duration = gameState.actionDuration || 5000;
+    const progress = Math.min(elapsed / duration, 1);
+    const remainingTime = Math.max(duration - elapsed, 0);
+    
+    if (elements.actionProgressFill) {
+        elements.actionProgressFill.style.width = `${progress * 100}%`;
+    }
+    if (elements.actionProgressTime) {
+        elements.actionProgressTime.textContent = formatTime(remainingTime);
+    }
+    if (elements.actionStatusCount) {
+        elements.actionStatusCount.textContent = remaining > 0 ? `×${remaining}` : '';
+    }
+    
+    // 更新队列按钮
+    updateQueueButton();
+}
+
+/**
+ * 更新队列按钮
+ */
+function updateQueueButton() {
+    if (!elements.actionQueueBtn) return;
+    
+    const queue = gameState?.actionQueue || [];
+    if (queue.length > 0) {
+        elements.actionQueueBtn.style.display = 'inline-block';
+        elements.actionQueueBtn.textContent = `+${queue.length}`;
+    } else {
+        elements.actionQueueBtn.style.display = 'none';
+    }
+}
     const elapsed = Date.now() - (gameState.actionStartTime || Date.now());
     const duration = gameState.actionDuration || 5000;
     const progress = Math.min(elapsed / duration, 1);
@@ -564,29 +602,100 @@ function openActionModal(type, id) {
     const config = configs[type]?.find(c => c.id === id);
     if (!config) return;
     
-    pendingAction = { type, id, name: config.name };
+    pendingAction = { type, id, name: config.name, icon: config.icon };
     
-    // 简化版：直接询问次数
-    const count = prompt(`请输入 ${config.name} 的执行次数：`, '1');
-    if (count) {
-        const countNum = parseInt(count) || 1;
-        confirmAction(countNum);
-    }
-    
-    pendingAction = null;
+    // 显示行动选择模态框
+    showActionModal(config);
 }
 
 /**
- * 确认行动
+ * 显示行动选择模态框
  */
-function confirmAction(count) {
-    if (!pendingAction) return;
+function showActionModal(config) {
+    // 创建模态框
+    const modal = document.createElement('div');
+    modal.className = 'action-modal-overlay';
+    modal.innerHTML = `
+        <div class="action-modal">
+            <div class="action-modal-header">
+                <span class="action-modal-icon">${config.icon}</span>
+                <span class="action-modal-title">${config.name}</span>
+                <button class="action-modal-close">&times;</button>
+            </div>
+            <div class="action-modal-body">
+                <div class="action-modal-info">
+                    ${config.duration ? `<span>⏱️ ${formatTime(config.duration)}</span>` : ''}
+                    ${config.exp ? `<span>✨ ${config.exp} 经验</span>` : ''}
+                    ${config.reqLevel ? `<span>📋 需要 Lv.${config.reqLevel}</span>` : ''}
+                </div>
+                <div class="action-modal-counts">
+                    <button class="count-btn" data-count="1">1次</button>
+                    <button class="count-btn" data-count="5">5次</button>
+                    <button class="count-btn" data-count="10">10次</button>
+                    <button class="count-btn" data-count="50">50次</button>
+                    <button class="count-btn" data-count="999">∞</button>
+                </div>
+                <div class="action-modal-custom">
+                    <input type="number" id="custom-count" min="1" max="999" placeholder="自定义次数">
+                </div>
+            </div>
+            <div class="action-modal-footer">
+                <button class="action-btn secondary" id="action-cancel">取消</button>
+                <button class="action-btn primary" id="action-confirm">开始</button>
+            </div>
+        </div>
+    `;
     
-    socket.emit('action_start', {
-        type: pendingAction.type,
-        id: pendingAction.id,
-        count: count
+    document.body.appendChild(modal);
+    
+    // 绑定事件
+    modal.querySelector('.action-modal-close').addEventListener('click', () => {
+        modal.remove();
+        pendingAction = null;
     });
+    
+    modal.querySelector('#action-cancel').addEventListener('click', () => {
+        modal.remove();
+        pendingAction = null;
+    });
+    
+    // 快捷次数按钮
+    modal.querySelectorAll('.count-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            modal.querySelector('#custom-count').value = btn.dataset.count;
+        });
+    });
+    
+    // 确认按钮
+    modal.querySelector('#action-confirm').addEventListener('click', () => {
+        const countInput = modal.querySelector('#custom-count');
+        const count = parseInt(countInput.value) || 1;
+        
+        if (pendingAction) {
+            socket.emit('action_start', {
+                type: pendingAction.type,
+                id: pendingAction.id,
+                count: count
+            });
+        }
+        
+        modal.remove();
+        pendingAction = null;
+    });
+    
+    // 点击背景关闭
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            pendingAction = null;
+        }
+    });
+    
+    // 默认选中1次
+    modal.querySelector('.count-btn[data-count="1"]').classList.add('active');
+    modal.querySelector('#custom-count').value = 1;
 }
 
 /**
