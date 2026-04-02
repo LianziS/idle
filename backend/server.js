@@ -393,19 +393,34 @@ io.on('connection', (socket) => {
             
             // 获取或创建游戏引擎实例
             if (gameEngines.has(decoded.userId)) {
+                // 已有内存中的实例
                 gameEngine = gameEngines.get(decoded.userId);
+                socketEngineMap.set(socket.id, { gameEngine, socket });
+                socket.emit('auth_result', { success: true, userId: decoded.userId });
+                socket.emit('game_state', gameEngine.getFullState());
             } else {
-                gameEngine = new GameEngine(decoded.userId);
-                gameEngines.set(decoded.userId, gameEngine);
+                // 尝试从数据库加载存档
+                db.get('SELECT data FROM user_game_data WHERE user_id = ?', [decoded.userId], (err, row) => {
+                    gameEngine = new GameEngine(decoded.userId);
+                    
+                    if (!err && row && row.data) {
+                        try {
+                            // 恢复存档数据
+                            const savedState = JSON.parse(row.data);
+                            gameEngine.state = { ...gameEngine.state, ...savedState };
+                            console.log(`已加载用户 ${decoded.username} 的存档`);
+                        } catch (parseError) {
+                            console.error('存档解析失败:', parseError);
+                        }
+                    }
+                    
+                    gameEngines.set(decoded.userId, gameEngine);
+                    socketEngineMap.set(socket.id, { gameEngine, socket });
+                    
+                    socket.emit('auth_result', { success: true, userId: decoded.userId });
+                    socket.emit('game_state', gameEngine.getFullState());
+                });
             }
-            
-            // 保存 socket 与引擎的映射
-            socketEngineMap.set(socket.id, { gameEngine, socket });
-            
-            socket.emit('auth_result', { success: true, userId: decoded.userId });
-            
-            // 发送完整游戏状态
-            socket.emit('game_state', gameEngine.getFullState());
         } catch (e) {
             socket.emit('auth_result', { success: false, error: 'Token无效' });
         }
@@ -576,5 +591,22 @@ setInterval(() => {
         }
     }
 }, 500);
+
+// ============ 自动存档定时器 ============
+
+// 每30秒自动保存所有在线用户的存档
+setInterval(() => {
+    for (const [userId, gameEngine] of gameEngines) {
+        if (gameEngine.state) {
+            db.run(
+                'INSERT OR REPLACE INTO user_game_data (user_id, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)',
+                [userId, JSON.stringify(gameEngine.state)],
+                (err) => {
+                    if (err) console.error(`自动存档失败 用户${userId}:`, err);
+                }
+            );
+        }
+    }
+}, 30000);
 
 module.exports = { app, io, db };
