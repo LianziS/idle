@@ -4536,12 +4536,34 @@ body::after {
 
 /* ============ 锻造标签切换样式 ============ */
 
-.gathering-items-list {
+/* 采集列表默认显示 */
+#gathering-items-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+}
+
+/* 标签切换的列表需要默认隐藏 */
+#forging-ingots-list,
+#forging-tools-list,
+#alchemy-potions-list,
+#alchemy-essences-list,
+#brewing-brews-list,
+#brewing-aging-list {
     display: none;
 }
 
-.gathering-items-list.active {
-    display: block;
+#forging-ingots-list.active,
+#forging-tools-list.active,
+#alchemy-potions-list.active,
+#alchemy-essences-list.active,
+#brewing-brews-list.active,
+#brewing-aging-list.active {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
 }
 
 /* ============ 工具系列分组样式 ============ */
