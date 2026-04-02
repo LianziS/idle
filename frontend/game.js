@@ -457,13 +457,6 @@ function switchPage(pageId) {
 function renderAll() {
     if (!gameState) return;
     
-    console.log('renderAll 开始, CONFIG 存在:', !!CONFIG);
-    console.log('CONFIG.woodPlanks:', CONFIG?.woodPlanks?.length);
-    console.log('CONFIG.fabrics:', CONFIG?.fabrics?.length);
-    console.log('CONFIG.gatheringLocations:', CONFIG?.gatheringLocations?.length);
-    console.log('elements.craftingList 存在:', !!elements.craftingList);
-    console.log('elements.tailoringList 存在:', !!elements.tailoringList);
-    
     renderBuildings();
     renderWoodcutting();
     renderMining();
