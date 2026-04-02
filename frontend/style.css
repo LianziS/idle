@@ -3312,3 +3312,113 @@ body::after {
 .action-btn.secondary:hover {
     color: #fff;
 }
+
+/* ============ 工具锻造样式 ============ */
+
+.tool-type-section {
+    margin-bottom: 20px;
+}
+
+.tool-type-title {
+    color: #E8C57F;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(107, 79, 60, 0.3);
+    padding-bottom: 5px;
+}
+
+.tool-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.tool-card {
+    background: rgba(45, 63, 82, 0.5);
+    border: 1px solid rgba(107, 79, 60, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.tool-card:hover:not(.locked):not(.owned) {
+    border-color: #8B2C2D;
+    transform: translateY(-2px);
+}
+
+.tool-card.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tool-card.owned {
+    border-color: #4a7c59;
+    background: rgba(74, 124, 89, 0.2);
+}
+
+.tool-icon {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.tool-name {
+    color: #E8C57F;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.tool-bonus {
+    color: #A0B2C0;
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.tool-owned {
+    color: #4a7c59;
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.forge-materials {
+    background: rgba(27, 42, 58, 0.5);
+    padding: 10px;
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+.forge-materials h4 {
+    color: #E8C57F;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.forge-materials > div {
+    color: #A0B2C0;
+    font-size: 0.85rem;
+    padding: 4px 0;
+}
+
+.forge-select {
+    margin: 10px 0;
+}
+
+.forge-select label {
+    display: block;
+    color: #A0B2C0;
+    margin-bottom: 5px;
+    font-size: 0.85rem;
+}
+
+.forge-select select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(107, 79, 60, 0.4);
+    border-radius: 6px;
+    background: rgba(27, 42, 58, 0.8);
+    color: #E8C57F;
+}

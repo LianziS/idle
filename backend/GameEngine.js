@@ -567,6 +567,90 @@ class GameEngine {
     }
     
     /**
+     * 锻造工具
+     */
+    forgeTool(toolType, toolIndex, ingotId, plankId) {
+        const toolsKey = this.getToolsKey(toolType);
+        const tools = CONFIG.tools[toolsKey];
+        const tool = tools?.[toolIndex];
+        
+        if (!tool) {
+            return { success: false, reason: '工具不存在' };
+        }
+        
+        // 检查等级要求
+        const forgingLevel = this.state.forgingLevel || 1;
+        if (forgingLevel < tool.reqEquipLevel) {
+            return { success: false, reason: `需要锻造 Lv.${tool.reqEquipLevel}` };
+        }
+        
+        // 获取材料需求
+        const materials = CONFIG.toolCraftingMaterials?.[toolsKey]?.[toolIndex];
+        if (!materials) {
+            return { success: false, reason: '材料配置错误' };
+        }
+        
+        // 检查材料
+        const ingots = this.state.ingotsInventory || {};
+        const planks = this.state.planksInventory || {};
+        
+        if (materials.ore && (ingots[ingotId] || 0) < materials.ore) {
+            return { success: false, reason: `矿锭不足: 需要 ${materials.ore}` };
+        }
+        
+        if (materials.plank && (planks[plankId] || 0) < materials.plank) {
+            return { success: false, reason: `木板不足: 需要 ${materials.plank}` };
+        }
+        
+        if (materials.ingot && (ingots[ingotId] || 0) < materials.ingot) {
+            return { success: false, reason: `矿锭不足: 需要 ${materials.ingot}` };
+        }
+        
+        // 检查前置工具
+        if (materials.prevTool) {
+            const prevTools = this.state.toolsInventory[toolsKey] || [];
+            const prevIndex = prevTools.indexOf(materials.prevTool);
+            if (prevIndex === -1) {
+                return { success: false, reason: '需要前置工具' };
+            }
+            // 消耗前置工具
+            prevTools.splice(prevIndex, 1);
+        }
+        
+        // 消耗材料
+        if (materials.ore) {
+            ingots[ingotId] = (ingots[ingotId] || 0) - materials.ore;
+            if (ingots[ingotId] <= 0) delete ingots[ingotId];
+        }
+        
+        if (materials.plank) {
+            planks[plankId] = (planks[plankId] || 0) - materials.plank;
+            if (planks[plankId] <= 0) delete planks[plankId];
+        }
+        
+        if (materials.ingot) {
+            ingots[ingotId] = (ingots[ingotId] || 0) - materials.ingot;
+            if (ingots[ingotId] <= 0) delete ingots[ingotId];
+        }
+        
+        // 添加工具到背包
+        if (!this.state.toolsInventory[toolsKey]) {
+            this.state.toolsInventory[toolsKey] = [];
+        }
+        this.state.toolsInventory[toolsKey].push(tool.id);
+        
+        // 添加经验
+        const exp = toolIndex * 20 + 10;
+        this.addSkillExp('forgingLevel', exp);
+        
+        return { 
+            success: true, 
+            tool: tool,
+            exp: exp
+        };
+    }
+    
+    /**
      * 辅助方法
      */
     getToolsKey(slotType) {

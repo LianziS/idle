@@ -215,35 +215,77 @@ const CONFIG = {
     // 工具配置（简化版）
     tools: {
         axes: [
-            { id: 'cyan_axe', name: '青闪斧', icon: '🪓', speedBonus: 0.15, reqEquipLevel: 1 },
-            { id: 'red_axe', name: '赤铁斧', icon: '🪓', speedBonus: 0.225, reqEquipLevel: 10 },
-            { id: 'feather_axe', name: '羽斧', icon: '🪓', speedBonus: 0.30, reqEquipLevel: 20 },
-            { id: 'white_axe', name: '白银斧', icon: '🪓', speedBonus: 0.45, reqEquipLevel: 35 }
+            { id: 'cyan_axe', name: '青闪斧', icon: '🪓', speedBonus: 0.15, reqEquipLevel: 1, index: 0 },
+            { id: 'red_axe', name: '赤铁斧', icon: '🪓', speedBonus: 0.225, reqEquipLevel: 10, index: 1 },
+            { id: 'feather_axe', name: '羽斧', icon: '🪓', speedBonus: 0.30, reqEquipLevel: 20, index: 2 },
+            { id: 'white_axe', name: '白银斧', icon: '🪓', speedBonus: 0.45, reqEquipLevel: 35, index: 3 }
         ],
         pickaxes: [
-            { id: 'cyan_pickaxe', name: '青闪镐', icon: '⛏️', speedBonus: 0.15, reqEquipLevel: 1 },
-            { id: 'red_pickaxe', name: '赤铁镐', icon: '⛏️', speedBonus: 0.225, reqEquipLevel: 10 },
-            { id: 'feather_pickaxe', name: '羽镐', icon: '⛏️', speedBonus: 0.30, reqEquipLevel: 20 }
+            { id: 'cyan_pickaxe', name: '青闪镐', icon: '⛏️', speedBonus: 0.15, reqEquipLevel: 1, index: 0 },
+            { id: 'red_pickaxe', name: '赤铁镐', icon: '⛏️', speedBonus: 0.225, reqEquipLevel: 10, index: 1 },
+            { id: 'feather_pickaxe', name: '羽镐', icon: '⛏️', speedBonus: 0.30, reqEquipLevel: 20, index: 2 }
         ],
         chisels: [
-            { id: 'cyan_chisel', name: '青闪凿子', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1 }
+            { id: 'cyan_chisel', name: '青闪凿子', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
         ],
         needles: [
-            { id: 'cyan_needle', name: '青闪针', icon: '🪡', speedBonus: 0.15, reqEquipLevel: 1 }
+            { id: 'cyan_needle', name: '青闪针', icon: '🪡', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
         ],
         scythes: [
-            { id: 'cyan_scythe', name: '青闪镰刀', icon: '🗡️', speedBonus: 0.15, reqEquipLevel: 1 }
+            { id: 'cyan_scythe', name: '青闪镰刀', icon: '🗡️', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
         ],
         hammers: [
-            { id: 'cyan_hammer', name: '青铁锤', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1 }
+            { id: 'cyan_hammer', name: '青铁锤', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
         ],
         tongs: [
-            { id: 'cyan_tongs', name: '青闪小桶', icon: '🪣', speedBonus: 0.15, reqEquipLevel: 1 }
+            { id: 'cyan_tongs', name: '青闪小桶', icon: '🪣', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
         ],
         rods: [
-            { id: 'cyan_rod', name: '青闪搅拌棒', icon: '🥄', speedBonus: 0.15, reqEquipLevel: 1 }
+            { id: 'cyan_rod', name: '青闪搅拌棒', icon: '🥄', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
         ]
     },
+    
+    // 工具锻造材料配置
+    toolCraftingMaterials: {
+        axes: [
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_axe' },
+            { ore: 22, plank: 14, prevTool: 'red_axe' },
+            { ore: 34, plank: 22, prevTool: 'feather_axe' }
+        ],
+        pickaxes: [
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_pickaxe' },
+            { ore: 22, plank: 14, prevTool: 'red_pickaxe' }
+        ],
+        chisels: [
+            { ore: 10, plank: 6, prevTool: null }
+        ],
+        needles: [
+            { ore: 10, plank: 6, prevTool: null }
+        ],
+        scythes: [
+            { ore: 10, plank: 6, prevTool: null }
+        ],
+        hammers: [
+            { ingot: 10, prevTool: null }
+        ],
+        tongs: [
+            { ore: 10, plank: 6, prevTool: null }
+        ],
+        rods: [
+            { ore: 10, plank: 6, prevTool: null }
+        ]
+    },
+    
+    // 矿锭到工具类型的映射（锻造工具需要矿锭）
+    ingotToToolType: {
+        'cyan_ingot': { toolTypes: ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'tongs', 'rods'], name: '青闪' },
+        'red_copper_ingot': { toolTypes: ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'tongs', 'rods'], name: '赤铁' }
+    },
+    
+    // 木板类型映射
+    plankTypes: ['pine_plank', 'iron_birch_plank', 'wind_tree_plank', 'flame_tree_plank'],
     
     // 资源出售价格
     resourcePrices: {

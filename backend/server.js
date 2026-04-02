@@ -482,6 +482,17 @@ io.on('connection', (socket) => {
         socket.emit('game_state_update', gameEngine.getFullState());
     });
     
+    // 锻造工具
+    socket.on('forge_tool', (data) => {
+        if (!gameEngine) return socket.emit('error', { message: '未认证' });
+        
+        const result = gameEngine.forgeTool(data.toolType, data.toolIndex, data.ingotId, data.plankId);
+        socket.emit('forge_result', result);
+        if (result.success) {
+            socket.emit('game_state_update', gameEngine.getFullState());
+        }
+    });
+    
     // 获取游戏状态
     socket.on('get_state', () => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });

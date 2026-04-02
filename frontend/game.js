@@ -155,6 +155,15 @@ function setupSocket() {
         showToast(`📋 自动开始: ${nextAction.name}`);
     });
     
+    // 锻造结果
+    socket.on('forge_result', (result) => {
+        if (result.success) {
+            showToast(`✅ 锻造成功: ${result.tool.name}`);
+        } else {
+            showToast(`❌ ${result.reason}`);
+        }
+    });
+    
     // 错误处理
     socket.on('error', (data) => {
         showToast(`❌ ${data.message}`);
@@ -216,6 +225,7 @@ function renderAll() {
     renderTailoring();
     renderBrewing();
     renderAlchemy();
+    renderToolForge();
     renderInventories();
     renderEquipmentSlots();
     updateUI();
@@ -697,6 +707,163 @@ function renderAlchemy() {
             const potionId = card.dataset.id;
             openActionModal('ALCHEMY', potionId);
         });
+    });
+}
+
+/**
+ * 渲染工具锻造列表
+ */
+function renderToolForge() {
+    const container = document.getElementById('tool-forge-list');
+    if (!container || !gameState || !CONFIG.tools) return;
+    
+    const forgingLevel = gameState.forgingLevel || 1;
+    
+    let html = '';
+    
+    // 遍历所有工具类型
+    const toolTypes = ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'hammers', 'tongs', 'rods'];
+    
+    toolTypes.forEach(toolType => {
+        const tools = CONFIG.tools[toolType];
+        if (!tools || tools.length === 0) return;
+        
+        const typeNames = {
+            axes: '🪓 斧头',
+            pickaxes: '⛏️ 镐子',
+            chisels: '🔨 凿子',
+            needles: '🪡 针',
+            scythes: '🗡️ 镰刀',
+            hammers: '🔨 锤子',
+            tongs: '🪣 小桶',
+            rods: '🥄 搅拌棒'
+        };
+        
+        html += `<div class="tool-type-section">
+            <h4 class="tool-type-title">${typeNames[toolType] || toolType}</h4>
+            <div class="tool-list">`;
+        
+        tools.forEach((tool, index) => {
+            const unlocked = forgingLevel >= tool.reqEquipLevel;
+            const owned = (gameState.toolsInventory?.[toolType] || []).includes(tool.id);
+            const materials = CONFIG.toolCraftingMaterials?.[toolType]?.[index];
+            
+            html += `
+                <div class="tool-card ${unlocked ? '' : 'locked'} ${owned ? 'owned' : ''}" 
+                     data-tool-type="${toolType}" data-tool-index="${index}">
+                    <div class="tool-icon">${tool.icon}</div>
+                    <div class="tool-info">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-bonus">+${Math.round(tool.speedBonus * 100)}% 速度</div>
+                        ${owned ? '<div class="tool-owned">✓ 已拥有</div>' : ''}
+                    </div>
+                    ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${tool.reqEquipLevel}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+    });
+    
+    container.innerHTML = html;
+    
+    // 绑定点击事件
+    container.querySelectorAll('.tool-card:not(.locked):not(.owned)').forEach(card => {
+        card.addEventListener('click', () => {
+            const toolType = card.dataset.toolType;
+            const toolIndex = parseInt(card.dataset.toolIndex);
+            openToolForgeModal(toolType, toolIndex);
+        });
+    });
+}
+
+/**
+ * 打开工具锻造模态框
+ */
+function openToolForgeModal(toolType, toolIndex) {
+    const tools = CONFIG.tools[toolType];
+    const tool = tools[toolIndex];
+    const materials = CONFIG.toolCraftingMaterials?.[toolType]?.[toolIndex];
+    
+    if (!tool || !materials) return;
+    
+    // 获取用户拥有的矿锭和木板
+    const ingots = Object.entries(gameState.ingotsInventory || {})
+        .filter(([id, count]) => count > 0);
+    const planks = Object.entries(gameState.planksInventory || {})
+        .filter(([id, count]) => count > 0);
+    
+    // 创建模态框
+    const modal = document.createElement('div');
+    modal.className = 'action-modal-overlay';
+    modal.innerHTML = `
+        <div class="action-modal">
+            <div class="action-modal-header">
+                <span class="action-modal-icon">${tool.icon}</span>
+                <span class="action-modal-title">锻造 ${tool.name}</span>
+                <button class="action-modal-close">&times;</button>
+            </div>
+            <div class="action-modal-body">
+                <div class="action-modal-info">
+                    <span>⚡ +${Math.round(tool.speedBonus * 100)}% 速度加成</span>
+                </div>
+                <div class="forge-materials">
+                    <h4>所需材料:</h4>
+                    ${materials.ore ? `<div>矿锭 × ${materials.ore}</div>` : ''}
+                    ${materials.plank ? `<div>木板 × ${materials.plank}</div>` : ''}
+                    ${materials.ingot ? `<div>矿锭 × ${materials.ingot}</div>` : ''}
+                    ${materials.prevTool ? `<div>前置工具: ${CONFIG.tools[toolType].find(t => t.id === materials.prevTool)?.name || materials.prevTool}</div>` : ''}
+                </div>
+                <div class="forge-select">
+                    <label>选择矿锭:</label>
+                    <select id="forge-ingot">
+                        ${ingots.map(([id, count]) => {
+                            const ingot = CONFIG.ingots.find(i => i.id === id);
+                            return `<option value="${id}">${ingot?.name || id} (${count})</option>`;
+                        }).join('')}
+                    </select>
+                </div>
+                ${materials.plank ? `
+                <div class="forge-select">
+                    <label>选择木板:</label>
+                    <select id="forge-plank">
+                        ${planks.map(([id, count]) => {
+                            const plank = CONFIG.woodPlanks.find(p => p.id === id);
+                            return `<option value="${id}">${plank?.name || id} (${count})</option>`;
+                        }).join('')}
+                    </select>
+                </div>
+                ` : ''}
+            </div>
+            <div class="action-modal-footer">
+                <button class="action-btn secondary" id="action-cancel">取消</button>
+                <button class="action-btn primary" id="action-confirm">锻造</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 绑定事件
+    modal.querySelector('.action-modal-close').addEventListener('click', () => modal.remove());
+    modal.querySelector('#action-cancel').addEventListener('click', () => modal.remove());
+    
+    modal.querySelector('#action-confirm').addEventListener('click', () => {
+        const ingotSelect = modal.querySelector('#forge-ingot');
+        const plankSelect = modal.querySelector('#forge-plank');
+        
+        socket.emit('forge_tool', {
+            toolType: toolType.replace('s', ''), // 'axes' -> 'axe'
+            toolIndex: toolIndex,
+            ingotId: ingotSelect?.value,
+            plankId: plankSelect?.value
+        });
+        
+        modal.remove();
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
     });
 }
 
