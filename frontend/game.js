@@ -72,6 +72,7 @@ function cacheElements() {
     elements.actionProgressTime = document.getElementById('action-progress-time');
     elements.actionCancelBtn = document.getElementById('action-cancel-btn');
     elements.actionQueueBtn = document.getElementById('action-queue-btn');
+    elements.actionRewards = document.getElementById('action-rewards');
     
     // 列表容器
     elements.buildingsList = document.getElementById('buildings-list');
@@ -521,22 +522,42 @@ function updateActionStatusBar() {
     }
     
     const action = gameState.activeAction;
+    const totalCount = action.count || gameState.actionCount || 1;
     const remaining = action.remaining || 0;
+    const current = totalCount - remaining + 1; // 当前是第几次
+    
+    // 获取行动信息
+    const actionType = action.type;
+    const actionId = action.id;
+    const config = getActionConfig(actionType, actionId);
+    
+    // 显示图标 + 行动名 + [当前/总数]
+    if (elements.actionStatusIcon) {
+        elements.actionStatusIcon.textContent = config?.icon || '🔧';
+    }
+    if (elements.actionStatusName) {
+        elements.actionStatusName.textContent = config?.name || actionId;
+    }
+    if (elements.actionStatusCount) {
+        if (totalCount >= 999) {
+            elements.actionStatusCount.textContent = '[∞]';
+        } else {
+            elements.actionStatusCount.textContent = `[${current}/${totalCount}]`;
+        }
+    }
     
     // 计算进度
     const elapsed = Date.now() - (gameState.actionStartTime || Date.now());
     const duration = gameState.actionDuration || 5000;
     const progress = Math.min(elapsed / duration, 1);
-    const remainingTime = Math.max(duration - elapsed, 0);
     
     if (elements.actionProgressFill) {
         elements.actionProgressFill.style.width = `${progress * 100}%`;
     }
     if (elements.actionProgressTime) {
-        elements.actionProgressTime.textContent = formatTime(remainingTime);
-    }
-    if (elements.actionStatusCount) {
-        elements.actionStatusCount.textContent = remaining > 0 ? `×${remaining}` : '';
+        // 显示实际时间，不是倒计时
+        const totalSeconds = Math.ceil(duration / 1000);
+        elements.actionProgressTime.textContent = `${totalSeconds}s`;
     }
     
     // 进度完成时自动发送完成事件（防止重复发送）
@@ -554,6 +575,25 @@ function updateActionStatusBar() {
     
     // 更新队列按钮
     updateQueueButton();
+}
+
+/**
+ * 获取行动配置
+ */
+function getActionConfig(actionType, actionId) {
+    const configMaps = {
+        WOODCUTTING: CONFIG.trees,
+        MINING: CONFIG.ores,
+        GATHERING: CONFIG.gatheringLocations,
+        CRAFTING: CONFIG.woodPlanks,
+        FORGING: CONFIG.ingots,
+        TAILORING: CONFIG.fabrics,
+        BREWING: CONFIG.brews,
+        ALCHEMY: CONFIG.potions,
+        ESSENCE: CONFIG.essences
+    };
+    const config = configMaps[actionType];
+    return config?.find(c => c.id === actionId);
 }
 
 /**
@@ -1614,14 +1654,33 @@ function showToast(message) {
  * 显示奖励
  */
 function showRewards(rewards) {
-    const text = rewards.map(r => {
-        if (r.type === 'exp') {
-            return `✨ +${r.amount} ${r.skill}经验${r.leveledUp ? ' 🎉升级!' : ''}`;
-        }
-        return `${r.icon} ${r.name} ×${r.count}`;
-    }).join(' | ');
+    // 过滤掉经验，只显示物品
+    const itemRewards = rewards.filter(r => r.type !== 'exp');
     
-    showToast(text);
+    if (elements.actionRewards && itemRewards.length > 0) {
+        // 显示获取的物品
+        const itemsHtml = itemRewards.map(r => {
+            return `<span class="action-reward-item">${r.icon} ${r.name} ×${r.count}</span>`;
+        }).join('');
+        
+        elements.actionRewards.innerHTML = itemsHtml;
+        
+        // 3秒后淡出
+        setTimeout(() => {
+            if (elements.actionRewards) {
+                elements.actionRewards.innerHTML = '';
+            }
+        }, 3000);
+    }
+    
+    // 经验单独显示 toast
+    const expRewards = rewards.filter(r => r.type === 'exp');
+    if (expRewards.length > 0) {
+        const expText = expRewards.map(r => {
+            return `✨ +${r.amount} ${r.skill}经验${r.leveledUp ? ' 🎉升级!' : ''}`;
+        }).join(' | ');
+        showToast(expText);
+    }
 }
 
 // ============ 游戏循环 ============
