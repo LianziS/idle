@@ -17,6 +17,7 @@ let CONFIG = null;     // 从后端获取的配置数据
 let socket = null;     // Socket.io 连接
 let animationFrame = null;
 let lastActionStartTime = 0;
+let completingAction = false; // 防止重复发送完成事件
 
 // DOM 元素缓存
 const elements = {};
@@ -172,6 +173,7 @@ function setupSocket() {
     
     // 行动完成结果
     socket.on('action_complete_result', (result) => {
+        completingAction = false; // 重置标志
         if (result.success && result.rewards) {
             showRewards(result.rewards);
             if (result.completed) {
@@ -525,8 +527,9 @@ function updateActionStatusBar() {
         elements.actionStatusCount.textContent = remaining > 0 ? `×${remaining}` : '';
     }
     
-    // 进度完成时自动发送完成事件
-    if (progress >= 1 && gameState.activeAction) {
+    // 进度完成时自动发送完成事件（防止重复发送）
+    if (progress >= 1 && gameState.activeAction && !completingAction) {
+        completingAction = true;
         socket.emit('action_complete');
     }
     
@@ -1085,7 +1088,7 @@ function openMerchantPanel(merchantId) {
 function renderMerchantPanel(merchantId, merchantData) {
     if (!merchantData) return;
     
-    // 构建我的物品列表（用于出售）
+    // 构建我的物品列表（网格显示）
     let myItemsHtml = '';
     const itemTypes = [
         { key: 'woodcuttingInventory', type: 'WOOD', config: CONFIG.trees, idField: 'dropId' },
@@ -1106,12 +1109,12 @@ function renderMerchantPanel(merchantId, merchantData) {
                 const configItem = config.find(c => c[idField] === itemId) || { name: itemId, icon: '❓' };
                 const price = Math.floor((CONFIG.resourcePrices?.[type.toLowerCase()] || 1) * 2);
                 myItemsHtml += `
-                    <div class="my-item">
+                    <div class="item-card" data-item-type="${type}" data-item-id="${itemId}" data-count="${count}">
                         <span class="item-icon">${configItem.icon}</span>
                         <span class="item-name">${configItem.name}</span>
                         <span class="item-count">×${count}</span>
                         <span class="item-price">${price}💰</span>
-                        <button class="sell-btn" data-item-type="${type}" data-item-id="${itemId}" data-count="1">出售</button>
+                        <button class="sell-btn">出售</button>
                     </div>
                 `;
             }
@@ -1119,7 +1122,7 @@ function renderMerchantPanel(merchantId, merchantData) {
     });
     
     const modal = document.createElement('div');
-    modal.className = 'merchant-modal active'; // 添加 active 类
+    modal.className = 'merchant-modal active';
     modal.innerHTML = `
         <div class="merchant-modal-overlay"></div>
         <div class="merchant-modal-panel">
@@ -1128,43 +1131,58 @@ function renderMerchantPanel(merchantId, merchantData) {
                 <div class="merchant-modal-info">
                     <h3>${merchantData.name}</h3>
                     <p class="merchant-modal-title">${merchantData.title}</p>
+                    <p class="merchant-favor">好感度: ${Math.floor((merchantData.favorability || 0) * 100)}%</p>
                 </div>
                 <button class="merchant-modal-close">&times;</button>
             </div>
+            <div class="merchant-tabs">
+                <button class="merchant-tab active" data-tab="trade">交易</button>
+                <button class="merchant-tab" data-tab="quest">任务</button>
+            </div>
             <div class="merchant-modal-body">
-                <div class="merchant-section">
-                    <h4>商品</h4>
-                    <div class="goods-list">
-                        ${merchantData.goods?.map(goods => `
-                            <div class="goods-item" data-goods-id="${goods.id}">
-                                <span class="goods-icon">${goods.icon}</span>
-                                <span class="goods-name">${goods.name}</span>
-                                <span class="goods-price">${goods.price} ${goods.currency === 'gold' ? '💰' : '🪙'}</span>
-                                <button class="buy-btn" data-goods-id="${goods.id}" data-price="${goods.price}">购买</button>
-                            </div>
-                        `).join('') || '<div class="empty">暂无商品</div>'}
+                <div class="merchant-tab-content active" id="merchant-tab-trade">
+                    <div class="merchant-section">
+                        <h4>商品</h4>
+                        <div class="goods-grid">
+                            ${merchantData.goods?.map(goods => `
+                                <div class="goods-card" data-goods-id="${goods.id}">
+                                    <span class="goods-icon">${goods.icon}</span>
+                                    <span class="goods-name">${goods.name}</span>
+                                    <span class="goods-price">${goods.price} ${goods.currency === 'gold' ? '💰' : '🪙'}</span>
+                                    <button class="buy-btn" data-goods-id="${goods.id}">购买</button>
+                                </div>
+                            `).join('') || '<div class="empty">暂无商品</div>'}
+                        </div>
+                    </div>
+                    <div class="merchant-section">
+                        <h4>我的物品</h4>
+                        <div class="my-items-grid">
+                            ${myItemsHtml || '<div class="empty">暂无可出售物品</div>'}
+                        </div>
                     </div>
                 </div>
-                <div class="merchant-section">
-                    <h4>任务</h4>
+                <div class="merchant-tab-content" id="merchant-tab-quest">
                     <div class="quest-list">
                         ${merchantData.quests?.map(quest => {
                             const completed = merchantData.completedQuests?.includes(quest.id);
+                            const accepted = merchantData.acceptedQuests?.includes(quest.id);
                             return `
-                                <div class="quest-item ${completed ? 'completed' : ''}" data-quest-id="${quest.id}">
-                                    <div class="quest-name">${quest.name}</div>
+                                <div class="quest-card ${completed ? 'completed' : ''}" data-quest-id="${quest.id}">
+                                    <div class="quest-header">
+                                        <span class="quest-name">${quest.name}</span>
+                                        ${completed ? '<span class="quest-badge completed">✓ 已完成</span>' : 
+                                          accepted ? '<span class="quest-badge accepted">进行中</span>' : ''}
+                                    </div>
                                     <div class="quest-desc">${quest.desc}</div>
                                     <div class="quest-reward">奖励: ${quest.reward.gold}💰 ${quest.reward.favorability ? `+${Math.floor(quest.reward.favorability * 100)}%好感` : ''}</div>
-                                    ${completed ? '<div class="quest-completed">✓ 已完成</div>' : `<button class="submit-quest-btn" data-quest-id="${quest.id}">提交</button>`}
+                                    <div class="quest-actions">
+                                        ${completed ? '' : 
+                                          accepted ? `<button class="submit-quest-btn" data-quest-id="${quest.id}">提交</button>` :
+                                          `<button class="accept-quest-btn" data-quest-id="${quest.id}">领取</button>`}
+                                    </div>
                                 </div>
                             `;
                         }).join('') || '<div class="empty">暂无任务</div>'}
-                    </div>
-                </div>
-                <div class="merchant-section">
-                    <h4>我的物品 (点击出售)</h4>
-                    <div class="my-items-list">
-                        ${myItemsHtml || '<div class="empty">暂无可出售物品</div>'}
                     </div>
                 </div>
             </div>
@@ -1177,11 +1195,30 @@ function renderMerchantPanel(merchantId, merchantData) {
     modal.querySelector('.merchant-modal-close').addEventListener('click', () => modal.remove());
     modal.querySelector('.merchant-modal-overlay').addEventListener('click', () => modal.remove());
     
+    // 标签切换
+    modal.querySelectorAll('.merchant-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            modal.querySelectorAll('.merchant-tab').forEach(t => t.classList.remove('active'));
+            modal.querySelectorAll('.merchant-tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            const tabId = tab.dataset.tab;
+            modal.querySelector(`#merchant-tab-${tabId}`)?.classList.add('active');
+        });
+    });
+    
     // 购买按钮
     modal.querySelectorAll('.buy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const goodsId = btn.dataset.goodsId;
             socket.emit('buy_goods', { merchantId, goodsId, count: 1 });
+        });
+    });
+    
+    // 领取任务按钮
+    modal.querySelectorAll('.accept-quest-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const questId = btn.dataset.questId;
+            socket.emit('accept_quest', { merchantId, questId });
         });
     });
     
@@ -1196,9 +1233,10 @@ function renderMerchantPanel(merchantId, merchantData) {
     // 出售按钮
     modal.querySelectorAll('.sell-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const itemType = btn.dataset.itemType;
-            const itemId = btn.dataset.itemId;
-            const count = parseInt(btn.dataset.count) || 1;
+            const card = btn.closest('.item-card');
+            const itemType = card.dataset.itemType;
+            const itemId = card.dataset.itemId;
+            const count = parseInt(card.dataset.count) || 1;
             socket.emit('sell_item', { itemType, itemId, count });
         });
     });

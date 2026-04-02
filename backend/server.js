@@ -520,6 +520,17 @@ io.on('connection', (socket) => {
         }
     });
     
+    // 领取任务
+    socket.on('accept_quest', (data) => {
+        if (!gameEngine) return socket.emit('error', { message: '未认证' });
+        
+        const result = gameEngine.acceptQuest(data.merchantId, data.questId);
+        socket.emit('accept_quest_result', result);
+        if (result.success) {
+            socket.emit('game_state_update', gameEngine.getFullState());
+        }
+    });
+    
     // 提交任务
     socket.on('submit_quest', (data) => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });

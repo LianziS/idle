@@ -690,16 +690,54 @@ class GameEngine {
         const merchant = CONFIG.merchants.find(m => m.id === merchantId);
         if (!merchant) return null;
         
-        // 从用户状态获取好感度
+        // 从用户状态获取好感度、已完成任务、已领取任务
         const userMerchantData = this.state.merchantData?.[merchantId] || {
             favorability: merchant.favorability || 0,
-            completedQuests: []
+            completedQuests: [],
+            acceptedQuests: []
         };
         
         return {
             ...merchant,
             ...userMerchantData
         };
+    }
+    
+    // 领取任务
+    acceptQuest(merchantId, questId) {
+        const merchant = CONFIG.merchants.find(m => m.id === merchantId);
+        if (!merchant) return { success: false, reason: '商人不存在' };
+        
+        const quest = merchant.quests?.find(q => q.id === questId);
+        if (!quest) return { success: false, reason: '任务不存在' };
+        
+        // 初始化商人数据
+        if (!this.state.merchantData) this.state.merchantData = {};
+        if (!this.state.merchantData[merchantId]) {
+            this.state.merchantData[merchantId] = {
+                favorability: 0,
+                completedQuests: [],
+                acceptedQuests: []
+            };
+        }
+        
+        const merchantData = this.state.merchantData[merchantId];
+        
+        // 检查是否已完成
+        if (merchantData.completedQuests?.includes(questId)) {
+            return { success: false, reason: '任务已完成' };
+        }
+        
+        // 检查是否已领取
+        if (merchantData.acceptedQuests?.includes(questId)) {
+            return { success: false, reason: '任务已领取' };
+        }
+        
+        // 添加到已领取列表
+        if (!merchantData.acceptedQuests) merchantData.acceptedQuests = [];
+        merchantData.acceptedQuests.push(questId);
+        
+        return { success: true, quest: quest };
     }
     
     // 购买商品
@@ -744,10 +782,22 @@ class GameEngine {
         const quest = merchant.quests?.find(q => q.id === questId);
         if (!quest) return { success: false, reason: '任务不存在' };
         
+        // 初始化商人数据
+        if (!this.state.merchantData) this.state.merchantData = {};
+        if (!this.state.merchantData[merchantId]) {
+            this.state.merchantData[merchantId] = { favorability: 0, completedQuests: [], acceptedQuests: [] };
+        }
+        
+        const merchantData = this.state.merchantData[merchantId];
+        
         // 检查是否已完成
-        const merchantData = this.state.merchantData?.[merchantId] || { favorability: 0, completedQuests: [] };
         if (merchantData.completedQuests?.includes(questId)) {
             return { success: false, reason: '任务已完成' };
+        }
+        
+        // 检查是否已领取
+        if (!merchantData.acceptedQuests?.includes(questId)) {
+            return { success: false, reason: '请先领取任务' };
         }
         
         // 检查材料
@@ -757,7 +807,7 @@ class GameEngine {
         
         const inventory = this.state[itemType.inventoryKey] || {};
         if ((inventory[req.id] || 0) < req.count) {
-            return { success: false, reason: '材料不足' };
+            return { success: false, reason: `材料不足: 需要 ${req.count} 个` };
         }
         
         // 消耗材料
@@ -770,17 +820,15 @@ class GameEngine {
         }
         
         // 更新好感度
-        if (!this.state.merchantData) {
-            this.state.merchantData = {};
-        }
-        if (!this.state.merchantData[merchantId]) {
-            this.state.merchantData[merchantId] = { favorability: 0, completedQuests: [] };
+        if (quest.reward.favorability) {
+            merchantData.favorability = (merchantData.favorability || 0) + quest.reward.favorability;
         }
         
-        if (quest.reward.favorability) {
-            this.state.merchantData[merchantId].favorability += quest.reward.favorability;
-        }
-        this.state.merchantData[merchantId].completedQuests.push(questId);
+        // 添加到已完成列表
+        merchantData.completedQuests.push(questId);
+        
+        // 从已领取列表移除
+        merchantData.acceptedQuests = merchantData.acceptedQuests.filter(id => id !== questId);
         
         return { 
             success: true, 
