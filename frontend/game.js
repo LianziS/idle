@@ -594,6 +594,7 @@ function updateUI() {
  * 更新技能等级显示
  */
 function updateSkillDisplay() {
+    // 技能页面内的等级显示
     const skills = [
         { key: 'woodcuttingLevel', name: '伐木', element: 'woodcutting-level' },
         { key: 'miningLevel', name: '挖矿', element: 'mining-level' },
@@ -609,6 +610,66 @@ function updateSkillDisplay() {
         const el = document.getElementById(skill.element);
         if (el && gameState[skill.key]) {
             el.textContent = `Lv.${gameState[skill.key]}`;
+        }
+    });
+    
+    // 侧边栏技能等级显示
+    const sidebarSkills = [
+        { key: 'woodcuttingLevel', element: 'nav-woodcutting-lvl' },
+        { key: 'miningLevel', element: 'nav-mining-lvl' },
+        { key: 'gatheringLevel', element: 'nav-gathering-lvl' },
+        { key: 'craftingLevel', element: 'nav-crafting-lvl' },
+        { key: 'forgingLevel', element: 'nav-forging-lvl' },
+        { key: 'tailoringLevel', element: 'nav-tailoring-lvl' },
+        { key: 'alchemyLevel', element: 'nav-alchemy-lvl' },
+        { key: 'brewingLevel', element: 'nav-brewing-lvl' }
+    ];
+    
+    sidebarSkills.forEach(skill => {
+        const el = document.getElementById(skill.element);
+        if (el) {
+            el.textContent = gameState[skill.key] || 1;
+        }
+    });
+    
+    // 顶部等级显示：所有技能等级之和
+    const topLevelEl = document.getElementById('top-level');
+    if (topLevelEl) {
+        const totalLevel = sidebarSkills.reduce((sum, skill) => {
+            return sum + (gameState[skill.key] || 1);
+        }, 0);
+        topLevelEl.textContent = totalLevel;
+    }
+    
+    // 更新侧边栏经验条
+    updateSidebarExpBars();
+}
+
+/**
+ * 更新侧边栏经验条
+ */
+function updateSidebarExpBars() {
+    const skills = [
+        { key: 'woodcuttingExp', levelKey: 'woodcuttingLevel', element: 'nav-woodcutting-exp' },
+        { key: 'miningExp', levelKey: 'miningLevel', element: 'nav-mining-exp' },
+        { key: 'gatheringExp', levelKey: 'gatheringLevel', element: 'nav-gathering-exp' },
+        { key: 'craftingExp', levelKey: 'craftingLevel', element: 'nav-crafting-exp' },
+        { key: 'forgingExp', levelKey: 'forgingLevel', element: 'nav-forging-exp' },
+        { key: 'tailoringExp', levelKey: 'tailoringLevel', element: 'nav-tailoring-exp' },
+        { key: 'alchemyExp', levelKey: 'alchemyLevel', element: 'nav-alchemy-exp' },
+        { key: 'brewingExp', levelKey: 'brewingLevel', element: 'nav-brewing-exp' }
+    ];
+    
+    skills.forEach(skill => {
+        const el = document.getElementById(skill.element);
+        if (el && gameState[skill.key]) {
+            const level = gameState[skill.levelKey] || 1;
+            const exp = gameState[skill.key] || 0;
+            // 计算当前等级需要的经验（简单公式：level * 100）
+            const expForCurrentLevel = (level - 1) * 100;
+            const expForNextLevel = level * 100;
+            const progress = Math.min(100, Math.max(0, ((exp - expForCurrentLevel) / (expForNextLevel - expForCurrentLevel)) * 100));
+            el.style.width = `${progress}%`;
         }
     });
 }
