@@ -525,6 +525,11 @@ function updateActionStatusBar() {
         elements.actionStatusCount.textContent = remaining > 0 ? `×${remaining}` : '';
     }
     
+    // 进度完成时自动发送完成事件
+    if (progress >= 1 && gameState.activeAction) {
+        socket.emit('action_complete');
+    }
+    
     // 更新队列按钮
     updateQueueButton();
 }
