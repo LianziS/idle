@@ -4104,3 +4104,38 @@ body::after {
     padding: 12px;
     border-top: 1px solid rgba(107, 79, 60, 0.4);
 }
+
+/* ============ 队列按钮样式 ============ */
+
+.action-btn.queue {
+    background: #b8860b;
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.action-btn.queue:hover {
+    background: #d4a017;
+}
+
+.action-btn.queue.disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+/* 危险按钮 */
+.action-btn.danger {
+    background: #8B2C2D;
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.action-btn.danger:hover {
+    background: #a33435;
+}

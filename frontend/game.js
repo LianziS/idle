@@ -301,12 +301,49 @@ function setupEventListeners() {
     const queueClearBtn = document.getElementById('queue-clear-btn');
     if (queueClearBtn) {
         queueClearBtn.addEventListener('click', () => {
-            if (confirm('确定要清空队列吗？')) {
-                socket.emit('queue_clear');
-                hideQueuePopover();
-            }
+            showClearQueueConfirm();
         });
     }
+}
+
+/**
+ * 显示清空队列确认卡片
+ */
+function showClearQueueConfirm() {
+    const modal = document.createElement('div');
+    modal.className = 'action-modal-overlay';
+    modal.innerHTML = `
+        <div class="action-modal" style="min-width: 280px;">
+            <div class="action-modal-header">
+                <span class="action-modal-title">⚠️ 确认清空队列</span>
+            </div>
+            <div class="action-modal-body" style="text-align: center; padding: 20px;">
+                <p style="color: #A0B2C0; margin-bottom: 20px;">确定要清空所有队列中的行动吗？</p>
+            </div>
+            <div class="action-modal-footer" style="justify-content: center;">
+                <button class="action-btn secondary" id="clear-cancel">取消</button>
+                <button class="action-btn danger" id="clear-confirm">确认清空</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#clear-cancel').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    modal.querySelector('#clear-confirm').addEventListener('click', () => {
+        socket.emit('queue_clear');
+        modal.remove();
+        hideQueuePopover();
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }
 
 /**
@@ -1540,6 +1577,13 @@ function openActionModal(type, id) {
  * 显示行动选择模态框
  */
 function showActionModal(config) {
+    // 检查队列状态
+    const currentQueue = gameState?.actionQueue || [];
+    const maxQueueSize = 2;
+    const currentAction = gameState?.activeAction;
+    const queueAvailable = currentQueue.length < maxQueueSize;
+    const queuePosition = currentQueue.length + 1;
+    
     // 创建模态框
     const modal = document.createElement('div');
     modal.className = 'action-modal-overlay';
@@ -1569,7 +1613,11 @@ function showActionModal(config) {
             </div>
             <div class="action-modal-footer">
                 <button class="action-btn secondary" id="action-cancel">取消</button>
-                <button class="action-btn queue" id="action-queue">加入队列</button>
+                ${currentAction ? 
+                  (queueAvailable ? 
+                    `<button class="action-btn queue" id="action-queue">加入队列 #${queuePosition}</button>` : 
+                    `<button class="action-btn queue disabled" id="action-queue" disabled>队列已满</button>`) : 
+                  ''}
                 <button class="action-btn primary" id="action-confirm">开始</button>
             </div>
         </div>
@@ -1615,21 +1663,24 @@ function showActionModal(config) {
     });
     
     // 加入队列按钮
-    modal.querySelector('#action-queue').addEventListener('click', () => {
-        const countInput = modal.querySelector('#custom-count');
-        const count = parseInt(countInput.value) || 1;
-        
-        if (pendingAction) {
-            socket.emit('action_start', {
-                type: pendingAction.type,
-                id: pendingAction.id,
-                count: count
-            });
-        }
-        
-        modal.remove();
-        pendingAction = null;
-    });
+    const queueBtn = modal.querySelector('#action-queue');
+    if (queueBtn && !queueBtn.disabled) {
+        queueBtn.addEventListener('click', () => {
+            const countInput = modal.querySelector('#custom-count');
+            const count = parseInt(countInput.value) || 1;
+            
+            if (pendingAction) {
+                socket.emit('action_start', {
+                    type: pendingAction.type,
+                    id: pendingAction.id,
+                    count: count
+                });
+            }
+            
+            modal.remove();
+            pendingAction = null;
+        });
+    }
     
     // 点击背景关闭
     modal.addEventListener('click', (e) => {
