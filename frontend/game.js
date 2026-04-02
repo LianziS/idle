@@ -1058,12 +1058,107 @@ function openUpgradeModal(buildingId) {
         }
     }
     
-    const costText = formatCost(cost, '\n');
     const nextLevelName = buildingConfig.levelNames?.[level + 1] || `${buildingConfig.name} Lv.${level + 1}`;
     
-    if (confirm(`升级到 ${nextLevelName}?\n\n需要:\n${costText}`)) {
+    // 使用自定义弹窗
+    const modal = document.createElement('div');
+    modal.className = 'action-modal-overlay';
+    modal.innerHTML = `
+        <div class="action-modal">
+            <div class="action-modal-header">
+                <span class="action-modal-icon">${buildingConfig.icon}</span>
+                <span class="action-modal-title">升级 ${buildingConfig.name}</span>
+                <button class="action-modal-close">&times;</button>
+            </div>
+            <div class="action-modal-body">
+                <div class="upgrade-info">
+                    <div class="upgrade-arrow">
+                        <span class="upgrade-from">${buildingConfig.name} Lv.${level}</span>
+                        <span class="arrow">→</span>
+                        <span class="upgrade-to">${nextLevelName}</span>
+                    </div>
+                </div>
+                <div class="upgrade-cost">
+                    <h4>所需材料</h4>
+                    <div class="cost-list">
+                        ${Object.entries(cost).map(([resource, amount]) => {
+                            const resourceName = getResourceName(resource);
+                            const owned = getResourceCount(resource);
+                            const enough = owned >= amount;
+                            return `
+                                <div class="cost-item ${enough ? '' : 'not-enough'}">
+                                    <span class="cost-name">${resourceName}</span>
+                                    <span class="cost-amount">${owned} / ${amount}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="action-modal-footer">
+                <button class="action-btn secondary" id="upgrade-cancel">取消</button>
+                <button class="action-btn primary" id="upgrade-confirm">确认升级</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 绑定事件
+    modal.querySelector('.action-modal-close').addEventListener('click', () => modal.remove());
+    modal.querySelector('#upgrade-cancel').addEventListener('click', () => modal.remove());
+    modal.querySelector('#upgrade-confirm').addEventListener('click', () => {
         socket.emit('upgrade_building', { buildingId });
+        modal.remove();
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+/**
+ * 获取资源中文名称
+ */
+function getResourceName(resourceId) {
+    const names = {
+        'gold': '金币',
+        'pine': '青杉木',
+        'iron_birch': '铁桦木',
+        'wind_tree': '风啸木',
+        'flame_tree': '焰心木',
+        'frost_maple': '霜叶枫木',
+        'thunder_tree': '雷鸣木',
+        'ancient_oak': '古橡木',
+        'world_tree': '世界树枝',
+        'cyan_ore': '青闪石',
+        'red_iron': '赤铁石',
+        'feather_ore': '羽石',
+        'hell_ore': '白鸠石',
+        'white_ore': '狱炎石',
+        'thunder_ore': '雷鸣石',
+        'brilliant': '璀璨原石',
+        'star_ore': '星辉原石'
+    };
+    return names[resourceId] || resourceId;
+}
+
+/**
+ * 获取资源数量
+ */
+function getResourceCount(resourceId) {
+    // 检查伐木物品
+    if (gameState.woodcuttingInventory?.[resourceId]) {
+        return gameState.woodcuttingInventory[resourceId];
     }
+    // 检查挖矿物品
+    if (gameState.miningInventory?.[resourceId]) {
+        return gameState.miningInventory[resourceId];
+    }
+    // 检查金币
+    if (resourceId === 'gold') {
+        return gameState.gold || 0;
+    }
+    return 0;
 }
 
 /**

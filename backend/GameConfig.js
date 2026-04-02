@@ -18,14 +18,14 @@ const CONFIG = {
             maxLevel: 5,
             levelNames: ['简陋帐篷', '炉火营地', '榫卯工房', '织造小筑', '秘药阁楼', '丰饶山庄']
         },
-        { id: 'lumber', name: '伐木场', icon: '🪓', baseCost: { wood: 50, stone: 20 }, production: { wood: 1 }, unlockReq: null },
-        { id: 'mine', name: '矿洞', icon: '⛏️', baseCost: { wood: 100, stone: 50 }, production: { stone: 1 }, unlockReq: { tentLevel: 0 } },
-        { id: 'smithy', name: '锻造屋', icon: '🔨', baseCost: { wood: 200, stone: 150 }, production: {}, unlockReq: { tentLevel: 1 } },
-        { id: 'workshop', name: '木工坊', icon: '🪵', baseCost: { wood: 300, stone: 100 }, production: {}, unlockReq: { tentLevel: 2 } },
-        { id: 'tailor', name: '裁缝铺', icon: '🧵', baseCost: { wood: 250, stone: 100, gold: 500 }, production: {}, unlockReq: { tentLevel: 3 } },
-        { id: 'alchemy', name: '炼金小屋', icon: '⚗️', baseCost: { wood: 300, stone: 200, herb: 100 }, production: {}, unlockReq: { tentLevel: 4 } },
-        { id: 'brewery', name: '酿酒坊', icon: '🍺', baseCost: { wood: 200, stone: 100, gold: 300 }, production: {}, unlockReq: { tentLevel: 3 } },
-        { id: 'farm', name: '草药园', icon: '🌿', baseCost: { wood: 150, stone: 50 }, production: { herb: 1 }, unlockReq: { tentLevel: 0 } }
+        { id: 'lumber', name: '伐木场', icon: '🪓', baseCost: { pine: 30 }, production: {}, unlockReq: null },
+        { id: 'mine', name: '矿洞', icon: '⛏️', baseCost: { pine: 50, cyan_ore: 10 }, production: {}, unlockReq: { tentLevel: 0 } },
+        { id: 'smithy', name: '锻造屋', icon: '🔨', baseCost: { pine: 80, cyan_ore: 30 }, production: {}, unlockReq: { tentLevel: 1 } },
+        { id: 'workshop', name: '木工坊', icon: '🪵', baseCost: { pine: 100 }, production: {}, unlockReq: { tentLevel: 2 } },
+        { id: 'tailor', name: '裁缝铺', icon: '🧵', baseCost: { pine: 80, gold: 500 }, production: {}, unlockReq: { tentLevel: 3 } },
+        { id: 'alchemy', name: '炼金小屋', icon: '⚗️', baseCost: { pine: 100, cyan_ore: 50 }, production: {}, unlockReq: { tentLevel: 4 } },
+        { id: 'brewery', name: '酿酒坊', icon: '🍺', baseCost: { pine: 60, gold: 300 }, production: {}, unlockReq: { tentLevel: 3 } },
+        { id: 'farm', name: '草药园', icon: '🌿', baseCost: { pine: 40 }, production: {}, unlockReq: { tentLevel: 0 } }
     ],
     
     // 树木配置

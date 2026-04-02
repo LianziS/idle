@@ -4669,3 +4669,75 @@ body::after {
     color: #4a7c59;
     font-size: 0.8rem;
 }
+
+/* 升级弹窗样式 */
+.upgrade-info {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.upgrade-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 1.1rem;
+}
+
+.upgrade-from {
+    color: #8B9DC3;
+}
+
+.upgrade-to {
+    color: #4ECDC4;
+    font-weight: bold;
+}
+
+.arrow {
+    color: #A0B2C0;
+    font-size: 1.5rem;
+}
+
+.upgrade-cost {
+    padding: 16px;
+}
+
+.upgrade-cost h4 {
+    margin-bottom: 12px;
+    color: #A0B2C0;
+    font-size: 0.9rem;
+}
+
+.cost-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cost-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.cost-item.not-enough {
+    background: rgba(255, 100, 100, 0.1);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+}
+
+.cost-name {
+    color: #E0E8F0;
+}
+
+.cost-amount {
+    color: #4ECDC4;
+}
+
+.cost-item.not-enough .cost-amount {
+    color: #FF6B6B;
+}
