@@ -565,7 +565,7 @@ class GameEngine {
         const config = CONFIG[actionType.configKey];
         const item = config.find(c => c.id === currentAction.id);
         
-        // 保存当前行动到队列末尾
+        // 保存当前行动
         const savedAction = {
             type: currentAction.type,
             id: currentAction.id,
@@ -575,13 +575,19 @@ class GameEngine {
             icon: item?.icon || '🔧'
         };
         
-        // 获取队列项
+        // 获取要执行的队列项
         const queueItem = queue[index];
-        queue.splice(index, 1);
         
-        // 把当前行动放回队列
-        if (savedAction.count > 0) {
-            queue.push(savedAction);
+        // 先把当前行动放到队列第一位
+        queue.unshift(savedAction);
+        
+        // 移除被选中的项（注意索引变化，因为已经 unshift 了）
+        if (index === 0) {
+            // 如果选择的是第一项，现在它是第二项了
+            queue.splice(1, 1);
+        } else {
+            // 否则移除原位置的项
+            queue.splice(index + 1, 1);
         }
         
         // 开始新的行动
