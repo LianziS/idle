@@ -1458,58 +1458,84 @@ function renderToolForge() {
     
     const forgingLevel = gameState.forgingLevel || 1;
     
-    let html = '';
+    // 工具类型中文名
+    const typeNames = {
+        axes: '🪓 斧头',
+        pickaxes: '⛏️ 镐子',
+        chisels: '🔨 凿子',
+        needles: '🪡 针',
+        scythes: '🗡️ 镰刀',
+        hammers: '🔨 锤子',
+        tongs: '🪣 小桶',
+        rods: '🥄 搅拌棒'
+    };
     
-    // 遍历所有工具类型
-    const toolTypes = ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'hammers', 'tongs', 'rods'];
+    // 生成二级标签栏
+    const tabsHtml = Object.keys(CONFIG.tools).map((toolType, index) => `
+        <button class="gathering-tab ${index === 0 ? 'active' : ''}" data-tool-type="${toolType}">
+            ${typeNames[toolType] || toolType}
+        </button>
+    `).join('');
     
-    toolTypes.forEach(toolType => {
-        const tools = CONFIG.tools[toolType];
-        if (!tools || tools.length === 0) return;
-        
-        const typeNames = {
-            axes: '🪓 斧头',
-            pickaxes: '⛏️ 镐子',
-            chisels: '🔨 凿子',
-            needles: '🪡 针',
-            scythes: '🗡️ 镰刀',
-            hammers: '🔨 锤子',
-            tongs: '🪣 小桶',
-            rods: '🥄 搅拌棒'
-        };
-        
-        html += `<div class="tool-type-section">
-            <h4 class="tool-type-title">${typeNames[toolType] || toolType}</h4>
-            <div class="tool-list">`;
-        
-        tools.forEach((tool, index) => {
+    // 生成各工具类型的内容区域
+    const contentsHtml = Object.entries(CONFIG.tools).map(([toolType, tools], index) => {
+        const cardsHtml = tools.map((tool, toolIndex) => {
             const unlocked = forgingLevel >= (tool.reqForgeLevel || 1);
             const owned = (gameState.toolsInventory?.[toolType] || []).includes(tool.id);
             
-            html += `
+            return `
                 <div class="tool-card ${unlocked ? '' : 'locked'} ${owned ? 'owned' : ''}" 
-                     data-tool-type="${toolType}" data-tool-index="${index}">
+                     data-tool-type="${toolType}" data-tool-index="${toolIndex}">
                     <div class="tool-icon">${tool.icon}</div>
                     <div class="tool-info">
                         <div class="tool-name">${tool.name}</div>
                         <div class="tool-meta">
                             <span>+${Math.round(tool.speedBonus * 100)}%</span>
                             <span>Lv.${tool.reqForgeLevel || 1}</span>
-                            <span>⏱️${formatTime(tool.duration || 6000)}</span>
                         </div>
-                        ${owned ? '<div class="tool-owned">✓ 已拥有</div>' : ''}
+                        ${owned ? '<div class="tool-owned">✓</div>' : ''}
                     </div>
                     ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${tool.reqForgeLevel || 1}</div>` : ''}
                 </div>
             `;
-        });
+        }).join('');
         
-        html += '</div></div>';
+        return `
+            <div class="tool-type-content ${index === 0 ? 'active' : ''}" id="tool-content-${toolType}">
+                <div class="tool-grid">
+                    ${cardsHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = `
+        <div class="tool-tabs-container">
+            <div class="tool-tabs">${tabsHtml}</div>
+        </div>
+        <div class="tool-contents-container">
+            ${contentsHtml}
+        </div>
+    `;
+    
+    // 绑定二级标签切换
+    container.querySelectorAll('.tool-tabs .gathering-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // 切换标签激活状态
+            container.querySelectorAll('.tool-tabs .gathering-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // 切换内容显示
+            const toolType = tab.dataset.toolType;
+            container.querySelectorAll('.tool-type-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            const targetContent = container.querySelector(`#tool-content-${toolType}`);
+            if (targetContent) targetContent.classList.add('active');
+        });
     });
     
-    container.innerHTML = html;
-    
-    // 绑定点击事件
+    // 绑定工具卡片点击事件
     container.querySelectorAll('.tool-card:not(.locked):not(.owned)').forEach(card => {
         card.addEventListener('click', () => {
             const toolType = card.dataset.toolType;

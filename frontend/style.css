@@ -4543,3 +4543,63 @@ body::after {
 .gathering-items-list.active {
     display: block;
 }
+
+/* ============ 工具三级菜单样式 ============ */
+
+.tool-tabs-container {
+    margin-bottom: 15px;
+}
+
+.tool-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.tool-tabs .gathering-tab {
+    padding: 6px 12px;
+    background: rgba(45, 63, 82, 0.6);
+    border: 1px solid rgba(107, 79, 60, 0.4);
+    border-radius: 4px;
+    color: #A0B2C0;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.tool-tabs .gathering-tab:hover {
+    background: rgba(50, 70, 90, 0.8);
+    color: #E8C57F;
+}
+
+.tool-tabs .gathering-tab.active {
+    background: #8B2C2D;
+    border-color: #8B2C2D;
+    color: #fff;
+}
+
+.tool-contents-container {
+    min-height: 200px;
+}
+
+.tool-type-content {
+    display: none;
+}
+
+.tool-type-content.active {
+    display: block;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .tool-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
