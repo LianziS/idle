@@ -176,6 +176,16 @@ function setupSocket() {
                 showQueuePopover();
             }
         }
+        
+        // 如果商人面板打开，刷新任务列表
+        const merchantModal = document.querySelector('.merchant-modal.active');
+        if (merchantModal) {
+            const merchantId = merchantModal.dataset?.merchantId;
+            if (merchantId) {
+                // 重新获取商人数据并刷新面板
+                socket.emit('get_merchant', { merchantId });
+            }
+        }
     });
     
     // 行动结果
@@ -219,6 +229,10 @@ function setupSocket() {
     
     // 商人系统事件
     socket.on('merchant_data', (data) => {
+        // 移除旧的商人面板
+        const oldModal = document.querySelector('.merchant-modal.active');
+        if (oldModal) oldModal.remove();
+        
         renderMerchantPanel(data.merchantId, data.data);
     });
     
@@ -1798,6 +1812,7 @@ function renderMerchantPanel(merchantId, merchantData) {
     
     const modal = document.createElement('div');
     modal.className = 'merchant-modal active';
+    modal.dataset.merchantId = merchantId;
     modal.innerHTML = `
         <div class="merchant-modal-overlay"></div>
         <div class="merchant-modal-panel">
