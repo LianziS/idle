@@ -403,21 +403,6 @@ function updateQueueButton() {
         elements.actionQueueBtn.style.display = 'none';
     }
 }
-    const elapsed = Date.now() - (gameState.actionStartTime || Date.now());
-    const duration = gameState.actionDuration || 5000;
-    const progress = Math.min(elapsed / duration, 1);
-    const remainingTime = Math.max(duration - elapsed, 0);
-    
-    if (elements.actionProgressFill) {
-        elements.actionProgressFill.style.width = `${progress * 100}%`;
-    }
-    if (elements.actionProgressTime) {
-        elements.actionProgressTime.textContent = formatTime(remainingTime);
-    }
-    if (elements.actionStatusCount) {
-        elements.actionStatusCount.textContent = remaining > 0 ? `×${remaining}` : '';
-    }
-}
 
 /**
  * 渲染建筑列表
