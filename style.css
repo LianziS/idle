@@ -1830,10 +1830,12 @@ body::after {
     height: 100vh;
     z-index: 2000;
     pointer-events: none;
+    display: none;
 }
 
 .merchant-modal.active {
     pointer-events: auto;
+    display: flex;
 }
 
 .merchant-modal-overlay {

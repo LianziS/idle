@@ -2800,6 +2800,11 @@ function switchPage(pageId) {
         }
     }
     
+    // 切换页面时隐藏所有弹窗
+    document.querySelectorAll('.queue-popover, .sell-popup-card, .modal').forEach(el => {
+        el.classList.remove('show', 'active');
+    });
+    
     gameState.currentPage = pageId;
     elements.navItems.forEach(item => {
         item.classList.toggle('active', item.dataset.page === pageId);
