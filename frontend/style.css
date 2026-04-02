@@ -4407,3 +4407,129 @@ body::after {
     color: #A0B2C0;
     font-size: 0.85rem;
 }
+
+/* ============ 锻造工具卡片样式 ============ */
+
+.tool-type-section {
+    margin-bottom: 20px;
+}
+
+.tool-type-title {
+    color: #E8C57F;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(107, 79, 60, 0.3);
+}
+
+.tool-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .tool-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.tool-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: rgba(45, 63, 82, 0.6);
+    border: 1px solid rgba(107, 79, 60, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.tool-card:hover {
+    border-color: #8B2C2D;
+    background: rgba(50, 70, 90, 0.8);
+    transform: translateY(-2px);
+}
+
+.tool-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tool-card.owned {
+    border-color: #4a7c59;
+    background: rgba(74, 124, 89, 0.15);
+    cursor: default;
+}
+
+.tool-card .tool-icon {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+.tool-card .tool-info {
+    text-align: center;
+}
+
+.tool-card .tool-name {
+    color: #E8C57F;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.tool-card .tool-meta {
+    display: flex;
+    gap: 8px;
+    color: #A0B2C0;
+    font-size: 0.75rem;
+    justify-content: center;
+}
+
+.tool-card .tool-owned {
+    color: #4a7c59;
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+/* 锻造材料选择 */
+.forge-materials {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.forge-materials h4 {
+    color: #A0B2C0;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.forge-materials div {
+    color: #E8C57F;
+    font-size: 0.85rem;
+    margin: 4px 0;
+}
+
+.forge-select {
+    margin-bottom: 10px;
+}
+
+.forge-select label {
+    display: block;
+    color: #A0B2C0;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.forge-select select {
+    width: 100%;
+    padding: 8px;
+    background: rgba(45, 63, 82, 0.8);
+    border: 1px solid rgba(107, 79, 60, 0.4);
+    border-radius: 4px;
+    color: #E8C57F;
+    font-size: 0.9rem;
+}

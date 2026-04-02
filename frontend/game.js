@@ -1448,9 +1448,8 @@ function renderToolForge() {
             <div class="tool-list">`;
         
         tools.forEach((tool, index) => {
-            const unlocked = forgingLevel >= tool.reqEquipLevel;
+            const unlocked = forgingLevel >= (tool.reqForgeLevel || 1);
             const owned = (gameState.toolsInventory?.[toolType] || []).includes(tool.id);
-            const materials = CONFIG.toolCraftingMaterials?.[toolType]?.[index];
             
             html += `
                 <div class="tool-card ${unlocked ? '' : 'locked'} ${owned ? 'owned' : ''}" 
@@ -1458,10 +1457,14 @@ function renderToolForge() {
                     <div class="tool-icon">${tool.icon}</div>
                     <div class="tool-info">
                         <div class="tool-name">${tool.name}</div>
-                        <div class="tool-bonus">+${Math.round(tool.speedBonus * 100)}% 速度</div>
+                        <div class="tool-meta">
+                            <span>+${Math.round(tool.speedBonus * 100)}%</span>
+                            <span>Lv.${tool.reqForgeLevel || 1}</span>
+                            <span>⏱️${formatTime(tool.duration || 6000)}</span>
+                        </div>
                         ${owned ? '<div class="tool-owned">✓ 已拥有</div>' : ''}
                     </div>
-                    ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${tool.reqEquipLevel}</div>` : ''}
+                    ${!unlocked ? `<div class="locked-overlay">🔒 Lv.${tool.reqForgeLevel || 1}</div>` : ''}
                 </div>
             `;
         });
@@ -1491,11 +1494,24 @@ function openToolForgeModal(toolType, toolIndex) {
     
     if (!tool || !materials) return;
     
+    // 检查队列状态
+    const currentQueue = gameState?.actionQueue || [];
+    const maxQueueSize = 2;
+    const currentAction = gameState?.activeAction;
+    const queueAvailable = currentQueue.length < maxQueueSize;
+    const queuePosition = currentQueue.length + 1;
+    
     // 获取用户拥有的矿锭和木板
     const ingots = Object.entries(gameState.ingotsInventory || {})
         .filter(([id, count]) => count > 0);
     const planks = Object.entries(gameState.planksInventory || {})
         .filter(([id, count]) => count > 0);
+    
+    // 检查前置工具
+    let hasPrevTool = true;
+    if (materials.prevTool) {
+        hasPrevTool = (gameState.toolsInventory?.[toolType] || []).includes(materials.prevTool);
+    }
     
     // 创建模态框
     const modal = document.createElement('div');
@@ -1504,35 +1520,50 @@ function openToolForgeModal(toolType, toolIndex) {
         <div class="action-modal">
             <div class="action-modal-header">
                 <span class="action-modal-icon">${tool.icon}</span>
-                <span class="action-modal-title">锻造 ${tool.name}</span>
+                <span class="action-modal-title">${tool.name}</span>
                 <button class="action-modal-close">&times;</button>
             </div>
             <div class="action-modal-body">
                 <div class="action-modal-info">
-                    <span>⚡ +${Math.round(tool.speedBonus * 100)}% 速度加成</span>
+                    <span>⚡ +${Math.round(tool.speedBonus * 100)}% 速度</span>
+                    <span>⏱️ ${formatTime(tool.duration || 6000)}</span>
+                    <span>✨ ${tool.exp || 14} 经验</span>
                 </div>
                 <div class="forge-materials">
                     <h4>所需材料:</h4>
-                    ${materials.ore ? `<div>矿锭 × ${materials.ore}</div>` : ''}
+                    ${materials.ore ? `<div>矿石 × ${materials.ore}</div>` : ''}
                     ${materials.plank ? `<div>木板 × ${materials.plank}</div>` : ''}
                     ${materials.ingot ? `<div>矿锭 × ${materials.ingot}</div>` : ''}
-                    ${materials.prevTool ? `<div>前置工具: ${CONFIG.tools[toolType].find(t => t.id === materials.prevTool)?.name || materials.prevTool}</div>` : ''}
+                    ${materials.prevTool ? `<div>前置: ${CONFIG.tools[toolType].find(t => t.id === materials.prevTool)?.name || materials.prevTool} ${hasPrevTool ? '✓' : '✗'}</div>` : ''}
                 </div>
+                ${materials.ore && ingots.length > 0 ? `
                 <div class="forge-select">
                     <label>选择矿锭:</label>
                     <select id="forge-ingot">
                         ${ingots.map(([id, count]) => {
-                            const ingot = CONFIG.ingots.find(i => i.id === id);
+                            const ingot = CONFIG.ingots?.find(i => i.id === id);
                             return `<option value="${id}">${ingot?.name || id} (${count})</option>`;
                         }).join('')}
                     </select>
                 </div>
-                ${materials.plank ? `
+                ` : ''}
+                ${materials.ingot && ingots.length > 0 ? `
+                <div class="forge-select">
+                    <label>选择矿锭:</label>
+                    <select id="forge-ingot">
+                        ${ingots.map(([id, count]) => {
+                            const ingot = CONFIG.ingots?.find(i => i.id === id);
+                            return `<option value="${id}">${ingot?.name || id} (${count})</option>`;
+                        }).join('')}
+                    </select>
+                </div>
+                ` : ''}
+                ${materials.plank && planks.length > 0 ? `
                 <div class="forge-select">
                     <label>选择木板:</label>
                     <select id="forge-plank">
                         ${planks.map(([id, count]) => {
-                            const plank = CONFIG.woodPlanks.find(p => p.id === id);
+                            const plank = CONFIG.woodPlanks?.find(p => p.id === id);
                             return `<option value="${id}">${plank?.name || id} (${count})</option>`;
                         }).join('')}
                     </select>
@@ -1541,7 +1572,10 @@ function openToolForgeModal(toolType, toolIndex) {
             </div>
             <div class="action-modal-footer">
                 <button class="action-btn secondary" id="action-cancel">取消</button>
-                <button class="action-btn primary" id="action-confirm">锻造</button>
+                ${currentAction && queueAvailable ? 
+                    `<button class="action-btn queue" id="action-queue">加入队列 #${queuePosition}</button>` : 
+                    (!currentAction ? '' : `<button class="action-btn queue disabled" disabled>队列已满</button>`)}
+                <button class="action-btn primary" id="action-start">立即锻造</button>
             </div>
         </div>
     `;
@@ -1552,18 +1586,97 @@ function openToolForgeModal(toolType, toolIndex) {
     modal.querySelector('.action-modal-close').addEventListener('click', () => modal.remove());
     modal.querySelector('#action-cancel').addEventListener('click', () => modal.remove());
     
-    modal.querySelector('#action-confirm').addEventListener('click', () => {
+    // 立即锻造
+    modal.querySelector('#action-start').addEventListener('click', () => {
         const ingotSelect = modal.querySelector('#forge-ingot');
         const plankSelect = modal.querySelector('#forge-plank');
         
-        socket.emit('forge_tool', {
-            toolType: toolType.replace('s', ''), // 'axes' -> 'axe'
-            toolIndex: toolIndex,
-            ingotId: ingotSelect?.value,
-            plankId: plankSelect?.value
+        // 检查是否有行动进行中
+        if (currentAction) {
+            // 显示确认替换卡片
+            showForgeImmediatelyConfirm(toolType, toolIndex, tool, ingotSelect?.value, plankSelect?.value, modal);
+        } else {
+            // 直接锻造
+            socket.emit('forge_tool', {
+                toolType: toolType.replace('s', ''),
+                toolIndex: toolIndex,
+                ingotId: ingotSelect?.value,
+                plankId: plankSelect?.value
+            });
+            modal.remove();
+        }
+    });
+    
+    // 加入队列
+    const queueBtn = modal.querySelector('#action-queue');
+    if (queueBtn && !queueBtn.disabled) {
+        queueBtn.addEventListener('click', () => {
+            const ingotSelect = modal.querySelector('#forge-ingot');
+            const plankSelect = modal.querySelector('#forge-plank');
+            
+            socket.emit('forge_tool', {
+                toolType: toolType.replace('s', ''),
+                toolIndex: toolIndex,
+                ingotId: ingotSelect?.value,
+                plankId: plankSelect?.value
+            });
+            modal.remove();
         });
-        
+    }
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+/**
+ * 显示锻造立即开始确认卡片
+ */
+function showForgeImmediatelyConfirm(toolType, toolIndex, tool, ingotId, plankId, parentModal) {
+    const currentAction = gameState?.activeAction;
+    if (!currentAction) return;
+    
+    const actionConfig = getActionConfig(currentAction.type, currentAction.id);
+    const currentName = actionConfig?.name || '当前行动';
+    
+    const modal = document.createElement('div');
+    modal.className = 'action-modal-overlay';
+    modal.innerHTML = `
+        <div class="confirm-dialog">
+            <div class="confirm-dialog-title">⚠️ 立即锻造将清空当前行动</div>
+            <div class="confirm-dialog-content">
+                <div class="confirm-dialog-compare">
+                    <div class="confirm-dialog-item">
+                        <span class="confirm-dialog-icon" style="opacity: 0.5;">${actionConfig?.icon || '🔧'}</span>
+                        <span class="confirm-dialog-name" style="opacity: 0.5;">${currentName}</span>
+                    </div>
+                    <span class="confirm-dialog-arrow">→</span>
+                    <div class="confirm-dialog-item">
+                        <span class="confirm-dialog-icon">${tool.icon}</span>
+                        <span class="confirm-dialog-name">${tool.name}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="confirm-dialog-footer">
+                <button class="dialog-btn secondary" id="forge-cancel">取消</button>
+                <button class="dialog-btn danger" id="forge-confirm">确认锻造</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#forge-cancel').addEventListener('click', () => modal.remove());
+    
+    modal.querySelector('#forge-confirm').addEventListener('click', () => {
+        socket.emit('forge_tool_immediately', {
+            toolType: toolType.replace('s', ''),
+            toolIndex: toolIndex,
+            ingotId: ingotId,
+            plankId: plankId
+        });
         modal.remove();
+        parentModal.remove();
     });
     
     modal.addEventListener('click', (e) => {

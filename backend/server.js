@@ -537,6 +537,20 @@ io.on('connection', (socket) => {
         }
     });
     
+    // 立即锻造（清空当前行动和队列）
+    socket.on('forge_tool_immediately', (data) => {
+        if (!gameEngine) return socket.emit('error', { message: '未认证' });
+        
+        // 清空当前行动和队列
+        gameEngine.state.activeAction = null;
+        gameEngine.state.actionQueue = [];
+        
+        // 执行锻造
+        const result = gameEngine.forgeTool(data.toolType, data.toolIndex, data.ingotId, data.plankId);
+        socket.emit('forge_result', result);
+        socket.emit('game_state_update', gameEngine.getFullState());
+    });
+    
     // 获取游戏状态
     socket.on('get_state', () => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });

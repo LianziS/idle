@@ -212,36 +212,87 @@ const CONFIG = {
         { id: 'rod', name: '搅拌棒', icon: '🥄', skill: 'alchemy' }
     ],
     
-    // 工具配置（简化版）
+    // 工具配置（完整版 - 每种工具8级）
     tools: {
         axes: [
-            { id: 'cyan_axe', name: '青闪斧', icon: '🪓', speedBonus: 0.15, reqEquipLevel: 1, index: 0 },
-            { id: 'red_axe', name: '赤铁斧', icon: '🪓', speedBonus: 0.225, reqEquipLevel: 10, index: 1 },
-            { id: 'feather_axe', name: '羽斧', icon: '🪓', speedBonus: 0.30, reqEquipLevel: 20, index: 2 },
-            { id: 'white_axe', name: '白银斧', icon: '🪓', speedBonus: 0.45, reqEquipLevel: 35, index: 3 }
+            { id: 'cyan_axe', name: '青闪斧', icon: '🪓', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_axe', name: '赤铁斧', icon: '🪓', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_axe', name: '羽斧', icon: '🪓', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_axe', name: '白银斧', icon: '🪓', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_axe', name: '狱炎斧', icon: '🪓', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_axe', name: '雷鸣斧', icon: '🪓', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_axe', name: '璀璨斧', icon: '🪓', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_axe', name: '星辉斧', icon: '🪓', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         pickaxes: [
-            { id: 'cyan_pickaxe', name: '青闪镐', icon: '⛏️', speedBonus: 0.15, reqEquipLevel: 1, index: 0 },
-            { id: 'red_pickaxe', name: '赤铁镐', icon: '⛏️', speedBonus: 0.225, reqEquipLevel: 10, index: 1 },
-            { id: 'feather_pickaxe', name: '羽镐', icon: '⛏️', speedBonus: 0.30, reqEquipLevel: 20, index: 2 }
+            { id: 'cyan_pickaxe', name: '青闪镐', icon: '⛏️', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_pickaxe', name: '赤铁镐', icon: '⛏️', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_pickaxe', name: '羽镐', icon: '⛏️', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_pickaxe', name: '白银镐', icon: '⛏️', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_pickaxe', name: '狱炎镐', icon: '⛏️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_pickaxe', name: '雷鸣镐', icon: '⛏️', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_pickaxe', name: '璀璨镐', icon: '⛏️', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_pickaxe', name: '星辉镐', icon: '⛏️', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         chisels: [
-            { id: 'cyan_chisel', name: '青闪凿子', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
+            { id: 'cyan_chisel', name: '青闪凿子', icon: '🔨', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_chisel', name: '赤铁凿子', icon: '🔨', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_chisel', name: '轻羽凿子', icon: '🔨', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_chisel', name: '白银凿子', icon: '🔨', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_chisel', name: '狱炎凿子', icon: '🔨', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_chisel', name: '雷鸣凿子', icon: '🔨', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_chisel', name: '璀璨凿子', icon: '🔨', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_chisel', name: '星辉凿子', icon: '🔨', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         needles: [
-            { id: 'cyan_needle', name: '青闪针', icon: '🪡', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
+            { id: 'cyan_needle', name: '青闪针', icon: '🪡', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_needle', name: '赤铁针', icon: '🪡', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_needle', name: '轻羽针', icon: '🪡', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_needle', name: '白银针', icon: '🪡', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_needle', name: '狱炎针', icon: '🪡', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_needle', name: '雷鸣针', icon: '🪡', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_needle', name: '璀璨针', icon: '🪡', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_needle', name: '星辉针', icon: '🪡', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         scythes: [
-            { id: 'cyan_scythe', name: '青闪镰刀', icon: '🗡️', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
+            { id: 'cyan_scythe', name: '青闪镰刀', icon: '🗡️', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_scythe', name: '赤铁镰刀', icon: '🗡️', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_scythe', name: '轻羽镰刀', icon: '🗡️', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_scythe', name: '白银镰刀', icon: '🗡️', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_scythe', name: '狱炎镰刀', icon: '🗡️', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_scythe', name: '雷鸣镰刀', icon: '🗡️', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_scythe', name: '璀璨镰刀', icon: '🗡️', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_scythe', name: '星辉镰刀', icon: '🗡️', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         hammers: [
-            { id: 'cyan_hammer', name: '青铁锤', icon: '🔨', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
+            { id: 'cyan_hammer', name: '青铁锤', icon: '🔨', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_hammer', name: '赤铜锤', icon: '🔨', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_hammer', name: '轻羽锤', icon: '🔨', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_hammer', name: '白银锤', icon: '🔨', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_hammer', name: '狱炎钢锤', icon: '🔨', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_hammer', name: '雷鸣钢锤', icon: '🔨', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_hammer', name: '璀璨之锤', icon: '🔨', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_hammer', name: '星辉之锤', icon: '🔨', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         tongs: [
-            { id: 'cyan_tongs', name: '青闪小桶', icon: '🪣', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
+            { id: 'cyan_tongs', name: '青闪小桶', icon: '🪣', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_tongs', name: '赤铁小桶', icon: '🪣', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_tongs', name: '轻羽小桶', icon: '🪣', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_tongs', name: '白银小桶', icon: '🪣', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_tongs', name: '狱炎小桶', icon: '🪣', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_tongs', name: '雷鸣小桶', icon: '🪣', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_tongs', name: '璀璨小桶', icon: '🪣', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_tongs', name: '星辉小桶', icon: '🪣', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ],
         rods: [
-            { id: 'cyan_rod', name: '青闪搅拌棒', icon: '🥄', speedBonus: 0.15, reqEquipLevel: 1, index: 0 }
+            { id: 'cyan_rod', name: '青闪搅拌棒', icon: '🥄', speedBonus: 0.15, reqForgeLevel: 2, reqEquipLevel: 1, duration: 6000, exp: 14 },
+            { id: 'red_rod', name: '赤铁搅拌棒', icon: '🥄', speedBonus: 0.225, reqForgeLevel: 12, reqEquipLevel: 10, duration: 10500, exp: 32 },
+            { id: 'feather_rod', name: '轻羽搅拌棒', icon: '🥄', speedBonus: 0.30, reqForgeLevel: 22, reqEquipLevel: 20, duration: 16000, exp: 70 },
+            { id: 'white_rod', name: '白银搅拌棒', icon: '🥄', speedBonus: 0.45, reqForgeLevel: 37, reqEquipLevel: 35, duration: 27000, exp: 168 },
+            { id: 'hell_rod', name: '狱炎搅拌棒', icon: '🥄', speedBonus: 0.60, reqForgeLevel: 52, reqEquipLevel: 50, duration: 45000, exp: 378 },
+            { id: 'thunder_rod', name: '雷鸣搅拌棒', icon: '🥄', speedBonus: 0.75, reqForgeLevel: 67, reqEquipLevel: 65, duration: 78000, exp: 728 },
+            { id: 'brilliant_rod', name: '璀璨搅拌棒', icon: '🥄', speedBonus: 0.90, reqForgeLevel: 82, reqEquipLevel: 80, duration: 134000, exp: 1386 },
+            { id: 'star_rod', name: '星辉搅拌棒', icon: '🥄', speedBonus: 1.05, reqForgeLevel: 97, reqEquipLevel: 95, duration: 235000, exp: 2605 }
         ]
     },
     
@@ -251,41 +302,119 @@ const CONFIG = {
             { ore: 10, plank: 6, prevTool: null },
             { ore: 16, plank: 10, prevTool: 'cyan_axe' },
             { ore: 22, plank: 14, prevTool: 'red_axe' },
-            { ore: 34, plank: 22, prevTool: 'feather_axe' }
+            { ore: 34, plank: 22, prevTool: 'feather_axe' },
+            { ore: 52, plank: 34, prevTool: 'white_axe' },
+            { ore: 76, plank: 50, prevTool: 'hell_axe' },
+            { ore: 106, plank: 70, prevTool: 'thunder_axe' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_axe' }
         ],
         pickaxes: [
             { ore: 10, plank: 6, prevTool: null },
             { ore: 16, plank: 10, prevTool: 'cyan_pickaxe' },
-            { ore: 22, plank: 14, prevTool: 'red_pickaxe' }
+            { ore: 22, plank: 14, prevTool: 'red_pickaxe' },
+            { ore: 34, plank: 22, prevTool: 'feather_pickaxe' },
+            { ore: 52, plank: 34, prevTool: 'white_pickaxe' },
+            { ore: 76, plank: 50, prevTool: 'hell_pickaxe' },
+            { ore: 106, plank: 70, prevTool: 'thunder_pickaxe' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_pickaxe' }
         ],
         chisels: [
-            { ore: 10, plank: 6, prevTool: null }
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_chisel' },
+            { ore: 22, plank: 14, prevTool: 'red_chisel' },
+            { ore: 34, plank: 22, prevTool: 'feather_chisel' },
+            { ore: 52, plank: 34, prevTool: 'white_chisel' },
+            { ore: 76, plank: 50, prevTool: 'hell_chisel' },
+            { ore: 106, plank: 70, prevTool: 'thunder_chisel' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_chisel' }
         ],
         needles: [
-            { ore: 10, plank: 6, prevTool: null }
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_needle' },
+            { ore: 22, plank: 14, prevTool: 'red_needle' },
+            { ore: 34, plank: 22, prevTool: 'feather_needle' },
+            { ore: 52, plank: 34, prevTool: 'white_needle' },
+            { ore: 76, plank: 50, prevTool: 'hell_needle' },
+            { ore: 106, plank: 70, prevTool: 'thunder_needle' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_needle' }
         ],
         scythes: [
-            { ore: 10, plank: 6, prevTool: null }
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_scythe' },
+            { ore: 22, plank: 14, prevTool: 'red_scythe' },
+            { ore: 34, plank: 22, prevTool: 'feather_scythe' },
+            { ore: 52, plank: 34, prevTool: 'white_scythe' },
+            { ore: 76, plank: 50, prevTool: 'hell_scythe' },
+            { ore: 106, plank: 70, prevTool: 'thunder_scythe' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_scythe' }
         ],
         hammers: [
-            { ingot: 10, prevTool: null }
+            { ingot: 10, prevTool: null },
+            { ingot: 16, prevTool: 'cyan_hammer' },
+            { ingot: 22, prevTool: 'red_hammer' },
+            { ingot: 34, prevTool: 'feather_hammer' },
+            { ingot: 52, prevTool: 'white_hammer' },
+            { ingot: 77, prevTool: 'hell_hammer' },
+            { ingot: 107, prevTool: 'thunder_hammer' },
+            { ingot: 143, prevTool: 'brilliant_hammer' }
         ],
         tongs: [
-            { ore: 10, plank: 6, prevTool: null }
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_tongs' },
+            { ore: 22, plank: 14, prevTool: 'red_tongs' },
+            { ore: 34, plank: 22, prevTool: 'feather_tongs' },
+            { ore: 52, plank: 34, prevTool: 'white_tongs' },
+            { ore: 76, plank: 50, prevTool: 'hell_tongs' },
+            { ore: 106, plank: 70, prevTool: 'thunder_tongs' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_tongs' }
         ],
         rods: [
-            { ore: 10, plank: 6, prevTool: null }
+            { ore: 10, plank: 6, prevTool: null },
+            { ore: 16, plank: 10, prevTool: 'cyan_rod' },
+            { ore: 22, plank: 14, prevTool: 'red_rod' },
+            { ore: 34, plank: 22, prevTool: 'feather_rod' },
+            { ore: 52, plank: 34, prevTool: 'white_rod' },
+            { ore: 76, plank: 50, prevTool: 'hell_rod' },
+            { ore: 106, plank: 70, prevTool: 'thunder_rod' },
+            { ore: 142, plank: 94, prevTool: 'brilliant_rod' }
         ]
     },
     
-    // 矿锭到工具类型的映射（锻造工具需要矿锭）
-    ingotToToolType: {
-        'cyan_ingot': { toolTypes: ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'tongs', 'rods'], name: '青闪' },
-        'red_copper_ingot': { toolTypes: ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'tongs', 'rods'], name: '赤铁' }
+    // 矿石与矿锭的映射
+    oreIngotMapping: {
+        'cyan_ore': 'cyan_ingot',
+        'red_iron': 'red_copper_ingot',
+        'feather_ore': 'feather_ingot',
+        'hell_ore': 'white_silver_ingot',
+        'white_ore': 'hell_steel_ingot',
+        'thunder_ore': 'thunder_steel_ingot',
+        'brilliant': 'brilliant_crystal',
+        'star_ore': 'star_crystal'
     },
     
-    // 木板类型映射
-    plankTypes: ['pine_plank', 'iron_birch_plank', 'wind_tree_plank', 'flame_tree_plank'],
+    // 木板ID映射
+    plankIdMapping: {
+        0: 'pine_plank',
+        1: 'iron_birch_plank',
+        2: 'wind_tree_plank',
+        3: 'flame_tree_plank',
+        4: 'frost_maple_plank',
+        5: 'thunder_tree_plank',
+        6: 'ancient_oak_plank',
+        7: 'world_tree_plank'
+    },
+    
+    // 矿锭ID映射
+    ingotIdMapping: {
+        0: 'cyan_ingot',
+        1: 'red_copper_ingot',
+        2: 'feather_ingot',
+        3: 'white_silver_ingot',
+        4: 'hell_steel_ingot',
+        5: 'thunder_steel_ingot',
+        6: 'brilliant_crystal',
+        7: 'star_crystal'
+    },
     
     // 资源出售价格
     resourcePrices: {
