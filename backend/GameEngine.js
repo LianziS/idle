@@ -814,6 +814,123 @@ class GameEngine {
             gold: totalPrice
         };
     }
+    
+    /**
+     * 建筑升级
+     */
+    upgradeBuilding(buildingId) {
+        const buildingConfig = CONFIG.buildings.find(b => b.id === buildingId);
+        if (!buildingConfig) return { success: false, reason: '建筑不存在' };
+        
+        // 检查是否已解锁
+        if (buildingConfig.unlockReq) {
+            const tentLevel = this.state.buildings?.tent?.level || 0;
+            if (buildingConfig.unlockReq.tentLevel !== undefined && tentLevel < buildingConfig.unlockReq.tentLevel) {
+                return { success: false, reason: `需要帐篷 Lv.${buildingConfig.unlockReq.tentLevel + 1}` };
+            }
+        }
+        
+        // 获取当前等级
+        if (!this.state.buildings) this.state.buildings = {};
+        if (!this.state.buildings[buildingId]) this.state.buildings[buildingId] = { level: 0 };
+        
+        const currentLevel = this.state.buildings[buildingId].level;
+        
+        // 检查是否已达最大等级
+        if (buildingConfig.maxLevel && currentLevel >= buildingConfig.maxLevel) {
+            return { success: false, reason: '已达最大等级' };
+        }
+        
+        // 计算升级费用（基础费用 × (等级 + 1)）
+        const costMultiplier = currentLevel + 1;
+        const cost = {};
+        
+        if (buildingConfig.baseCost) {
+            for (const [resource, amount] of Object.entries(buildingConfig.baseCost)) {
+                cost[resource] = amount * costMultiplier;
+            }
+        }
+        
+        // 检查资源
+        const woodcuttingInv = this.state.woodcuttingInventory || {};
+        const miningInv = this.state.miningInventory || {};
+        const planksInv = this.state.planksInventory || {};
+        
+        for (const [resource, amount] of Object.entries(cost)) {
+            let available = 0;
+            
+            // 检查木材
+            if (['pine', 'iron_birch', 'wind_tree', 'flame_tree'].includes(resource)) {
+                available = woodcuttingInv[resource] || 0;
+            }
+            // 检查矿石
+            else if (['cyan_ore', 'red_iron', 'feather_ore'].includes(resource)) {
+                available = miningInv[resource] || 0;
+            }
+            // 检查木板
+            else if (resource.endsWith('_plank')) {
+                available = planksInv[resource] || 0;
+            }
+            // 检查金币
+            else if (resource === 'gold') {
+                available = this.state.gold || 0;
+            }
+            // 检查石头/草药（简化处理）
+            else if (resource === 'stone') {
+                available = miningInv[resource] || 0;
+            }
+            else if (resource === 'herb') {
+                available = (this.state.gatheringInventory || {})[resource] || 0;
+            }
+            
+            if (available < amount) {
+                return { success: false, reason: `${resource} 不足: 需要 ${amount}, 拥有 ${available}` };
+            }
+        }
+        
+        // 扣除资源
+        for (const [resource, amount] of Object.entries(cost)) {
+            if (['pine', 'iron_birch', 'wind_tree', 'flame_tree'].includes(resource)) {
+                woodcuttingInv[resource] = (woodcuttingInv[resource] || 0) - amount;
+                if (woodcuttingInv[resource] <= 0) delete woodcuttingInv[resource];
+            }
+            else if (['cyan_ore', 'red_iron', 'feather_ore', 'stone'].includes(resource)) {
+                miningInv[resource] = (miningInv[resource] || 0) - amount;
+                if (miningInv[resource] <= 0) delete miningInv[resource];
+            }
+            else if (resource.endsWith('_plank')) {
+                planksInv[resource] = (planksInv[resource] || 0) - amount;
+                if (planksInv[resource] <= 0) delete planksInv[resource];
+            }
+            else if (resource === 'gold') {
+                this.state.gold = (this.state.gold || 0) - amount;
+            }
+            else if (resource === 'herb') {
+                const gatheringInv = this.state.gatheringInventory || {};
+                gatheringInv[resource] = (gatheringInv[resource] || 0) - amount;
+                if (gatheringInv[resource] <= 0) delete gatheringInv[resource];
+            }
+        }
+        
+        // 升级建筑
+        this.state.buildings[buildingId].level = currentLevel + 1;
+        
+        // 获取新名称
+        let newName = buildingConfig.name;
+        if (buildingConfig.levelNames && buildingConfig.levelNames[currentLevel + 1]) {
+            newName = buildingConfig.levelNames[currentLevel + 1];
+        }
+        
+        return { 
+            success: true, 
+            building: {
+                id: buildingId,
+                level: currentLevel + 1,
+                name: newName
+            },
+            cost: cost
+        };
+    }
 }
 
 module.exports = { GameEngine, CONFIG, ACTION_TYPES, ITEM_TYPES };

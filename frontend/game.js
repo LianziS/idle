@@ -209,6 +209,16 @@ function setupSocket() {
         }
     });
     
+    // 建筑升级结果
+    socket.on('upgrade_result', (result) => {
+        if (result.success) {
+            showToast(`✅ 建筑升级成功: ${result.building.name} Lv.${result.building.level}`);
+            renderBuildings(); // 重新渲染建筑列表
+        } else {
+            showToast(`❌ ${result.reason}`);
+        }
+    });
+    
     // 错误处理
     socket.on('error', (data) => {
         showToast(`❌ ${data.message}`);
@@ -432,29 +442,80 @@ function renderBuildings() {
     if (!elements.buildingsList || !gameState) return;
     
     elements.buildingsList.innerHTML = CONFIG.buildings.map(b => {
-        const building = gameState.buildings[b.id] || { level: 0 };
+        const building = gameState.buildings?.[b.id] || { level: 0 };
         const level = building.level;
         const isMaxLevel = b.maxLevel && level >= b.maxLevel;
         const displayName = b.levelNames && b.levelNames[level] ? b.levelNames[level] : b.name;
         
+        // 计算升级费用
+        const costMultiplier = level + 1;
+        const cost = {};
+        if (b.baseCost) {
+            for (const [resource, amount] of Object.entries(b.baseCost)) {
+                cost[resource] = amount * costMultiplier;
+            }
+        }
+        
+        // 检查是否可以升级
+        const tentLevel = gameState.buildings?.tent?.level || 0;
+        const isUnlocked = !b.unlockReq || !b.unlockReq.tentLevel || tentLevel >= b.unlockReq.tentLevel;
+        
+        // 检查资源是否足够
+        let canUpgrade = isUnlocked && !isMaxLevel;
+        const costText = Object.entries(cost).map(([r, a]) => `${r}×${a}`).join(' ');
+        
         return `
-            <div class="building-card" data-id="${b.id}">
+            <div class="building-card ${isUnlocked ? '' : 'locked'}" data-id="${b.id}">
                 <div class="building-icon">${b.icon}</div>
                 <div class="building-name">${displayName}</div>
-                ${level > 0 ? `<div class="building-level">LV.${level}</div>` : ''}
-                ${isMaxLevel ? '<div class="building-cost">已满级</div>' : `<div class="building-cost">${formatCost(b.baseCost)}</div>`}
+                ${level > 0 ? `<div class="building-level">LV.${level}</div>` : '<div class="building-level">未建造</div>'}
+                ${isMaxLevel ? '<div class="building-cost">已满级</div>' : 
+                  isUnlocked ? `<div class="building-cost">${costText}</div>` : 
+                  `<div class="building-cost">需要帐篷 Lv.${(b.unlockReq?.tentLevel || 0) + 1}</div>`}
             </div>
         `;
     }).join('');
     
     // 绑定点击事件
-    elements.buildingsList.querySelectorAll('.building-card').forEach(card => {
+    elements.buildingsList.querySelectorAll('.building-card:not(.locked)').forEach(card => {
         card.addEventListener('click', () => {
             const buildingId = card.dataset.id;
-            // TODO: 发送建筑升级请求到后端
-            showToast('🏗️ 建筑系统待实现');
+            openUpgradeModal(buildingId);
         });
     });
+}
+
+/**
+ * 打开建筑升级模态框
+ */
+function openUpgradeModal(buildingId) {
+    const buildingConfig = CONFIG.buildings.find(b => b.id === buildingId);
+    if (!buildingConfig) return;
+    
+    const building = gameState.buildings?.[buildingId] || { level: 0 };
+    const level = building.level;
+    const isMaxLevel = buildingConfig.maxLevel && level >= buildingConfig.maxLevel;
+    
+    if (isMaxLevel) {
+        showToast('✅ 已达最大等级');
+        return;
+    }
+    
+    // 计算升级费用
+    const costMultiplier = level + 1;
+    const cost = {};
+    if (buildingConfig.baseCost) {
+        for (const [resource, amount] of Object.entries(buildingConfig.baseCost)) {
+            cost[resource] = amount * costMultiplier;
+        }
+    }
+    
+    const costText = Object.entries(cost).map(([r, a]) => `${r} × ${a}`).join('\n');
+    const nextLevelName = buildingConfig.levelNames?.[level + 1] || `${buildingConfig.name} Lv.${level + 1}`;
+    
+    if (confirm(`升级到 ${nextLevelName}?\n\n需要:\n${costText}`)) {
+        socket.emit('upgrade_building', { buildingId });
+    }
 }
 
 /**

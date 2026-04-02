@@ -542,6 +542,19 @@ io.on('connection', (socket) => {
         }
     });
     
+    // ============ 建筑系统事件 ============
+    
+    // 升级建筑
+    socket.on('upgrade_building', (data) => {
+        if (!gameEngine) return socket.emit('error', { message: '未认证' });
+        
+        const result = gameEngine.upgradeBuilding(data.buildingId);
+        socket.emit('upgrade_result', result);
+        if (result.success) {
+            socket.emit('game_state_update', gameEngine.getFullState());
+        }
+    });
+    
     // GM 指令（测试用）
     socket.on('gm_command', (data) => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });
