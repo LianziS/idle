@@ -164,10 +164,17 @@ function setupSocket() {
         }
         updateUI();
         
-        // 如果队列面板打开，实时刷新
+        // 如果队列面板打开，检查队列状态
         const popover = document.getElementById('queue-popover');
         if (popover && popover.style.display === 'block') {
-            showQueuePopover();
+            const queue = state?.actionQueue || [];
+            if (queue.length === 0) {
+                // 队列空了自动关闭
+                hideQueuePopover();
+            } else {
+                // 刷新队列面板
+                showQueuePopover();
+            }
         }
     });
     
@@ -816,9 +823,8 @@ function showReplaceActionConfirm(index, action, queueItem) {
     });
     
     modal.querySelector('#replace-confirm').addEventListener('click', () => {
-        socket.emit('queue_replace_current', { index, action });
+        socket.emit('queue_replace_current', { index });
         modal.remove();
-        hideQueuePopover();
     });
     
     modal.addEventListener('click', (e) => {
