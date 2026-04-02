@@ -111,6 +111,9 @@ function setupSocket() {
             showToast('✅ 已连接服务器');
         } else {
             console.error('认证失败:', data.error);
+            // 隐藏 loading，跳转到登录页
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) loadingEl.style.display = 'none';
             window.location.href = '/login';
         }
     });
@@ -120,6 +123,12 @@ function setupSocket() {
         gameState = state;
         renderAll();
         console.log('游戏状态已同步');
+        
+        // 隐藏 loading 元素
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+            loadingEl.style.display = 'none';
+        }
     });
     
     // 状态更新
