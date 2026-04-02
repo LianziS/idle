@@ -477,6 +477,9 @@ class GameEngine {
             return { success: true, completed: true, rewards: rewards };
         }
         
+        // 还有剩余次数，重置开始时间
+        this.state.actionStartTime = Date.now();
+        
         return { success: true, rewards: rewards, remaining: action.remaining };
     }
     
