@@ -1392,46 +1392,52 @@ function getResourceCount(resourceId) {
     // 定义采集物类型
     const gatheringTypes = ['sweet_berry', 'wild_mint', 'honey', 'blood_rose', 'jute', 'flax', 'wool', 'silk', 'wind_silk_raw', 'shadow_thread', 'dragon_fiber', 'celestial_lotus'];
     
+    let count = 0;
+    
     // 检查木材
     if (woodTypes.includes(resourceId)) {
-        return gameState.woodcuttingInventory?.[resourceId] || 0;
+        count = gameState.woodcuttingInventory?.[resourceId] || 0;
     }
     // 检查矿石
-    if (oreTypes.includes(resourceId)) {
-        return gameState.miningInventory?.[resourceId] || 0;
+    else if (oreTypes.includes(resourceId)) {
+        count = gameState.miningInventory?.[resourceId] || 0;
     }
     // 检查木板
-    if (resourceId.endsWith('_plank')) {
-        return gameState.planksInventory?.[resourceId] || 0;
+    else if (resourceId.endsWith('_plank')) {
+        count = gameState.planksInventory?.[resourceId] || 0;
     }
     // 检查矿锭
-    if (resourceId.endsWith('_ingot')) {
-        return gameState.ingotsInventory?.[resourceId] || 0;
+    else if (resourceId.endsWith('_ingot')) {
+        count = gameState.ingotsInventory?.[resourceId] || 0;
     }
     // 检查布料
-    if (fabricTypes.includes(resourceId) || resourceId.endsWith('_cloth')) {
-        return gameState.fabricsInventory?.[resourceId] || 0;
+    else if (fabricTypes.includes(resourceId) || resourceId.endsWith('_cloth')) {
+        count = gameState.fabricsInventory?.[resourceId] || 0;
     }
     // 检查采集物
-    if (gatheringTypes.includes(resourceId)) {
-        return gameState.gatheringInventory?.[resourceId] || 0;
+    else if (gatheringTypes.includes(resourceId)) {
+        count = gameState.gatheringInventory?.[resourceId] || 0;
     }
     // 检查药水
-    if (resourceId.endsWith('_potion') || resourceId.includes('potion')) {
-        return gameState.potionsInventory?.[resourceId] || 0;
+    else if (resourceId.endsWith('_potion') || resourceId.includes('potion')) {
+        count = gameState.potionsInventory?.[resourceId] || 0;
     }
     // 检查金币
-    if (resourceId === 'gold') {
-        return gameState.gold || 0;
+    else if (resourceId === 'gold') {
+        count = gameState.gold || 0;
     }
     // 默认：尝试从所有库存查找
-    return gameState.woodcuttingInventory?.[resourceId] || 
-           gameState.miningInventory?.[resourceId] || 
-           gameState.gatheringInventory?.[resourceId] || 
-           gameState.planksInventory?.[resourceId] || 
-           gameState.ingotsInventory?.[resourceId] || 
-           gameState.fabricsInventory?.[resourceId] || 
-           gameState.potionsInventory?.[resourceId] || 0;
+    else {
+        count = gameState.woodcuttingInventory?.[resourceId] || 
+               gameState.miningInventory?.[resourceId] || 
+               gameState.gatheringInventory?.[resourceId] || 
+               gameState.planksInventory?.[resourceId] || 
+               gameState.ingotsInventory?.[resourceId] || 
+               gameState.fabricsInventory?.[resourceId] || 
+               gameState.potionsInventory?.[resourceId] || 0;
+    }
+    
+    return count;
 }
 
 /**
