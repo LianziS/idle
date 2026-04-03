@@ -1577,7 +1577,7 @@ function openGatheringItemModal(locId, itemId) {
                     <button class="count-btn infinity" data-count="infinity">∞</button>
                 </div>
                 <div class="action-modal-custom">
-                    <input type="number" id="custom-count" min="1" max="99999" placeholder="自定义次数">
+                    <input type="text" id="custom-count" placeholder="自定义次数">
                 </div>
             </div>
             <div class="action-modal-footer">
@@ -1608,19 +1608,16 @@ function openGatheringItemModal(locId, itemId) {
             btn.classList.add('active');
             const countVal = btn.dataset.count;
             if (countVal === 'infinity') {
-                // 无限模式：设置一个特殊标记
-                modal.querySelector('#custom-count').value = -1;
-                modal.querySelector('#custom-count').placeholder = '∞ 无限';
+                modal.querySelector('#custom-count').value = '∞';
             } else {
                 modal.querySelector('#custom-count').value = countVal;
-                modal.querySelector('#custom-count').placeholder = '自定义次数';
             }
         });
     });
     
     const getCount = () => { 
         const val = modal.querySelector('#custom-count').value; 
-        if (val === '-1' || val === -1) return -1; // -1 表示无限模式
+        if (val === '∞' || val === '-1') return -1; // -1 表示无限模式
         return parseInt(val) || 1; 
     };
     
@@ -2553,7 +2550,7 @@ function showActionModal(config) {
                     <button class="count-btn infinity" data-count="infinity">∞</button>
                 </div>
                 <div class="action-modal-custom">
-                    <input type="number" id="custom-count" min="1" max="99999" placeholder="自定义次数">
+                    <input type="text" id="custom-count" placeholder="自定义次数">
                 </div>
             </div>
             <div class="action-modal-footer">
@@ -2586,12 +2583,9 @@ function showActionModal(config) {
             btn.classList.add('active');
             const countVal = btn.dataset.count;
             if (countVal === 'infinity') {
-                // 无限模式：设置一个特殊标记
-                modal.querySelector('#custom-count').value = -1;
-                modal.querySelector('#custom-count').placeholder = '∞ 无限';
+                modal.querySelector('#custom-count').value = '∞';
             } else {
                 modal.querySelector('#custom-count').value = countVal;
-                modal.querySelector('#custom-count').placeholder = '自定义次数';
             }
         });
     });
@@ -2599,7 +2593,7 @@ function showActionModal(config) {
     // 获取次数
     const getCount = () => { 
         const val = modal.querySelector('#custom-count').value; 
-        if (val === '-1' || val === -1) return -1; // -1 表示无限模式
+        if (val === '∞' || val === '-1') return -1; // -1 表示无限模式
         return parseInt(val) || 1; 
     };
     
