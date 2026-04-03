@@ -206,7 +206,7 @@ class GameEngine {
         // 检查材料
         if (actionType.needsMaterials && item.materials) {
             for (const [matId, count] of Object.entries(item.materials)) {
-                const owned = this.getItemCount(actionType.dropType || 'WOOD', matId);
+                const owned = this.getItemCount(actionType.materialType || 'WOOD', matId);
                 if (owned < count) {
                     return { canDo: false, reason: `材料不足: 需要 ${matId} ${count}, 拥有 ${owned}` };
                 }
@@ -304,7 +304,7 @@ class GameEngine {
         
         let maxCount = requestedCount;
         for (const [matId, count] of Object.entries(item.materials)) {
-            const owned = this.getItemCount(actionType.dropType || 'WOOD', matId);
+            const owned = this.getItemCount(actionType.materialType || 'WOOD', matId);
             const possible = Math.floor(owned / count);
             maxCount = Math.min(maxCount, possible);
         }

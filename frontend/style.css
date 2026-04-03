@@ -566,11 +566,12 @@ body::after {
     font-weight: bold;
 }
 
-/* 经验值信息 [当前/升级所需] */
+/* 经验值信息 [当前/升级所需] - 放在进度条下方左对齐 */
 .skill-exp-info {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #7A8A98;
-    margin-bottom: 8px;
+    margin-top: 4px;
+    text-align: left;
 }
 
 /* 技能分隔线（在经验条下面） */

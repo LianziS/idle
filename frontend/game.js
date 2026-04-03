@@ -707,6 +707,11 @@ function updateSkillDisplay() {
  * 更新侧边栏经验条
  */
 function updateSidebarExpBars() {
+    // 计算升级所需经验（与后端一致）
+    function getExpForLevel(level) {
+        return Math.floor(100 * Math.pow(1.5, level - 1));
+    }
+    
     const skills = [
         { key: 'woodcuttingExp', levelKey: 'woodcuttingLevel', element: 'nav-woodcutting-exp' },
         { key: 'miningExp', levelKey: 'miningLevel', element: 'nav-mining-exp' },
@@ -720,13 +725,11 @@ function updateSidebarExpBars() {
     
     skills.forEach(skill => {
         const el = document.getElementById(skill.element);
-        if (el && gameState[skill.key]) {
+        if (el) {
             const level = gameState[skill.levelKey] || 1;
             const exp = gameState[skill.key] || 0;
-            // 计算当前等级需要的经验（简单公式：level * 100）
-            const expForCurrentLevel = (level - 1) * 100;
-            const expForNextLevel = level * 100;
-            const progress = Math.min(100, Math.max(0, ((exp - expForCurrentLevel) / (expForNextLevel - expForCurrentLevel)) * 100));
+            const expForCurrentLevel = getExpForLevel(level);
+            const progress = Math.min(100, Math.max(0, (exp / expForCurrentLevel) * 100));
             el.style.width = `${progress}%`;
         }
     });
