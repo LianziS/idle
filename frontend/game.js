@@ -2495,10 +2495,22 @@ function renderInventories() {
     const allToolItems = [];
     const toolTypes = ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'hammers', 'tongs', 'rods'];
     
+    // 工具类型到槽位ID的映射
+    const toolTypeToSlot = {
+        'axes': 'axe',
+        'pickaxes': 'pickaxe',
+        'chisels': 'chisel',
+        'needles': 'needle',
+        'scythes': 'scythe',
+        'hammers': 'hammer',
+        'tongs': 'tongs',  // 小桶槽位ID是 tongs，不是 tong
+        'rods': 'rod'
+    };
+    
     // 先添加已装备的工具（装备时会从背包移除，所以这里只显示已装备的）
     if (gameState.equipment) {
         toolTypes.forEach(toolType => {
-            const slotId = toolType.slice(0, -1); // axes -> axe
+            const slotId = toolTypeToSlot[toolType];
             const equippedId = gameState.equipment[slotId];
             if (equippedId) {
                 const tools = CONFIG.tools?.[toolType] || [];
