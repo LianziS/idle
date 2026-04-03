@@ -2491,18 +2491,16 @@ function renderInventories() {
         renderInventoryGrid('storage-fabrics-items', gameState.fabricsInventory, CONFIG.fabrics);
     }
     
-    // 锻造工具 - 显示所有工具（背包中的 + 已装备的）
+    // 锻造工具 - 显示所有工具（已装备的 + 背包中的）
     const allToolItems = [];
     const toolTypes = ['axes', 'pickaxes', 'chisels', 'needles', 'scythes', 'hammers', 'tongs', 'rods'];
     
-    // 统计已装备工具的数量（用于排除）
-    const equippedCounts = {};
+    // 先添加已装备的工具（装备时会从背包移除，所以这里只显示已装备的）
     if (gameState.equipment) {
         toolTypes.forEach(toolType => {
             const slotId = toolType.slice(0, -1); // axes -> axe
             const equippedId = gameState.equipment[slotId];
             if (equippedId) {
-                equippedCounts[equippedId] = (equippedCounts[equippedId] || 0) + 1;
                 const tools = CONFIG.tools?.[toolType] || [];
                 const tool = tools.find(t => t.id === equippedId);
                 if (tool) {
@@ -2512,22 +2510,11 @@ function renderInventories() {
         });
     }
     
-    // 再添加背包中的工具（只排除已装备的数量）
-    const addedFromInventory = {}; // 记录从背包添加的数量
+    // 再添加背包中的工具（装备时已从背包移除，所以这些都是未装备的）
     toolTypes.forEach(toolType => {
         const tools = CONFIG.tools?.[toolType] || [];
         const inventory = gameState.toolsInventory?.[toolType] || [];
         inventory.forEach(toolId => {
-            const equippedCount = equippedCounts[toolId] || 0;
-            const addedCount = addedFromInventory[toolId] || 0;
-            
-            // 如果已装备数量 > 已从背包添加的数量，说明这把是装备的那把，跳过
-            if (equippedCount > addedCount) {
-                addedFromInventory[toolId] = addedCount + 1;
-                return; // 跳过，这是装备的那把
-            }
-            
-            // 否则显示未装备的工具
             const tool = tools.find(t => t.id === toolId);
             if (tool) {
                 allToolItems.push({ id: toolId, name: tool.name, icon: tool.icon, isEquipped: false });
