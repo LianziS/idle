@@ -8,7 +8,7 @@
     <meta name="format-detection" content="telephone=no">
     <title>中世纪雇佣兵 - 放置游戏</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="style.css?v=202604030200">
+    <link rel="stylesheet" href="style.css?v=202604030950">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1B2A3A;color:#A0B2C0;min-height:100vh;padding:0;font-size:14px;overflow-x:hidden}
@@ -20,7 +20,7 @@
     <!-- 顶部固定区域 -->
     <header class="top-fixed">
         <div class="top-fixed-content">
-            <span class="update-time-badge">代码更新: 2026-04-03 09:30</span>
+            <span class="update-time-badge">代码更新: 2026-04-03 09:50</span>
             <span class="player-badge">
                 <span>LV.<span id="top-level">1</span></span>
             </span>
@@ -340,42 +340,48 @@
 
         <!-- 伐木页 -->
         <main class="page" id="page-woodcutting">
-            <section class="panel">
-                <h2 class="panel-title">🪓 伐木场</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="woodcutting-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">🪓 伐木场 <span class="skill-level" id="woodcutting-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="woodcutting-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="woodcutting-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <div class="woodcutting-list" id="woodcutting-list"></div>
             </section>
         </main>
 
         <!-- 挖矿页 -->
         <main class="page" id="page-mining">
-            <section class="panel">
-                <h2 class="panel-title">⛏️ 矿洞</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="mining-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">⛏️ 矿洞 <span class="skill-level" id="mining-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="mining-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="mining-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <div class="mining-list" id="mining-list"></div>
             </section>
         </main>
 
         <!-- 采集页 -->
         <main class="page" id="page-gathering">
-            <section class="panel">
-                <h2 class="panel-title">🌾 采集</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="gathering-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">🌾 采集 <span class="skill-level" id="gathering-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="gathering-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="gathering-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <!-- 采集区域标签页 -->
                 <div class="gathering-tabs" id="gathering-tabs">
                     <!-- 由 JS 动态生成 -->
@@ -387,14 +393,16 @@
 
         <!-- 制作页 -->
         <main class="page" id="page-crafting">
-            <section class="panel">
-                <h2 class="panel-title">🔨 制作</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="crafting-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">🔨 制作 <span class="skill-level" id="crafting-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="crafting-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="crafting-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <!-- 制作标签页 -->
                 <div class="gathering-tabs" id="crafting-tabs">
                     <button class="gathering-tab active" data-tab="planks">木板</button>
@@ -407,14 +415,16 @@
 
         <!-- 锻造页 -->
         <main class="page" id="page-forging">
-            <section class="panel">
-                <h2 class="panel-title">⚒️ 锻造</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="forging-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">⚒️ 锻造 <span class="skill-level" id="forging-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="forging-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="forging-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <!-- 锻造标签页 -->
                 <div class="gathering-tabs" id="forging-tabs">
                     <button class="gathering-tab active" data-tab="ingots">矿锭</button>
@@ -432,14 +442,16 @@
 
         <!-- 缝制页 -->
         <main class="page" id="page-tailoring">
-            <section class="panel">
-                <h2 class="panel-title">🧵 缝制</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="tailoring-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">🧵 缝制 <span class="skill-level" id="tailoring-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="tailoring-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="tailoring-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <!-- 缝制标签页 -->
                 <div class="gathering-tabs" id="tailoring-tabs">
                     <button class="gathering-tab active" data-tab="fabrics">布料</button>
@@ -452,14 +464,16 @@
 
         <!-- 炼金页 -->
         <main class="page" id="page-alchemy">
-            <section class="panel">
-                <h2 class="panel-title">⚗️ 炼金</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="alchemy-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">⚗️ 炼金 <span class="skill-level" id="alchemy-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="alchemy-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="alchemy-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <!-- 炼金标签页 -->
                 <div class="gathering-tabs" id="alchemy-tabs">
                     <button class="gathering-tab active" data-tab="potions">炼药</button>
@@ -475,14 +489,16 @@
 
         <!-- 酿造页 -->
         <main class="page" id="page-brewing">
-            <section class="panel">
-                <h2 class="panel-title">🍺 酿造</h2>
-                <div class="skill-exp-bar">
-                    <div class="skill-exp-bg">
-                        <div class="skill-exp-fill" id="brewing-exp-fill"></div>
+            <section class="panel skill-panel">
+                <div class="skill-header">
+                    <h2 class="panel-title">🍺 酿造 <span class="skill-level" id="brewing-level">Lv.1</span></h2>
+                    <div class="skill-exp-bar">
+                        <div class="skill-exp-bg">
+                            <div class="skill-exp-fill" id="brewing-exp-fill"></div>
+                        </div>
                     </div>
-                    <span class="skill-exp-level" id="brewing-level">1</span>
                 </div>
+                <div class="skill-divider"></div>
                 <!-- 酿造标签页 -->
                 <div class="gathering-tabs" id="brewing-tabs">
                     <button class="gathering-tab active" data-tab="brews">酿酒</button>
