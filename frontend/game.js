@@ -1544,7 +1544,7 @@ function openGatheringItemModal(locId, itemId) {
                     <button class="count-btn infinity" data-count="infinity">∞</button>
                 </div>
                 <div class="action-modal-custom">
-                    <input type="number" id="custom-count" min="1" max="999" placeholder="自定义次数">
+                    <input type="number" id="custom-count" min="1" max="99999" placeholder="自定义次数">
                 </div>
             </div>
             <div class="action-modal-footer">
@@ -2472,7 +2472,7 @@ function showActionModal(config) {
                     <button class="count-btn infinity" data-count="infinity">∞</button>
                 </div>
                 <div class="action-modal-custom">
-                    <input type="number" id="custom-count" min="1" max="999" placeholder="自定义次数">
+                    <input type="number" id="custom-count" min="1" max="99999" placeholder="自定义次数">
                 </div>
             </div>
             <div class="action-modal-footer">
