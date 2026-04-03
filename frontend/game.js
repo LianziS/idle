@@ -2504,25 +2504,32 @@ function renderInventories() {
                 const tools = CONFIG.tools?.[toolType] || [];
                 const tool = tools.find(t => t.id === equippedId);
                 if (tool) {
-                    allToolItems.push({ id: equippedId, name: tool.name, icon: tool.icon, isEquipped: true });
+                    allToolItems.push({ id: equippedId, name: tool.name, icon: tool.icon, isEquipped: true, count: 1 });
                 }
             }
         });
     }
     
-    // 再添加背包中的工具（装备时已从背包移除，所以这些都是未装备的）
+    // 统计背包中的工具数量（装备时已从背包移除，所以这些都是未装备的）
+    const unequippedCounts = {};
     toolTypes.forEach(toolType => {
         const tools = CONFIG.tools?.[toolType] || [];
         const inventory = gameState.toolsInventory?.[toolType] || [];
         inventory.forEach(toolId => {
-            const tool = tools.find(t => t.id === toolId);
-            if (tool) {
-                allToolItems.push({ id: toolId, name: tool.name, icon: tool.icon, isEquipped: false });
+            if (!unequippedCounts[toolId]) {
+                const tool = tools.find(t => t.id === toolId);
+                unequippedCounts[toolId] = { count: 0, name: tool?.name || toolId, icon: tool?.icon || '❓' };
             }
+            unequippedCounts[toolId].count++;
         });
     });
     
-    // 渲染工具网格（每个工具独立显示）
+    // 添加未装备工具（合并相同ID）
+    Object.entries(unequippedCounts).forEach(([toolId, data]) => {
+        allToolItems.push({ id: toolId, name: data.name, icon: data.icon, isEquipped: false, count: data.count });
+    });
+    
+    // 渲染工具网格（已装备独立显示，未装备合并显示数量）
     const toolsElement = document.getElementById('storage-tools-items');
     if (toolsElement && allToolItems.length > 0) {
         const items = allToolItems.map(tool => {
@@ -2531,13 +2538,13 @@ function renderInventories() {
                 <div class="inventory-item ${tool.isEquipped ? 'equipped' : ''}" 
                      data-id="${tool.id}" 
                      data-name="${tool.name}" 
-                     data-count="1" 
+                     data-count="${tool.count}" 
                      data-price="0"
                      data-desc="${desc}"
                      data-icon="${tool.icon}">
                     <span class="item-icon">${tool.icon}</span>
                     <span class="item-name">${tool.name}</span>
-                    ${tool.isEquipped ? '<span class="item-equipped-check">✓</span>' : ''}
+                    ${tool.isEquipped ? '<span class="item-equipped-check">✓</span>' : `<span class="item-count">${tool.count}</span>`}
                 </div>
             `;
         }).join('');
