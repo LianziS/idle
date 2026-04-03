@@ -287,7 +287,7 @@ body::after {
     left: 0;
     width: 70px;
     height: calc(100% - 130px);
-    background: linear-gradient(180deg, rgba(27, 42, 58, 0.95) 0%, rgba(45, 63, 82, 0.9) 100%);
+    background: rgba(27, 42, 58, 0.95);
     backdrop-filter: blur(10px);
     z-index: 1000;
     display: flex;
@@ -295,8 +295,7 @@ body::after {
     box-shadow: 2px 0 15px rgba(0, 0, 0, 0.4);
     transition: width 0.3s ease;
     overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-top: none;
+    border: none;
 }
 
 .sidebar.expanded {
@@ -318,7 +317,7 @@ body::after {
 .sidebar.expanded .sidebar-icon-bar {
     width: 220px;
     align-items: flex-start;
-    padding-left: 10px;
+    padding-left: 6px;
 }
 
 .toggle-btn {
@@ -405,12 +404,18 @@ body::after {
 
 .nav-icon {
     font-size: 1.3rem;
-    width: 50px;
+    width: 70px;
     height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+
+.sidebar.expanded .nav-icon {
+    width: 40px;
+    justify-content: center;
 }
 
 .nav-skill-wrapper {
@@ -424,8 +429,9 @@ body::after {
 .nav-text-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
+    gap: 6px;
 }
 
 .nav-text {

@@ -686,7 +686,8 @@ function updateSkillDisplay() {
     sidebarSkills.forEach(skill => {
         const el = document.getElementById(skill.element);
         if (el) {
-            el.textContent = gameState[skill.key] || 1;
+            const level = gameState[skill.key] || 1;
+            el.textContent = `lv ${level}`;
         }
     });
     
