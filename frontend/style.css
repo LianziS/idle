@@ -3312,6 +3312,23 @@ body::after {
     background: linear-gradient(180deg, #5a7751 0%, #4a6341 100%);
 }
 
+.item-unequip-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: linear-gradient(180deg, #674141 0%, #533131 100%);
+    border: 1px solid #775151;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.item-unequip-btn:hover {
+    background: linear-gradient(180deg, #775151 0%, #634141 100%);
+}
+
 .item-equipped-label {
     margin-top: 8px;
     padding: 4px 8px;

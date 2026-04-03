@@ -524,18 +524,23 @@ class GameEngine {
         if (!action.isInfinite && action.remaining <= 0) {
             this.state.activeAction = null;
             
-            // 检查队列
+            // 检查队列，自动开始下一个
+            let nextAction = null;
             if (this.state.actionQueue.length > 0) {
-                const nextAction = this.state.actionQueue.shift();
-                return {
-                    success: true,
-                    completed: true,
-                    rewards: rewards,
-                    nextAction: nextAction
-                };
+                const queueItem = this.state.actionQueue.shift();
+                // 自动开始队列中的下一个行动
+                const startResult = this.startAction(queueItem.type, queueItem.id, queueItem.count, { itemId: queueItem.itemId });
+                if (startResult.success) {
+                    nextAction = queueItem;
+                }
             }
             
-            return { success: true, completed: true, rewards: rewards };
+            return {
+                success: true,
+                completed: true,
+                rewards: rewards,
+                nextAction: nextAction
+            };
         }
         
         // 还有剩余次数（或无限模式），重置开始时间
