@@ -612,7 +612,13 @@ class GameEngine {
         let nextAction = null;
         if (this.state.actionQueue.length > 0) {
             const queueItem = this.state.actionQueue.shift();
-            this.startAction(queueItem.type, queueItem.id, queueItem.count);
+            
+            // 区分锻造工具和其他行动
+            if (queueItem.type === 'FORGING' && queueItem.toolType !== undefined) {
+                this.startForgeAction(queueItem.toolType, queueItem.toolIndex, queueItem.count);
+            } else {
+                this.startAction(queueItem.type, queueItem.id, queueItem.count, { itemId: queueItem.itemId });
+            }
             nextAction = queueItem;
         }
         
