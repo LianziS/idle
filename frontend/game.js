@@ -2158,8 +2158,9 @@ function openToolForgeModal(toolType, toolIndex) {
         const count = getCount();
         if (count <= 0) return;
         
-        // 转换 toolType: axes -> axe, chisels -> chisel
-        const singularType = toolType.endsWith('s') ? toolType.slice(0, -1) : toolType;
+        // 转换 toolType: axes -> axe, chisels -> chisel, tongs -> tongs (保持不变), rods -> rod
+        const singularType = toolType === 'tongs' ? 'tongs' : 
+                            toolType.endsWith('s') ? toolType.slice(0, -1) : toolType;
         
         // 检查是否有行动进行中
         if (currentAction) {
@@ -2180,7 +2181,8 @@ function openToolForgeModal(toolType, toolIndex) {
         queueBtn.addEventListener('click', () => {
             const count = getCount();
             if (count <= 0) return;
-            const singularType = toolType.endsWith('s') ? toolType.slice(0, -1) : toolType;
+            const singularType = toolType === 'tongs' ? 'tongs' : 
+                                toolType.endsWith('s') ? toolType.slice(0, -1) : toolType;
             socket.emit('forge_tool', {
                 toolType: singularType,
                 toolIndex: toolIndex,
@@ -2239,7 +2241,8 @@ function showForgeImmediatelyConfirm(toolType, toolIndex, tool, count, parentMod
     modal.querySelector('#forge-cancel').addEventListener('click', () => modal.remove());
     
     modal.querySelector('#forge-confirm').addEventListener('click', () => {
-        const singularType = toolType.endsWith('s') ? toolType.slice(0, -1) : toolType;
+        const singularType = toolType === 'tongs' ? 'tongs' : 
+                            toolType.endsWith('s') ? toolType.slice(0, -1) : toolType;
         socket.emit('forge_tool_immediately', {
             toolType: singularType,
             toolIndex: toolIndex,
