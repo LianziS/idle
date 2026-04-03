@@ -360,7 +360,7 @@ body::after {
 }
 
 .toggle-btn:hover {
-    background: rgba(107, 79, 60, 0.3);
+    background: transparent;
     color: #6b4f3c;
 }
 
