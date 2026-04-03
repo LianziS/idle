@@ -254,8 +254,9 @@ class GameEngine {
         const config = CONFIG[actionType.configKey];
         const item = config.find(c => c.id === actionId);
         
-        // 无限模式：仅当 count 为 Infinity 时
-        const isInfinite = count === Infinity;
+        // 无限模式：count 为 -1 或 Infinity 时
+        const isInfinite = count === -1 || count === Infinity;
+        count = isInfinite ? Infinity : count;
         
         let actualCount = count;
         if (!isInfinite && actionType.needsMaterials && item.materials) {

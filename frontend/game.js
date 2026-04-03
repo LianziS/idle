@@ -822,23 +822,16 @@ function updateActionStatusBar() {
     if (!gameState) return;
     
     if (!gameState.activeAction) {
-        // 没有行动进行中
-        if (elements.actionStatusIcon) elements.actionStatusIcon.textContent = '∞';
-        if (elements.actionStatusName) elements.actionStatusName.textContent = '休息中';
-        if (elements.actionStatusCount) elements.actionStatusCount.textContent = '';
-        if (elements.actionProgressFill) elements.actionProgressFill.style.width = '0%';
-        if (elements.actionProgressTime) elements.actionProgressTime.textContent = '-';
-        
-        // 更新停止按钮
-        if (elements.actionCancelBtn) {
-            elements.actionCancelBtn.textContent = '休息中';
-            elements.actionCancelBtn.classList.add('idle');
-            elements.actionCancelBtn.disabled = true;
+        // 没有行动进行中，隐藏整个状态栏
+        if (elements.actionStatusBar) {
+            elements.actionStatusBar.style.display = 'none';
         }
-        
-        // 更新队列按钮
-        updateQueueButton();
         return;
+    }
+    
+    // 有行动，显示状态栏
+    if (elements.actionStatusBar) {
+        elements.actionStatusBar.style.display = '';
     }
     
     const action = gameState.activeAction;
@@ -1631,7 +1624,7 @@ function openGatheringItemModal(locId, itemId) {
         });
     });
     
-    const getCount = () => { const val = modal.querySelector('#custom-count').value; if (val === 'infinity' || val === '∞') return Infinity; return parseInt(val) || 1; };
+    const getCount = () => { const val = modal.querySelector('#custom-count').value; if (val === 'infinity' || val === '∞') return -1; return parseInt(val) || 1; }; // -1 表示无限模式
     
     const queueBtn = modal.querySelector('#action-queue');
     if (queueBtn && !queueBtn.disabled) {
@@ -2598,7 +2591,7 @@ function showActionModal(config) {
     });
     
     // 获取次数
-    const getCount = () => { const val = modal.querySelector('#custom-count').value; if (val === 'infinity' || val === '∞') return Infinity; return parseInt(val) || 1; };
+    const getCount = () => { const val = modal.querySelector('#custom-count').value; if (val === 'infinity' || val === '∞') return -1; return parseInt(val) || 1; }; // -1 表示无限模式
     
     // 加入队列按钮
     const queueBtn = modal.querySelector('#action-queue');
