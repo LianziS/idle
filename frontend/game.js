@@ -822,16 +822,23 @@ function updateActionStatusBar() {
     if (!gameState) return;
     
     if (!gameState.activeAction) {
-        // 没有行动进行中，隐藏整个状态栏
-        if (elements.actionStatusBar) {
-            elements.actionStatusBar.style.display = 'none';
+        // 没有行动进行中
+        if (elements.actionStatusIcon) elements.actionStatusIcon.textContent = '💤';
+        if (elements.actionStatusName) elements.actionStatusName.textContent = '休息中';
+        if (elements.actionStatusCount) elements.actionStatusCount.textContent = '';
+        if (elements.actionProgressFill) elements.actionProgressFill.style.width = '0%';
+        if (elements.actionProgressTime) elements.actionProgressTime.textContent = '-';
+        
+        // 隐藏停止按钮
+        if (elements.actionCancelBtn) {
+            elements.actionCancelBtn.style.display = 'none';
         }
         return;
     }
     
-    // 有行动，显示状态栏
-    if (elements.actionStatusBar) {
-        elements.actionStatusBar.style.display = '';
+    // 有行动，显示停止按钮
+    if (elements.actionCancelBtn) {
+        elements.actionCancelBtn.style.display = '';
     }
     
     const action = gameState.activeAction;
