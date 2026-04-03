@@ -2283,9 +2283,15 @@ function renderMerchantPanel(merchantId, merchantData, activeTab = 'trade') {
     
     document.body.appendChild(modal);
     
+    // 关闭函数（带动画）
+    const closeModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    };
+    
     // 绑定事件
-    modal.querySelector('.merchant-modal-close').addEventListener('click', () => modal.remove());
-    modal.querySelector('.merchant-modal-overlay').addEventListener('click', () => modal.remove());
+    modal.querySelector('.merchant-modal-close').addEventListener('click', closeModal);
+    modal.querySelector('.merchant-modal-overlay').addEventListener('click', closeModal);
     
     // 标签切换
     modal.querySelectorAll('.merchant-tab').forEach(tab => {
