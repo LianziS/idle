@@ -2691,17 +2691,20 @@ function showItemTooltip(item, event) {
                           id.includes('needle') || id.includes('scythe') || id.includes('hammer') || 
                           id.includes('tongs') || id.includes('rod'));
     
-    // 检查是否已装备
-    let isEquipped = false;
+    // 检查是否已装备（通过 item 的 CSS 类判断，而不是遍历 equipment）
+    const isEquipped = item.classList.contains('equipped');
+    
+    // 获取装备槽位（用于卸下）
     let equipSlot = null;
-    if (isTool && gameState?.equipment) {
-        for (const [slot, toolId] of Object.entries(gameState.equipment)) {
-            if (toolId === id) {
-                isEquipped = true;
-                equipSlot = slot;
-                break;
-            }
-        }
+    if (isEquipped && isTool) {
+        if (id.includes('axe')) equipSlot = 'axe';
+        else if (id.includes('pickaxe')) equipSlot = 'pickaxe';
+        else if (id.includes('chisel')) equipSlot = 'chisel';
+        else if (id.includes('needle')) equipSlot = 'needle';
+        else if (id.includes('scythe')) equipSlot = 'scythe';
+        else if (id.includes('hammer')) equipSlot = 'hammer';
+        else if (id.includes('tongs')) equipSlot = 'tongs';
+        else if (id.includes('rod')) equipSlot = 'rod';
     }
     
     const tooltip = document.createElement('div');
