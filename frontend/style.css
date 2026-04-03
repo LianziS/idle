@@ -89,10 +89,7 @@ body::after {
     width: 100%;
     background: linear-gradient(180deg, rgba(27, 42, 58, 0.98) 0%, rgba(45, 63, 82, 0.95) 100%);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: none;
-    border-left: none;
-    border-right: none;
+    border: none;
     z-index: 1100;
     display: flex;
     flex-direction: column;
@@ -541,7 +538,7 @@ body::after {
 /* 技能头部区域（标题+经验条合并） */
 .skill-header {
     background: rgba(107, 79, 60, 0.12);
-    border: 1px solid rgba(107, 79, 60, 0.35);
+    border: none;
     border-radius: 10px;
     padding: 12px 15px;
     margin-bottom: 0;
