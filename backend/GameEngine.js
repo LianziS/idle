@@ -485,9 +485,8 @@ class GameEngine {
             rateTable = tokenDropRates.tailoring;
         } else if (actionType.id === 'brewing') {
             rateTable = tokenDropRates.brewing;
-        } else if (actionType.id === 'forging') {
-            rateTable = tokenDropRates.tool;
         }
+        // 注意：锻造矿锭冶炼使用 standard 概率，锻造工具在 completeForgeOnce 中单独处理
         
         // 根据等级获取概率（每10级一个区间）
         const skillKey = actionType.skillKey;
@@ -903,6 +902,22 @@ class GameEngine {
         // 添加经验
         const exp = tool.exp || (toolIndex * 20 + 10);
         this.addSkillExp('forgingLevel', exp);
+        
+        // 代币掉落（锻造工具使用 tool 概率表）
+        const tokenDropRates = CONFIG.tokenDropRates || {
+            tool: [0.017, 0.033, 0.061, 0.110, 0.196, 0.343, 0.590, 0.990]
+        };
+        const forgingLevel = this.state.forgingLevel || 1;
+        const levelIndex = Math.min(Math.floor((forgingLevel - 1) / 10), tokenDropRates.tool.length - 1);
+        const dropRate = tokenDropRates.tool[levelIndex];
+        
+        if (Math.random() < dropRate) {
+            if (!this.state.tokensInventory) {
+                this.state.tokensInventory = {};
+            }
+            this.state.tokensInventory['forging_token'] = (this.state.tokensInventory['forging_token'] || 0) + 1;
+            // 代币奖励将在返回结果中体现
+        }
         
         // 更新剩余次数
         action.remaining--;
