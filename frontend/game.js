@@ -2534,12 +2534,13 @@ function renderInventories() {
     if (toolsElement && allToolItems.length > 0) {
         const items = allToolItems.map(tool => {
             const desc = getItemDescription(tool.id, tool);
+            const price = getItemSellPrice(tool.id); // 使用 ITEM_VALUES 获取价格
             return `
                 <div class="inventory-item ${tool.isEquipped ? 'equipped' : ''}" 
                      data-id="${tool.id}" 
                      data-name="${tool.name}" 
                      data-count="${tool.count}" 
-                     data-price="0"
+                     data-price="${price}"
                      data-desc="${desc}"
                      data-icon="${tool.icon}">
                     <span class="item-icon">${tool.icon}</span>
@@ -2620,6 +2621,109 @@ function renderMerchants() {
 }
 
 /**
+ * 物品价值配置
+ */
+const ITEM_VALUES = {
+    // 代币 - 全部50
+    tokens: {
+        wood_token: 50, mining_token: 50, gathering_token: 50, forging_token: 50,
+        crafting_token: 50, alchemy_token: 50, tailoring_token: 50, brewing_token: 50
+    },
+    // 木材（伐木获得）- 按等级
+    woods: {
+        pine: 2, iron_birch: 4, wind_tree: 8, flame_tree: 12,
+        frost_maple: 16, thunder_tree: 24, ancient_oak: 40, world_tree: 56
+    },
+    // 矿石（挖矿获得）- 按等级
+    ores: {
+        cyan_ore: 2, red_iron: 4, feather_ore: 8, hell_ore: 12,
+        white_ore: 16, thunder_ore: 24, brilliant: 40, star_ore: 56
+    },
+    // 采集品
+    gathering: {
+        honey: 1, sweet_berry: 1, blood_rose: 2, jute: 2, wild_mint: 2,
+        wheat: 3, star_dew_herb: 4, flax: 4, pine_needle: 4, feather: 4,
+        blossom_honey: 4, hops: 5, red_serpent_fruit: 8, moonlight_mushroom: 8, vanilla: 8, jade_feather: 8,
+        apple: 8, wool: 12, sage: 12, falcon_tail_feather: 12,
+        moonlight_honey: 8, grape: 11, silk: 16, soul_herb: 16, chili: 16,
+        wind_velvet: 24, wild_heart: 24, rye: 16, mist_flower: 24, rainbow_feather: 24,
+        rock_rose_honey: 20, mist_fruit: 27, bewitch_berry: 40, harpy_feather: 40,
+        dragon_blood_fruit: 37, life_fiber: 56, star_blossom: 56, four_leaf_clover: 56
+    },
+    // 木板
+    planks: {
+        pine_plank: 16, iron_birch_plank: 32, wind_tree_plank: 64, flame_tree_plank: 96,
+        frost_maple_plank: 112, thunder_tree_plank: 154, ancient_oak_plank: 240, world_tree_plank: 314
+    },
+    // 矿锭
+    ingots: {
+        cyan_ingot: 16, red_copper_ingot: 32, feather_ingot: 64, white_silver_ingot: 96,
+        hell_steel_ingot: 112, thunder_steel_ingot: 154, brilliant_crystal: 240, star_crystal: 314
+    },
+    // 布料
+    fabrics: {
+        jute_cloth: 16, linen_cloth: 32, wool_cloth: 96, silk_cloth: 112,
+        wind_silk: 154, dream_cloth: 314
+    },
+    // 精华
+    essences: {
+        mint_essence: 16, pine_essence: 32, vanilla_essence: 64, sage_essence: 96,
+        chili_essence: 128, mist_essence: 192, clover_essence: 392
+    },
+    // 药水
+    potions: {
+        hp_potion_1: 28, mp_potion_1: 36,
+        hp_potion_2: 44, mp_potion_2: 44,
+        hp_potion_3: 116, mp_potion_3: 116,
+        hp_potion_4: 128, mp_potion_4: 128,
+        hp_potion_5: 235, mp_potion_5: 207,
+        hp_potion_6: 230, mp_potion_6: 205,
+        hp_potion_7: 441, mp_potion_7: 441,
+        hp_potion_8: 440, mp_potion_8: 440
+    },
+    // 酒类
+    brews: {
+        woodcutting_wine: 118, gathering_ale: 126, mining_wine: 182, forging_ale: 190,
+        crafting_ale: 318, tailoring_beer: 326, alchemy_beer: 454, brewing_wine: 466
+    },
+    // 工具（非锤子）
+    tools_normal: {
+        cyan_axe: 116, red_axe: 616, feather_axe: 2304, white_axe: 7128,
+        hell_axe: 17470, thunder_axe: 37476, brilliant_axe: 77254, star_axe: 145624,
+        cyan_pickaxe: 116, red_pickaxe: 616, feather_pickaxe: 2304, white_pickaxe: 7128,
+        hell_pickaxe: 17470, thunder_pickaxe: 37476, brilliant_pickaxe: 77254, star_pickaxe: 145624,
+        cyan_chisel: 116, red_chisel: 616, feather_chisel: 2304, white_chisel: 7128,
+        hell_chisel: 17470, thunder_chisel: 37476, brilliant_chisel: 77254, star_chisel: 145624,
+        cyan_needle: 116, red_needle: 616, feather_needle: 2304, white_needle: 7128,
+        hell_needle: 17470, thunder_needle: 37476, brilliant_needle: 77254, star_needle: 145624,
+        cyan_scythe: 116, red_scythe: 616, feather_scythe: 2304, white_scythe: 7128,
+        hell_scythe: 17470, thunder_scythe: 37476, brilliant_scythe: 77254, star_scythe: 145624,
+        cyan_tongs: 116, red_tongs: 616, feather_tongs: 2304, white_tongs: 7128,
+        hell_tongs: 17470, thunder_tongs: 37476, brilliant_tongs: 77254, star_tongs: 145624,
+        cyan_rod: 116, red_rod: 616, feather_rod: 2304, white_rod: 7128,
+        hell_rod: 17470, thunder_rod: 37476, brilliant_rod: 77254, star_rod: 145624
+    },
+    // 锤子
+    hammers: {
+        cyan_hammer: 160, red_hammer: 832, feather_hammer: 3072, white_hammer: 9408,
+        hell_hammer: 22758, thunder_hammer: 48271, brilliant_hammer: 98087, star_hammer: 182224
+    }
+};
+
+/**
+ * 获取物品售价
+ */
+function getItemSellPrice(itemId) {
+    // 检查所有类型
+    for (const category of Object.values(ITEM_VALUES)) {
+        if (category[itemId]) {
+            return category[itemId];
+        }
+    }
+    return 0; // 未找到则返回0（不可出售）
+}
+
+/**
  * 渲染库存网格
  */
 function renderInventoryGrid(elementId, inventory, config, idField = 'id') {
@@ -2630,7 +2734,7 @@ function renderInventoryGrid(elementId, inventory, config, idField = 'id') {
         .filter(([id, count]) => count > 0)
         .map(([id, count]) => {
             const configItem = config.find(c => c[idField] === id) || { name: id, icon: '❓' };
-            const price = configItem.price || 0;
+            const price = configItem.price || getItemSellPrice(id); // 优先使用配置价格，否则使用 ITEM_VALUES
             const desc = configItem.desc || configItem.description || getItemDescription(id, configItem);
             return `
                 <div class="inventory-item" 
