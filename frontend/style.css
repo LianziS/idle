@@ -4331,18 +4331,18 @@ body::after {
 
 .confirm-dialog-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
 }
 
 .confirm-dialog-icon {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
 }
 
 .confirm-dialog-name {
     color: #E8C57F;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .confirm-dialog-arrow {
