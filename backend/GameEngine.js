@@ -318,8 +318,12 @@ class GameEngine {
             const owned = this.getItemCount(actionType.materialType || 'WOOD', matId);
             const possible = Math.floor(owned / count);
             maxCount = Math.min(maxCount, possible);
+            
+            // 调试日志
+            console.log(`📊 材料检查: ${matId}, 需要=${count}, 拥有=${owned}, 可执行=${possible}次`);
         }
         
+        console.log(`📊 最大可执行次数: ${maxCount}`);
         return maxCount;
     }
     

@@ -18,6 +18,7 @@ let socket = null;     // Socket.io 连接
 let animationFrame = null;
 let lastActionStartTime = 0;
 let completingAction = false; // 防止重复发送完成事件
+let actionCompleteTimeout = null; // 超时保护定时器ID
 
 // DOM 元素缓存
 const elements = {};
@@ -163,6 +164,10 @@ function setupSocket() {
         // 如果收到更新时 action 已完成，重置标志
         if (!state.activeAction) {
             completingAction = false;
+            if (actionCompleteTimeout) {
+                clearTimeout(actionCompleteTimeout);
+                actionCompleteTimeout = null;
+            }
         }
         
         // 如果行动刚开始或改变了，更新时间戳
@@ -220,6 +225,12 @@ function setupSocket() {
     // 行动完成结果
     socket.on('action_complete_result', (result) => {
         console.log(`📥 action_complete_result:`, result.success ? '成功' : result.reason);
+        
+        // 清除超时定时器
+        if (actionCompleteTimeout) {
+            clearTimeout(actionCompleteTimeout);
+            actionCompleteTimeout = null;
+        }
         
         if (result.success) {
             // 处理锻造结果
@@ -935,11 +946,17 @@ function updateActionStatusBar() {
             console.log(`📤 行动完成，发送 action_complete: ${gameState.activeAction.id}`);
             socket.emit('action_complete');
             
+            // 清除之前的超时定时器
+            if (actionCompleteTimeout) {
+                clearTimeout(actionCompleteTimeout);
+            }
+            
             // 超时保护：5秒后如果还没收到响应，重置标志
-            setTimeout(() => {
+            actionCompleteTimeout = setTimeout(() => {
                 if (completingAction) {
                     console.warn('⚠️ action_complete 超时，重置标志');
                     completingAction = false;
+                    actionCompleteTimeout = null;
                 }
             }, 5000);
         }
