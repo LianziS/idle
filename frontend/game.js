@@ -311,16 +311,35 @@ function setupEventListeners() {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
     if (sidebarToggle && sidebar) {
+        // 根据屏幕宽度自动展开/收起
+        const updateSidebarByWidth = () => {
+            const isWide = window.innerWidth >= 768;
+            if (isWide) {
+                // PC端：恢复上次状态或默认展开
+                const saved = localStorage.getItem('sidebarExpanded');
+                if (saved === null || saved === 'true') {
+                    sidebar.classList.add('expanded');
+                }
+            } else {
+                // 移动端：强制收起
+                sidebar.classList.remove('expanded');
+            }
+        };
+        
+        // 初始化
+        updateSidebarByWidth();
+        
+        // 监听窗口大小变化
+        window.addEventListener('resize', updateSidebarByWidth);
+        
+        // 点击切换
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('expanded');
-            // 保存状态到本地存储
-            localStorage.setItem('sidebarExpanded', sidebar.classList.contains('expanded'));
+            // 只在PC端保存状态
+            if (window.innerWidth >= 768) {
+                localStorage.setItem('sidebarExpanded', sidebar.classList.contains('expanded'));
+            }
         });
-        
-        // 恢复上次状态
-        if (localStorage.getItem('sidebarExpanded') === 'true') {
-            sidebar.classList.add('expanded');
-        }
     }
     
     // 取消行动按钮
