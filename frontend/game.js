@@ -2377,6 +2377,19 @@ function renderInventories() {
     if (CONFIG.essences) {
         renderInventoryGrid('storage-essences-items', gameState.essencesInventory, CONFIG.essences);
     }
+    
+    // 代币
+    const tokenConfig = [
+        { id: 'wood_token', name: '伐木代币', icon: '🪙' },
+        { id: 'mining_token', name: '挖矿代币', icon: '🪙' },
+        { id: 'gathering_token', name: '采集代币', icon: '🪙' },
+        { id: 'crafting_token', name: '制作代币', icon: '🪙' },
+        { id: 'forging_token', name: '锻造代币', icon: '🪙' },
+        { id: 'tailoring_token', name: '缝制代币', icon: '🪙' },
+        { id: 'alchemy_token', name: '炼金代币', icon: '🪙' },
+        { id: 'brewing_token', name: '酿造代币', icon: '🪙' }
+    ];
+    renderInventoryGrid('storage-tokens-items', gameState.tokensInventory, tokenConfig);
 }
 
 /**

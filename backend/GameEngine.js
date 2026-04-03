@@ -460,7 +460,18 @@ class GameEngine {
         
         // 尝试获取代币
         if (Math.random() < 0.05) {
-            const tokenId = `${actionType.id}_token`;
+            // 代币ID映射
+            const tokenIdMap = {
+                'woodcutting': 'wood_token',
+                'mining': 'mining_token',
+                'gathering': 'gathering_token',
+                'crafting': 'crafting_token',
+                'forging': 'forging_token',
+                'tailoring': 'tailoring_token',
+                'alchemy': 'alchemy_token',
+                'brewing': 'brewing_token'
+            };
+            const tokenId = tokenIdMap[actionType.id] || `${actionType.id}_token`;
             if (!this.state.tokensInventory) {
                 this.state.tokensInventory = {};
             }
