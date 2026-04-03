@@ -637,6 +637,11 @@ function updateSkillDisplay() {
         { key: 'alchemyLevel', expKey: 'alchemyExp', element: 'alchemy-level', expInfo: 'alchemy-exp-info', expFill: 'alchemy-exp-fill' }
     ];
     
+    // 计算升级所需经验（与后端一致：100 × 1.5^(等级-1)）
+    function getExpForLevel(level) {
+        return Math.floor(100 * Math.pow(1.5, level - 1));
+    }
+    
     skills.forEach(skill => {
         const levelEl = document.getElementById(skill.element);
         const expInfoEl = document.getElementById(skill.expInfo);
@@ -645,11 +650,9 @@ function updateSkillDisplay() {
         const level = gameState[skill.key] || 1;
         const exp = gameState[skill.expKey] || 0;
         
-        // 计算升级所需经验（每级 100 经验）
-        const expForCurrentLevel = (level - 1) * 100;
-        const expForNextLevel = level * 100;
-        const currentExp = exp - expForCurrentLevel;  // 当前级别的经验
-        const needExp = expForNextLevel - expForCurrentLevel;  // 升级所需
+        // 计算当前级别的经验进度
+        const expForCurrentLevel = getExpForLevel(level);  // 当前等级升到下一级需要的经验
+        const currentExp = exp;  // 当前累计经验（后端已经扣除已用经验）
         
         // 更新等级显示
         if (levelEl) {
@@ -658,12 +661,12 @@ function updateSkillDisplay() {
         
         // 更新经验值信息 [当前/升级所需]
         if (expInfoEl) {
-            expInfoEl.textContent = `[${Math.floor(currentExp)}/${needExp}]`;
+            expInfoEl.textContent = `[${Math.floor(currentExp)}/${expForCurrentLevel}]`;
         }
         
         // 更新经验条
         if (expFillEl) {
-            const progress = Math.min(100, Math.max(0, (currentExp / needExp) * 100));
+            const progress = Math.min(100, Math.max(0, (currentExp / expForCurrentLevel) * 100));
             expFillEl.style.width = `${progress}%`;
         }
     });

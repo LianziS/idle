@@ -153,23 +153,29 @@ class GameEngine {
     }
     
     /**
-     * 添加技能经验
+     * 添加技能经验（支持连续升级）
      */
     addSkillExp(skillKey, amount) {
-        const currentLevel = this.state[skillKey];
-        const currentExp = this.state[skillKey.replace('Level', 'Exp')] || 0;
-        const newExp = currentExp + amount;
+        let currentLevel = this.state[skillKey];
+        let currentExp = this.state[skillKey.replace('Level', 'Exp')] || 0;
+        currentExp += amount;
         
-        // 计算升级
-        const expNeeded = this.getExpForLevel(currentLevel + 1);
-        if (newExp >= expNeeded) {
-            this.state[skillKey] = currentLevel + 1;
-            this.state[skillKey.replace('Level', 'Exp')] = newExp - expNeeded;
-            return { leveledUp: true, newLevel: currentLevel + 1 };
-        } else {
-            this.state[skillKey.replace('Level', 'Exp')] = newExp;
-            return { leveledUp: false };
+        // 循环检查升级（支持连续升级）
+        let leveledUp = false;
+        let totalLevelGain = 0;
+        
+        while (currentExp >= this.getExpForLevel(currentLevel + 1)) {
+            const expNeeded = this.getExpForLevel(currentLevel + 1);
+            currentExp -= expNeeded;
+            currentLevel++;
+            totalLevelGain++;
+            leveledUp = true;
         }
+        
+        this.state[skillKey] = currentLevel;
+        this.state[skillKey.replace('Level', 'Exp')] = currentExp;
+        
+        return { leveledUp, newLevel: currentLevel, levelGain: totalLevelGain };
     }
     
     /**
