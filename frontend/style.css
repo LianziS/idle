@@ -285,17 +285,31 @@ body::after {
     position: fixed;
     top: 130px;
     left: 0;
-    width: 70px;
+    width: 55px;
     height: calc(100% - 130px);
-    background: rgba(27, 42, 58, 0.95);
+    background: #1B2A3A;
     backdrop-filter: blur(10px);
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.4);
+    box-shadow: none;
     transition: width 0.3s ease;
     overflow: hidden;
     border: none;
+}
+
+.sidebar::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.15) 50%, 
+        transparent 100%);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
 .sidebar.expanded {
@@ -304,7 +318,7 @@ body::after {
 
 /* 图标栏 */
 .sidebar-icon-bar {
-    width: 70px;
+    width: 55px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -404,7 +418,7 @@ body::after {
 
 .nav-icon {
     font-size: 1.3rem;
-    width: 70px;
+    width: 55px;
     height: 34px;
     display: flex;
     align-items: center;
@@ -499,20 +513,20 @@ body::after {
 .game-container {
     max-width: 1400px;
     margin: 0 auto;
-    margin-left: 80px;
+    margin-left: 55px;
     margin-top: 135px;
-    background: rgba(27, 42, 58, 0.7);
+    background: #1B2A3A;
     backdrop-filter: blur(10px);
-    border-radius: 12px;
+    border-radius: 0;
     overflow-x: hidden;
     transition: margin-left 0.3s ease;
     min-height: calc(100vh - 135px);
     border: none;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: none;
 }
 
 .sidebar.expanded ~ .game-container {
-    margin-left: 230px;
+    margin-left: 220px;
 }
 
 /* ============ 页面 ============ */
