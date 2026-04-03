@@ -159,6 +159,7 @@ function setupSocket() {
     // 状态更新
     socket.on('game_state_update', (state) => {
         const prevAction = gameState?.activeAction;
+        const prevRemaining = prevAction?.remaining;
         gameState = state;
         
         // 如果收到更新时 action 已完成，重置标志
@@ -170,13 +171,14 @@ function setupSocket() {
             }
         }
         
-        // 如果行动刚开始或改变了，更新时间戳
-        if (state.activeAction && state.actionStartTime) {
-            // 如果是新行动，使用前端当前时间作为开始时间
-            if (!prevAction || prevAction.id !== state.activeAction.id) {
-                lastActionStartTime = Date.now(); // 使用前端时间，确保进度从0%开始
+        // 如果行动开始或 remaining 变化，重置时间戳
+        if (state.activeAction) {
+            const currentRemaining = state.activeAction.remaining;
+            // 新行动 或 剩余次数变化（后端完成一次后继续）
+            if (!prevAction || prevAction.id !== state.activeAction.id || prevRemaining !== currentRemaining) {
+                lastActionStartTime = Date.now();
                 completingAction = false;
-                console.log(`🔄 行动开始: ${state.activeAction.id}, duration: ${state.actionDuration}ms`);
+                console.log(`🔄 行动进度: remaining ${prevRemaining} → ${currentRemaining}`);
             }
         }
         
@@ -247,12 +249,9 @@ function setupSocket() {
             
             if (result.completed) {
                 showToast('✅ 行动全部完成');
-                completingAction = false;
-            } else if (result.remaining > 0) {
-                // 还有剩余次数，重置开始时间
-                lastActionStartTime = Date.now();
-                completingAction = false;
             }
+            // remaining > 0 时，等待 game_state_update 来重置时间戳
+            completingAction = false;
         } else {
             completingAction = false;
             if (result.reason) {
