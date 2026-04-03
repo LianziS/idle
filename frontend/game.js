@@ -1019,7 +1019,7 @@ function renderBuildings() {
                 ${level > 0 ? `<div class="building-level">LV.${level}</div>` : '<div class="building-level">未建造</div>'}
                 ${isMaxLevel ? '<div class="building-cost">已满级</div>' : 
                   isUnlocked ? `<div class="building-cost">${costText}</div>` : 
-                  `<div class="building-cost">需要帐篷 Lv.${(b.unlockReq?.tentLevel || 0) + 1}</div>`}
+                  `<div class="building-cost">需要帐篷 Lv.${b.unlockReq?.tentLevel || 1}</div>`}
             </div>
         `;
     }).join('');
@@ -2394,6 +2394,19 @@ function showActionModal(config) {
                     ${config.exp ? `<span>✨ ${config.exp} 经验</span>` : ''}
                     ${config.reqLevel ? `<span>📋 需要 Lv.${config.reqLevel}</span>` : ''}
                 </div>
+                ${config.materials ? `
+                <div class="action-modal-materials">
+                    <h4>所需材料</h4>
+                    <div class="materials-list">
+                        ${Object.entries(config.materials).map(([matId, amount]) => {
+                            const matName = getResourceName(matId);
+                            const have = getResourceCount(matId);
+                            const enough = have >= amount;
+                            return `<span class="material-item ${enough ? '' : 'insufficient'}">${matName} ×${amount} (${have})</span>`;
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
                 <div class="action-modal-counts">
                     <button class="count-btn" data-count="1">1次</button>
                     <button class="count-btn" data-count="5">5次</button>
