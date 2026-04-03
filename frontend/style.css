@@ -314,6 +314,8 @@ body::after {
         rgba(255, 255, 255, 0.15) 50%, 
         transparent 100%);
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .sidebar.expanded {
@@ -392,6 +394,8 @@ body::after {
     flex-shrink: 0;
     width: 100%;
     min-height: 34px;
+    position: relative;
+    z-index: 1;
 }
 
 .nav-item-skill {
