@@ -690,6 +690,9 @@ class GameEngine {
     getFullState() {
         return {
             ...this.state,
+            // 确保这些字段在顶层，方便前端访问
+            actionStartTime: this.state.actionStartTime,
+            actionDuration: this.state.actionDuration,
             activeActionInfo: this.state.activeAction ? {
                 ...this.state.activeAction,
                 startTime: this.state.actionStartTime,

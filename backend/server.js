@@ -535,7 +535,15 @@ io.on('connection', (socket) => {
     socket.on('forge_tool', (data) => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });
         
+        console.log('🔨 forge_tool 收到:', JSON.stringify({ toolType: data.toolType, toolIndex: data.toolIndex, count: data.count }));
+        
         const result = gameEngine.startForgeAction(data.toolType, data.toolIndex, data.count || 1);
+        
+        console.log('🔨 startForgeAction 结果:', JSON.stringify({ 
+            success: result.success, 
+            action: result.action ? { type: result.action.type, id: result.action.id, duration: result.action.duration } : null 
+        }));
+        
         socket.emit('action_result', result);
         if (result.success) {
             socket.emit('game_state_update', gameEngine.getFullState());
