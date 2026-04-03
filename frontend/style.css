@@ -354,6 +354,10 @@ body::after {
     color: #A0B2C0;
 }
 
+.sidebar.expanded .toggle-btn {
+    width: 40px;
+}
+
 .toggle-btn:hover {
     background: rgba(107, 79, 60, 0.3);
     color: #6b4f3c;
@@ -499,7 +503,7 @@ body::after {
 
 .nav-exp-bg {
     width: 100%;
-    height: 2px;
+    height: 3px;
     background: rgba(107, 79, 60, 0.4);
     border-radius: 1px;
     overflow: hidden;
@@ -1565,7 +1569,7 @@ body::after {
     
     .sidebar.expanded .sidebar-icon-bar {
         width: 160px;
-        padding-left: 6px;
+        padding-left: 4px;
     }
     
     .toggle-btn {
@@ -1574,24 +1578,28 @@ body::after {
         font-size: 1.1rem;
     }
     
+    .sidebar.expanded .toggle-btn {
+        width: 32px;
+    }
+    
     .nav-item {
-        min-height: 24px;
+        min-height: 22px;
     }
     
     .nav-item-skill {
-        min-height: 22px;
+        min-height: 20px;
         padding: 0;
     }
     
     .nav-icon {
         width: 50px;
-        height: 24px;
+        height: 22px;
         font-size: 1rem;
     }
     
     .sidebar.expanded .nav-icon {
         width: 32px;
-        height: 24px;
+        height: 22px;
     }
     
     .nav-text {
