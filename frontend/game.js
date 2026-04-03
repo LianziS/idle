@@ -159,7 +159,6 @@ function setupSocket() {
     // 状态更新
     socket.on('game_state_update', (state) => {
         const prevAction = gameState?.activeAction;
-        const prevRemaining = prevAction?.remaining;
         gameState = state;
         
         // 如果收到更新时 action 已完成，重置标志
@@ -171,15 +170,11 @@ function setupSocket() {
             }
         }
         
-        // 如果行动开始或 remaining 变化，重置时间戳
-        if (state.activeAction) {
-            const currentRemaining = state.activeAction.remaining;
-            // 新行动 或 剩余次数变化（后端完成一次后继续）
-            if (!prevAction || prevAction.id !== state.activeAction.id || prevRemaining !== currentRemaining) {
-                lastActionStartTime = Date.now();
-                completingAction = false;
-                console.log(`🔄 行动进度: remaining ${prevRemaining} → ${currentRemaining}`);
-            }
+        // 只有新行动开始时才重置时间戳（每次完成后由 action_complete_result 处理）
+        if (state.activeAction && (!prevAction || prevAction.id !== state.activeAction.id)) {
+            lastActionStartTime = Date.now();
+            completingAction = false;
+            console.log(`🔄 新行动开始: ${state.activeAction.id}`);
         }
         
         updateUI();
@@ -240,6 +235,10 @@ function setupSocket() {
         }
         
         if (result.success) {
+            // 每次完成都重置进度条开始时间（包括无限模式）
+            lastActionStartTime = Date.now();
+            completingAction = false;
+            
             // 处理锻造结果
             if (result.tool) {
                 showToast(`✅ 锻造成功: ${result.tool.name}`);
@@ -250,8 +249,6 @@ function setupSocket() {
             if (result.completed) {
                 showToast('✅ 行动全部完成');
             }
-            // remaining > 0 时，等待 game_state_update 来重置时间戳
-            completingAction = false;
         } else {
             completingAction = false;
             if (result.reason) {
