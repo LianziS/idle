@@ -1927,13 +1927,14 @@ body::after {
     background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(4px);
     z-index: 1;
-    pointer-events: auto; /* overlay 可以点击关闭 */
+    pointer-events: none; /* 默认不拦截点击 */
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .merchant-modal.active .merchant-modal-overlay {
     opacity: 1;
+    pointer-events: auto; /* active 时才可点击 */
 }
 
 .merchant-modal-panel {
