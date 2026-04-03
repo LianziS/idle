@@ -432,8 +432,13 @@ io.on('connection', (socket) => {
     socket.on('action_start', (data) => {
         if (!gameEngine) return socket.emit('error', { message: '未认证' });
         
+        console.log('📥 action_start 收到:', JSON.stringify({ type: data.type, id: data.id, count: data.count }));
+        
         const extraParams = data.itemId ? { itemId: data.itemId } : null;
         const result = gameEngine.startAction(data.type, data.id, data.count || 1, extraParams);
+        
+        console.log('📤 startAction 结果:', JSON.stringify({ success: result.success, isInfinite: result.action?.isInfinite, count: result.action?.count }));
+        
         socket.emit('action_result', result);
         
         // 如果成功，广播状态更新

@@ -30,28 +30,11 @@ const elements = {};
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-    console.log('🚀 游戏初始化开始...');
-    try {
-        cacheElements();
-        console.log('✅ cacheElements 完成');
-        
-        await loadConfig();
-        console.log('✅ loadConfig 完成');
-        
-        setupSocket();
-        console.log('✅ setupSocket 完成');
-        
-        setupEventListeners();
-        console.log('✅ setupEventListeners 完成');
-        
-        setupNavigation();
-        console.log('✅ setupNavigation 完成');
-    } catch (error) {
-        console.error('❌ 初始化错误:', error);
-        // 即使出错也移除 loading
-        const loadingEl = document.getElementById('loading');
-        if (loadingEl) loadingEl.remove();
-    }
+    cacheElements();
+    await loadConfig();
+    setupSocket();
+    setupEventListeners();
+    setupNavigation();
 }
 
 /**
@@ -449,13 +432,9 @@ function showClearQueueConfirm() {
  * 设置导航
  */
 function setupNavigation() {
-    console.log('📍 setupNavigation 开始, navItems数量:', elements.navItems.length);
-    
-    elements.navItems.forEach((item, index) => {
-        console.log(`  绑定导航项 [${index}]:`, item.dataset.page);
-        item.addEventListener('click', (e) => {
+    elements.navItems.forEach(item => {
+        item.addEventListener('click', () => {
             const page = item.dataset.page;
-            console.log('🖱️ 点击导航项:', page);
             switchPage(page);
         });
     });
