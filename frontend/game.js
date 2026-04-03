@@ -1606,11 +1606,23 @@ function openGatheringItemModal(locId, itemId) {
         btn.addEventListener('click', () => {
             modal.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            modal.querySelector('#custom-count').value = btn.dataset.count;
+            const countVal = btn.dataset.count;
+            if (countVal === 'infinity') {
+                // 无限模式：设置一个特殊标记
+                modal.querySelector('#custom-count').value = -1;
+                modal.querySelector('#custom-count').placeholder = '∞ 无限';
+            } else {
+                modal.querySelector('#custom-count').value = countVal;
+                modal.querySelector('#custom-count').placeholder = '自定义次数';
+            }
         });
     });
     
-    const getCount = () => { const val = modal.querySelector('#custom-count').value; if (val === 'infinity' || val === '∞') return -1; return parseInt(val) || 1; }; // -1 表示无限模式
+    const getCount = () => { 
+        const val = modal.querySelector('#custom-count').value; 
+        if (val === '-1' || val === -1) return -1; // -1 表示无限模式
+        return parseInt(val) || 1; 
+    };
     
     const queueBtn = modal.querySelector('#action-queue');
     if (queueBtn && !queueBtn.disabled) {
@@ -2572,12 +2584,24 @@ function showActionModal(config) {
         btn.addEventListener('click', () => {
             modal.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            modal.querySelector('#custom-count').value = btn.dataset.count;
+            const countVal = btn.dataset.count;
+            if (countVal === 'infinity') {
+                // 无限模式：设置一个特殊标记
+                modal.querySelector('#custom-count').value = -1;
+                modal.querySelector('#custom-count').placeholder = '∞ 无限';
+            } else {
+                modal.querySelector('#custom-count').value = countVal;
+                modal.querySelector('#custom-count').placeholder = '自定义次数';
+            }
         });
     });
     
     // 获取次数
-    const getCount = () => { const val = modal.querySelector('#custom-count').value; if (val === 'infinity' || val === '∞') return -1; return parseInt(val) || 1; }; // -1 表示无限模式
+    const getCount = () => { 
+        const val = modal.querySelector('#custom-count').value; 
+        if (val === '-1' || val === -1) return -1; // -1 表示无限模式
+        return parseInt(val) || 1; 
+    };
     
     // 加入队列按钮
     const queueBtn = modal.querySelector('#action-queue');
