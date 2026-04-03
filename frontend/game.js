@@ -625,22 +625,46 @@ function updateUI() {
  * 更新技能等级显示
  */
 function updateSkillDisplay() {
-    // 技能页面内的等级显示
+    // 技能页面内的等级显示 + 经验值信息
     const skills = [
-        { key: 'woodcuttingLevel', name: '伐木', element: 'woodcutting-level' },
-        { key: 'miningLevel', name: '挖矿', element: 'mining-level' },
-        { key: 'gatheringLevel', name: '采集', element: 'gathering-level' },
-        { key: 'craftingLevel', name: '制作', element: 'crafting-level' },
-        { key: 'forgingLevel', name: '锻造', element: 'forging-level' },
-        { key: 'tailoringLevel', name: '缝制', element: 'tailoring-level' },
-        { key: 'brewingLevel', name: '酿造', element: 'brewing-level' },
-        { key: 'alchemyLevel', name: '炼金', element: 'alchemy-level' }
+        { key: 'woodcuttingLevel', expKey: 'woodcuttingExp', element: 'woodcutting-level', expInfo: 'woodcutting-exp-info', expFill: 'woodcutting-exp-fill' },
+        { key: 'miningLevel', expKey: 'miningExp', element: 'mining-level', expInfo: 'mining-exp-info', expFill: 'mining-exp-fill' },
+        { key: 'gatheringLevel', expKey: 'gatheringExp', element: 'gathering-level', expInfo: 'gathering-exp-info', expFill: 'gathering-exp-fill' },
+        { key: 'craftingLevel', expKey: 'craftingExp', element: 'crafting-level', expInfo: 'crafting-exp-info', expFill: 'crafting-exp-fill' },
+        { key: 'forgingLevel', expKey: 'forgingExp', element: 'forging-level', expInfo: 'forging-exp-info', expFill: 'forging-exp-fill' },
+        { key: 'tailoringLevel', expKey: 'tailoringExp', element: 'tailoring-level', expInfo: 'tailoring-exp-info', expFill: 'tailoring-exp-fill' },
+        { key: 'brewingLevel', expKey: 'brewingExp', element: 'brewing-level', expInfo: 'brewing-exp-info', expFill: 'brewing-exp-fill' },
+        { key: 'alchemyLevel', expKey: 'alchemyExp', element: 'alchemy-level', expInfo: 'alchemy-exp-info', expFill: 'alchemy-exp-fill' }
     ];
     
     skills.forEach(skill => {
-        const el = document.getElementById(skill.element);
-        if (el && gameState[skill.key]) {
-            el.textContent = `Lv.${gameState[skill.key]}`;
+        const levelEl = document.getElementById(skill.element);
+        const expInfoEl = document.getElementById(skill.expInfo);
+        const expFillEl = document.getElementById(skill.expFill);
+        
+        const level = gameState[skill.key] || 1;
+        const exp = gameState[skill.expKey] || 0;
+        
+        // 计算升级所需经验（每级 100 经验）
+        const expForCurrentLevel = (level - 1) * 100;
+        const expForNextLevel = level * 100;
+        const currentExp = exp - expForCurrentLevel;  // 当前级别的经验
+        const needExp = expForNextLevel - expForCurrentLevel;  // 升级所需
+        
+        // 更新等级显示
+        if (levelEl) {
+            levelEl.textContent = `Lv.${level}`;
+        }
+        
+        // 更新经验值信息 [当前/升级所需]
+        if (expInfoEl) {
+            expInfoEl.textContent = `[${Math.floor(currentExp)}/${needExp}]`;
+        }
+        
+        // 更新经验条
+        if (expFillEl) {
+            const progress = Math.min(100, Math.max(0, (currentExp / needExp) * 100));
+            expFillEl.style.width = `${progress}%`;
         }
     });
     
