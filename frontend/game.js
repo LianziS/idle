@@ -30,11 +30,28 @@ const elements = {};
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-    cacheElements();
-    await loadConfig();
-    setupSocket();
-    setupEventListeners();
-    setupNavigation();
+    console.log('🚀 游戏初始化开始...');
+    try {
+        cacheElements();
+        console.log('✅ cacheElements 完成');
+        
+        await loadConfig();
+        console.log('✅ loadConfig 完成');
+        
+        setupSocket();
+        console.log('✅ setupSocket 完成');
+        
+        setupEventListeners();
+        console.log('✅ setupEventListeners 完成');
+        
+        setupNavigation();
+        console.log('✅ setupNavigation 完成');
+    } catch (error) {
+        console.error('❌ 初始化错误:', error);
+        // 即使出错也移除 loading
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) loadingEl.remove();
+    }
 }
 
 /**
