@@ -9,6 +9,8 @@ node_modules/
 
 # Environment
 .env
+.feishu_env
+.github_config
 
 # IDE
 .idea/
@@ -17,3 +19,24 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Test files
+test-*.png
+test-*.jpg
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OpenClaw workspace files
+AGENTS.md
+HEARTBEAT.md
+IDENTITY.md
+MEMORY.md
+SOUL.md
+TOOLS.md
+USER.md
+BOOTSTRAP.md
+memory/
+.openclaw/
+skills/
