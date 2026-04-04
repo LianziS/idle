@@ -20,6 +20,9 @@ const gameEngines = new Map();
 // Socket 连接与引擎映射
 const socketEngineMap = new Map();
 
+// 用户ID -> Socket列表映射（用于检测重复登录）
+const userSockets = new Map();
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -389,7 +392,23 @@ io.on('connection', (socket) => {
             socket.userId = decoded.userId;
             socket.username = decoded.username;
             socket.join('global'); // 加入全服频道
-            console.log(`用户认证成功: ${decoded.username}`);
+            console.log(`用户认证成功: ${decoded.username} (userId: ${decoded.userId}, socket: ${socket.id})`);
+            
+            // 断开该用户之前的 socket 连接（防止重复登录导致存档混乱）
+            if (userSockets.has(decoded.userId)) {
+                const oldSockets = userSockets.get(decoded.userId);
+                console.log(`检测到用户 ${decoded.username} 有 ${oldSockets.length} 个旧连接，正在断开...`);
+                oldSockets.forEach(oldSocketId => {
+                    if (oldSocketId !== socket.id && io.sockets.sockets.has(oldSocketId)) {
+                        const oldSocket = io.sockets.sockets.get(oldSocketId);
+                        oldSocket.emit('error', { message: '您的账号在其他地方登录，连接已断开' });
+                        oldSocket.disconnect(true);
+                    }
+                });
+            }
+            
+            // 更新用户的 socket 列表
+            userSockets.set(decoded.userId, [socket.id]);
             
             // 获取或创建游戏引擎实例
             if (gameEngines.has(decoded.userId)) {
@@ -812,10 +831,22 @@ io.on('connection', (socket) => {
     });
     
     socket.on('disconnect', () => {
-        console.log(`用户断开: ${socket.id}`);
+        console.log(`用户断开: ${socket.id} (userId: ${socket.userId || 'unknown'})`);
         
         // 清理 socket 映射
         socketEngineMap.delete(socket.id);
+        
+        // 清理 userSockets 映射
+        if (socket.userId && userSockets.has(socket.userId)) {
+            const sockets = userSockets.get(socket.userId);
+            const index = sockets.indexOf(socket.id);
+            if (index > -1) {
+                sockets.splice(index, 1);
+            }
+            if (sockets.length === 0) {
+                userSockets.delete(socket.userId);
+            }
+        }
         
         // 保存游戏状态到数据库
         if (currentUser && gameEngine) {
